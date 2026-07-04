@@ -2,7 +2,13 @@
 
 import { AuthProvider } from "@/context/AuthContext";
 import { ReactNode } from "react";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export function Providers({ children }: { children: ReactNode }) {
-  return <AuthProvider>{children}</AuthProvider>;
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+  return (
+    <GoogleOAuthProvider clientId={clientId}>
+      <AuthProvider>{children}</AuthProvider>
+    </GoogleOAuthProvider>
+  );
 }

@@ -18,6 +18,7 @@ interface AuthContextType {
   error: string | null;
   register: (data: any) => Promise<any>;
   login: (data: any) => Promise<any>;
+  googleLogin: (token: string) => Promise<any>;
   adminLogin: (data: any) => Promise<any>;
   logout: () => void;
   updateProfile: (data: any) => Promise<void>;
@@ -99,6 +100,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const googleLoginUser = useCallback(async (token: string) => {
+    try {
+      setError(null);
+      const res = await authAPI.googleLogin(token);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("codeskill_token", res.data.token);
+      }
+      setUser(res.data.user);
+      return res.data;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Google login failed";
+      setError(msg);
+      throw new Error(msg);
+    }
+  }, []);
+
   const logoutUser = useCallback(() => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("codeskill_token");
@@ -127,7 +144,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         error,
         register: registerUser,
         login: loginUser,
-    adminLogin,
+        googleLogin: googleLoginUser,
+        adminLogin,
         logout: logoutUser,
         updateProfile,
         updateUserLocal,

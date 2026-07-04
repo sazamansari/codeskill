@@ -32,6 +32,7 @@ export const authAPI = {
   register: (data: any) => api.post("/auth/register", data),
   login: (data: any) => api.post("/auth/login", data),
   adminLogin: (data: any) => api.post("/auth/admin-login", data),
+  googleLogin: (token: string) => api.post("/auth/google", { token }),
   getMe: () => api.get("/auth/me"),
   updateProfile: (data: any) => api.put("/auth/profile", data),
   saveNote: (problemId: string, note: string) => api.put(`/auth/notes/${problemId}`, { note }),
