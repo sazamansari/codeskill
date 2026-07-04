@@ -1,0 +1,68 @@
+"use client";
+
+import { useQuestionStore } from "../_store/useQuestionStore";
+import SectionCard from "./SectionCard";
+import Editor from "@monaco-editor/react";
+import { ArrowRightLeft } from "lucide-react";
+
+export default function InputOutputFormat() {
+  const { statement, updateStatement, isDarkMode } = useQuestionStore();
+
+  return (
+    <SectionCard
+      id="io-format"
+      title="Input & Output Format"
+      subtitle="Describe the expected input and output format."
+      icon={ArrowRightLeft}
+      delay={0.25}
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {/* Input Format */}
+        <div className="space-y-2">
+          <label className="text-[13px] font-medium text-gray-700 dark:text-slate-300">Input Format</label>
+          <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
+            <Editor
+              height="200px"
+              language="markdown"
+              theme={isDarkMode ? "vs-dark" : "light"}
+              value={statement.inputFormat}
+              onChange={(value) => updateStatement({ inputFormat: value || "" })}
+              options={{
+                minimap: { enabled: false },
+                padding: { top: 12 },
+                scrollBeyondLastLine: false,
+                lineNumbers: "off",
+                wordWrap: "on",
+                fontSize: 13,
+                renderLineHighlightOnlyWhenFocus: true,
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Output Format */}
+        <div className="space-y-2">
+          <label className="text-[13px] font-medium text-gray-700 dark:text-slate-300">Output Format</label>
+          <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
+            <Editor
+              height="200px"
+              language="markdown"
+              theme={isDarkMode ? "vs-dark" : "light"}
+              value={statement.outputFormat}
+              onChange={(value) => updateStatement({ outputFormat: value || "" })}
+              options={{
+                minimap: { enabled: false },
+                padding: { top: 12 },
+                scrollBeyondLastLine: false,
+                lineNumbers: "off",
+                wordWrap: "on",
+                fontSize: 13,
+                renderLineHighlightOnlyWhenFocus: true,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </SectionCard>
+  );
+}

@@ -1,0 +1,79 @@
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { CheckSquare, Maximize } from "lucide-react";
+
+interface ContestStartGateProps {
+  onAccept: () => void;
+  requestFullscreen: () => Promise<void>;
+  isFullscreen: boolean;
+  hasRequestedFullscreen: boolean;
+}
+
+export function ContestStartGate({ 
+  onAccept, 
+  requestFullscreen, 
+  isFullscreen,
+  hasRequestedFullscreen 
+}: ContestStartGateProps) {
+  const [agreed, setAgreed] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleStart = async () => {
+    if (!agreed) return;
+    setLoading(true);
+    
+    // Ensure fullscreen first
+    if (!isFullscreen) {
+      await requestFullscreen();
+    }
+    
+    // We wait a tiny bit to allow fullscreen transition
+    setTimeout(() => {
+      onAccept();
+      setLoading(false);
+    }, 500);
+  };
+
+  return (
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+      <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-xl max-w-2xl w-full shadow-2xl">
+        <h1 className="text-3xl font-bold text-white mb-6">CodeSkill Secure Environment</h1>
+        
+        <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-6 mb-6 h-64 overflow-y-auto">
+          <h2 className="text-xl font-semibold text-white mb-4">Contest Rules & Anti-Cheat Policy</h2>
+          <ul className="list-disc pl-5 space-y-2 text-zinc-400">
+            <li>You must remain in <strong className="text-white">Fullscreen Mode</strong> for the duration of the contest.</li>
+            <li>Do not switch tabs, minimize the browser, or open other applications.</li>
+            <li>Copying code from external sources and pasting is strictly prohibited.</li>
+            <li>Right-clicking and Developer Tools are disabled.</li>
+            <li>Violations will be logged. Exceeding the warning limit will result in immediate auto-submission.</li>
+            <li>Your activity, device fingerprint, and IP address are monitored in real-time.</li>
+          </ul>
+        </div>
+
+        <div className="flex items-center space-x-3 mb-8 cursor-pointer" onClick={() => setAgreed(!agreed)}>
+          <div className={`w-6 h-6 rounded border flex items-center justify-center transition-colors ${agreed ? 'bg-primary border-primary text-black' : 'border-zinc-700 bg-zinc-800'}`}>
+            {agreed && <CheckSquare size={16} />}
+          </div>
+          <span className="text-zinc-300 select-none">
+            I have read and agree to follow all contest rules. I understand that violations may lead to disqualification.
+          </span>
+        </div>
+
+        <div className="flex justify-end">
+          <Button 
+            disabled={!agreed || loading} 
+            onClick={handleStart}
+            size="lg"
+            className="w-full sm:w-auto"
+          >
+            <Maximize className="mr-2 h-4 w-4" />
+            {loading ? "Entering Secure Mode..." : "Enter Fullscreen & Start"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
