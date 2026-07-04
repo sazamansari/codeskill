@@ -22,6 +22,8 @@ interface AuthContextType {
   googleLogin: (token: string) => Promise<any>;
   adminLogin: (data: any) => Promise<any>;
   adminLoginVerify: (data: { email: string; otp: string }) => Promise<any>;
+  forgotPassword: (data: { email: string }) => Promise<any>;
+  resetPassword: (data: any) => Promise<any>;
   logout: () => void;
   updateProfile: (data: any) => Promise<void>;
   updateUserLocal: (updates: Partial<User>) => void;
@@ -143,6 +145,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const forgotPassword = useCallback(async (data: { email: string }) => {
+    try {
+      setError(null);
+      const res = await authAPI.forgotPassword(data);
+      return res.data;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Failed to send reset link";
+      setError(msg);
+      throw new Error(msg);
+    }
+  }, []);
+
+  const resetPassword = useCallback(async (data: any) => {
+    try {
+      setError(null);
+      const res = await authAPI.resetPassword(data);
+      return res.data;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Failed to reset password";
+      setError(msg);
+      throw new Error(msg);
+    }
+  }, []);
+
   const logoutUser = useCallback(() => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("codeskill_token");
@@ -175,6 +201,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         googleLogin: googleLoginUser,
         adminLogin,
         adminLoginVerify,
+        forgotPassword,
+        resetPassword,
         logout: logoutUser,
         updateProfile,
         updateUserLocal,

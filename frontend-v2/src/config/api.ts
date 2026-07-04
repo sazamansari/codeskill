@@ -39,6 +39,8 @@ export const authAPI = {
   updateProfile: (data: any) => api.put("/auth/profile", data),
   saveNote: (problemId: string, note: string) => api.put(`/auth/notes/${problemId}`, { note }),
   toggleBookmark: (problemId: string) => api.put(`/auth/bookmark/${problemId}`),
+  forgotPassword: (data: { email: string }) => api.post("/auth/forgot-password", data),
+  resetPassword: (data: any) => api.post("/auth/reset-password", data),
 };
 
 // ── Public Problems ──

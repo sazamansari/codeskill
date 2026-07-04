@@ -93,6 +93,59 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// @route   POST /api/auth/forgot-password
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: "Email is required" });
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "No user found with this email" });
+    }
+
+    if (user.authProvider !== "local") {
+      return res.status(400).json({ success: false, message: `Please login using your ${user.authProvider} account` });
+    }
+
+    await sendOTP(email);
+    res.json({ success: true, message: "Password reset OTP sent to your email" });
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @route   POST /api/auth/reset-password
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ success: false, message: "Email, OTP, and new password are required" });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ success: false, message: "Password must be at least 8 characters" });
+    }
+
+    // Verify OTP
+    await verifyOTP(email, otp);
+
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Hash is handled by the pre-save hook
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ success: true, message: "Password has been successfully reset" });
+  } catch (error) {
+    console.error("Reset Password Error:", error);
+    res.status(500).json({ success: false, message: error.message || "Failed to reset password" });
+  }
+});
+
 // @route   GET /api/auth/me
 router.get("/me", protect, async (req, res) => {
   try {

@@ -1,4 +1,4 @@
-const { redisClient } = require("../redis");
+const { getRedisClient } = require("../config/redis");
 const crypto = require("crypto");
 const { sendOTPEmail } = require("./emailService");
 
@@ -8,7 +8,8 @@ const generateOTP = () => {
 };
 
 const sendOTP = async (email) => {
-  if (!redisClient.isReady) {
+  const redisClient = getRedisClient();
+  if (redisClient.status !== 'ready') {
     throw new Error("Redis is not connected");
   }
 
@@ -23,10 +24,10 @@ const sendOTP = async (email) => {
   const otpKey = `otp:${email}`;
 
   // Store OTP in Redis for 5 minutes (300 seconds)
-  await redisClient.setEx(otpKey, 300, otp);
+  await redisClient.set(otpKey, otp, "EX", 300);
   
   // Set rate limit for 60 seconds
-  await redisClient.setEx(rateLimitKey, 60, "1");
+  await redisClient.set(rateLimitKey, "1", "EX", 60);
 
   // Send the email via AWS SES
   await sendOTPEmail(email, otp);
@@ -35,7 +36,8 @@ const sendOTP = async (email) => {
 };
 
 const verifyOTP = async (email, code) => {
-  if (!redisClient.isReady) {
+  const redisClient = getRedisClient();
+  if (redisClient.status !== 'ready') {
     throw new Error("Redis is not connected");
   }
 
