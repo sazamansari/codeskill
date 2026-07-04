@@ -65,3 +65,11 @@ coverage/
 .vscode/
 .idea/
 *.pem
+
+# Uploads & Backups
+backups/
+uploads/
+
+# IDE & PM2
+.pm2/
+
