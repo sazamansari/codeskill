@@ -1,0 +1,67 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node Modules
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+frontend-v2/node_modules/
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Environment Variables
+.env
+.env.test
+.env.production
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+frontend/.env
+frontend-v2/.env
+frontend-v2/.env.local
+
+# Next.js / Frontend builds
+.next/
+out/
+build/
+dist/
+frontend-v2/.next/
+frontend-v2/out/
+frontend-v2/build/
+frontend/build/
+frontend/dist/
+
+# Backend builds (if any)
+backend/dist/
+backend/build/
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output/
+
+# Misc / IDEs
+.vercel
+.vscode/
+.idea/
+*.pem
