@@ -16,10 +16,12 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
+  registerSendOTP: (data: { email: string }) => Promise<any>;
   register: (data: any) => Promise<any>;
   login: (data: any) => Promise<any>;
   googleLogin: (token: string) => Promise<any>;
   adminLogin: (data: any) => Promise<any>;
+  adminLoginVerify: (data: { email: string; otp: string }) => Promise<any>;
   logout: () => void;
   updateProfile: (data: any) => Promise<void>;
   updateUserLocal: (updates: Partial<User>) => void;
@@ -48,6 +50,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
+    }
+  }, []);
+
+  const registerSendOTP = useCallback(async (data: { email: string }) => {
+    try {
+      setError(null);
+      const res = await authAPI.registerSendOTP(data);
+      return res.data;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Failed to send OTP";
+      setError(msg);
+      throw new Error(msg);
     }
   }, []);
 
@@ -88,13 +102,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setError(null);
       const res = await authAPI.adminLogin(data);
+      // Removed token setting and user setting because it only returns requireOTP now
+      return res.data;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Admin login failed";
+      setError(msg);
+      throw new Error(msg);
+    }
+  }, []);
+
+  const adminLoginVerify = useCallback(async (data: { email: string; otp: string }) => {
+    try {
+      setError(null);
+      const res = await authAPI.adminLoginVerify(data);
       if (typeof window !== "undefined") {
         localStorage.setItem("codeskill_token", res.data.token);
       }
       setUser(res.data.user);
       return res.data;
     } catch (err: any) {
-      const msg = err.response?.data?.message || "Admin login failed";
+      const msg = err.response?.data?.message || "OTP verification failed";
       setError(msg);
       throw new Error(msg);
     }
@@ -142,10 +169,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         loading,
         error,
+        registerSendOTP,
         register: registerUser,
         login: loginUser,
         googleLogin: googleLoginUser,
         adminLogin,
+        adminLoginVerify,
         logout: logoutUser,
         updateProfile,
         updateUserLocal,

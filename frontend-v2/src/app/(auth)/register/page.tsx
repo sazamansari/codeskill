@@ -16,13 +16,15 @@ const registerSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
+  otp: z.string().optional(),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const { register: registerUser, googleLogin } = useAuth();
+  const [showOTP, setShowOTP] = useState(false);
+  const { register: registerUser, registerSendOTP, googleLogin } = useAuth();
   const router = useRouter();
 
   const handleGoogleSuccess = async (credential: string) => {
@@ -44,9 +46,21 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
+    form.clearErrors("root");
     try {
-      await registerUser(data);
-      router.push("/dashboard");
+      if (!showOTP) {
+        // Step 1: Request OTP
+        await registerSendOTP({ email: data.email });
+        setShowOTP(true);
+      } else {
+        // Step 2: Verify OTP and Register
+        if (!data.otp) {
+          form.setError("otp", { type: "manual", message: "OTP is required" });
+          return;
+        }
+        await registerUser(data);
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       form.setError("root", { type: "manual", message: err.message || "Failed to register" });
     } finally {
@@ -117,8 +131,9 @@ export default function RegisterPage() {
             <label className="text-sm font-semibold text-[#334155]">Name</label>
             <input
               type="text"
+              disabled={showOTP}
               {...form.register("name")}
-              className="w-full h-11 bg-white border border-gray-300 rounded-[6px] px-3 text-[#1E293B] placeholder:text-gray-400 focus:outline-none focus:border-[#1E40AF] focus:ring-1 focus:ring-[#1E40AF] transition-all text-sm"
+              className="w-full h-11 bg-white border border-gray-300 rounded-[6px] px-3 text-[#1E293B] placeholder:text-gray-400 focus:outline-none focus:border-[#1E40AF] focus:ring-1 focus:ring-[#1E40AF] transition-all text-sm disabled:opacity-50"
             />
             {form.formState.errors.name && (
               <p className="text-xs text-red-500 mt-1">{form.formState.errors.name.message}</p>
@@ -129,8 +144,9 @@ export default function RegisterPage() {
             <label className="text-sm font-semibold text-[#334155]">Email</label>
             <input
               type="email"
+              disabled={showOTP}
               {...form.register("email")}
-              className="w-full h-11 bg-white border border-gray-300 rounded-[6px] px-3 text-[#1E293B] placeholder:text-gray-400 focus:outline-none focus:border-[#1E40AF] focus:ring-1 focus:ring-[#1E40AF] transition-all text-sm"
+              className="w-full h-11 bg-white border border-gray-300 rounded-[6px] px-3 text-[#1E293B] placeholder:text-gray-400 focus:outline-none focus:border-[#1E40AF] focus:ring-1 focus:ring-[#1E40AF] transition-all text-sm disabled:opacity-50"
             />
             {form.formState.errors.email && (
               <p className="text-xs text-red-500 mt-1">{form.formState.errors.email.message}</p>
@@ -141,13 +157,29 @@ export default function RegisterPage() {
             <label className="text-sm font-semibold text-[#334155]">Password</label>
             <input
               type="password"
+              disabled={showOTP}
               {...form.register("password")}
-              className="w-full h-11 bg-white border border-gray-300 rounded-[6px] px-3 text-[#1E293B] placeholder:text-gray-400 focus:outline-none focus:border-[#1E40AF] focus:ring-1 focus:ring-[#1E40AF] transition-all text-sm"
+              className="w-full h-11 bg-white border border-gray-300 rounded-[6px] px-3 text-[#1E293B] placeholder:text-gray-400 focus:outline-none focus:border-[#1E40AF] focus:ring-1 focus:ring-[#1E40AF] transition-all text-sm disabled:opacity-50"
             />
             {form.formState.errors.password && (
               <p className="text-xs text-red-500">{form.formState.errors.password.message}</p>
             )}
           </div>
+
+          {showOTP && (
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-[#334155]">Enter OTP sent to email</label>
+              <input
+                type="text"
+                placeholder="123456"
+                {...form.register("otp")}
+                className="w-full h-11 bg-white border border-gray-300 rounded-[6px] px-3 text-[#1E293B] placeholder:text-gray-400 focus:outline-none focus:border-[#1E40AF] focus:ring-1 focus:ring-[#1E40AF] transition-all text-sm tracking-[0.2em] font-medium"
+              />
+              {form.formState.errors.otp && (
+                <p className="text-xs text-red-500">{form.formState.errors.otp.message}</p>
+              )}
+            </div>
+          )}
 
           <button
             disabled={isLoading}
@@ -157,7 +189,7 @@ export default function RegisterPage() {
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              "Sign Up"
+              showOTP ? "Verify & Register" : "Sign Up"
             )}
           </button>
         </form>

@@ -2,16 +2,43 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const { protect } = require("../middleware/auth");
+const { sendOTP, verifyOTP } = require("../services/otpService");
 
-// @route   POST /api/auth/register
-router.post("/register", async (req, res) => {
+// @route   POST /api/auth/register/send-otp
+router.post("/register/send-otp", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: "Email is required" });
 
     const exists = await User.findOne({ email });
     if (exists) {
       return res.status(400).json({ success: false, message: "Email already registered" });
     }
+
+    await sendOTP(email);
+    res.json({ success: true, message: "OTP sent successfully" });
+  } catch (error) {
+    console.error("Register Send OTP Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @route   POST /api/auth/register
+router.post("/register", async (req, res) => {
+  try {
+    const { name, email, password, otp } = req.body;
+
+    if (!otp) {
+      return res.status(400).json({ success: false, message: "OTP is required" });
+    }
+
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).json({ success: false, message: "Email already registered" });
+    }
+
+    // Verify OTP first
+    await verifyOTP(email, otp);
 
     const user = await User.create({ name, email, password });
     const token = user.getSignedJwtToken();
@@ -176,6 +203,31 @@ router.post("/admin-login", async (req, res) => {
       return res.status(403).json({ success: false, message: "Access denied. Admin only." });
     }
 
+    // Send OTP for 2FA instead of directly logging in
+    await sendOTP(email);
+    res.json({ success: true, requireOTP: true, message: "OTP sent successfully" });
+  } catch (error) {
+    console.error("Admin Login Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @route   POST /api/auth/admin-login/verify
+router.post("/admin-login/verify", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ success: false, message: "Email and OTP are required" });
+    }
+
+    await verifyOTP(email, otp);
+
+    const user = await User.findOne({ email });
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ success: false, message: "Access denied" });
+    }
+
     user.lastActive = new Date();
     await user.save();
 
@@ -196,7 +248,7 @@ router.post("/admin-login", async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Admin Login Error:", error);
+    console.error("Admin Login Verify Error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -225,7 +277,6 @@ router.post("/seed-admin", async (req, res) => {
 
 const { OAuth2Client } = require("google-auth-library");
 const axios = require("axios");
-const { sendOTP, verifyOTP } = require("../services/otpService");
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 

@@ -14,13 +14,15 @@ import { Loader2, ShieldCheck } from "lucide-react";
 const adminLoginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
+  otp: z.string().optional(),
 });
 
 type AdminLoginFormValues = z.infer<typeof adminLoginSchema>;
 
 export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const { adminLogin } = useAuth();
+  const [showOTP, setShowOTP] = useState(false);
+  const { adminLogin, adminLoginVerify } = useAuth();
   const router = useRouter();
 
   const form = useForm<AdminLoginFormValues>({
@@ -30,9 +32,23 @@ export default function AdminLoginPage() {
 
   const onSubmit = async (data: AdminLoginFormValues) => {
     setIsLoading(true);
+    form.clearErrors("root");
     try {
-      await adminLogin(data);
-      router.push("/admin/dashboard");
+      if (!showOTP) {
+        const res = await adminLogin({ email: data.email, password: data.password });
+        if (res.requireOTP) {
+          setShowOTP(true);
+        } else {
+          router.push("/admin/dashboard");
+        }
+      } else {
+        if (!data.otp) {
+          form.setError("otp", { type: "manual", message: "OTP is required" });
+          return;
+        }
+        await adminLoginVerify({ email: data.email, otp: data.otp });
+        router.push("/admin/dashboard");
+      }
     } catch (err: any) {
       form.setError("root", { type: "manual", message: err.message || "Failed to authenticate admin" });
     } finally {
@@ -67,8 +83,9 @@ export default function AdminLoginPage() {
             <input
               type="email"
               placeholder="admin@codeskill.com"
+              disabled={showOTP}
               {...form.register("email")}
-              className="w-full h-11 px-3 border border-gray-200 rounded-[6px] text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6] transition-all bg-white"
+              className="w-full h-11 px-3 border border-gray-200 rounded-[6px] text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6] transition-all bg-white disabled:opacity-50"
             />
             {form.formState.errors.email && (
               <p className="text-xs text-red-500 font-medium">{form.formState.errors.email.message}</p>
@@ -80,20 +97,36 @@ export default function AdminLoginPage() {
             <input
               type="password"
               placeholder="••••••••"
+              disabled={showOTP}
               {...form.register("password")}
-              className="w-full h-11 px-3 border border-gray-200 rounded-[6px] text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6] transition-all bg-white"
+              className="w-full h-11 px-3 border border-gray-200 rounded-[6px] text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6] transition-all bg-white disabled:opacity-50"
             />
             {form.formState.errors.password && (
               <p className="text-xs text-red-500 font-medium">{form.formState.errors.password.message}</p>
             )}
           </div>
 
+          {showOTP && (
+            <div className="space-y-1.5 pt-2">
+              <label className="text-sm font-semibold text-[#334155]">Verification Code</label>
+              <input
+                type="text"
+                placeholder="123456"
+                {...form.register("otp")}
+                className="w-full h-11 px-3 border border-gray-200 rounded-[6px] text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6] transition-all bg-white tracking-[0.2em] font-medium"
+              />
+              {form.formState.errors.otp && (
+                <p className="text-xs text-red-500 font-medium">{form.formState.errors.otp.message}</p>
+              )}
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={isLoading}
             className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-[6px] transition-colors flex items-center justify-center mt-2 disabled:opacity-70"
           >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Authenticate as Admin"}
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (showOTP ? "Verify Login" : "Authenticate as Admin")}
           </button>
         </form>
         
