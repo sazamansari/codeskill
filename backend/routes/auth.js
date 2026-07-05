@@ -309,19 +309,22 @@ router.post("/admin-login/verify", async (req, res) => {
 // @route   POST /api/auth/seed-admin
 router.post("/seed-admin", async (req, res) => {
   try {
-    let admin = await User.findOne({ email: "admin@codeskill.com" });
+    const adminEmail = process.env.ADMIN_EMAIL || "md.shadab.azam.ansari@gmail.com";
+    const adminPassword = process.env.ADMIN_PASSWORD || "password123";
+
+    let admin = await User.findOne({ email: adminEmail });
     if (admin) {
       return res.json({ success: true, message: "Admin already exists", user: admin });
     }
 
     admin = await User.create({
       name: "Admin User",
-      email: "admin@codeskill.com",
-      password: "password123",
+      email: adminEmail,
+      password: adminPassword,
       isAdmin: true
     });
 
-    res.status(201).json({ success: true, message: "Admin created successfully (admin@codeskill.com / password123)" });
+    res.status(201).json({ success: true, message: `Admin created successfully (${adminEmail})` });
   } catch (error) {
     console.error("Seed Admin Error:", error);
     res.status(500).json({ success: false, message: error.message });
