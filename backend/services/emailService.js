@@ -11,11 +11,12 @@ const sesClient = new SESClient({
 });
 
 const sendOTPEmail = async (toEmail, otp) => {
-  const senderEmail = process.env.AWS_SES_SENDER || "noreply@codeskill.com";
+  const senderEmail = (process.env.AWS_SES_SENDER || "noreply@evolvian.in").trim();
+  const recipientEmail = toEmail ? toEmail.trim() : "";
 
   const params = {
     Destination: {
-      ToAddresses: [toEmail],
+      ToAddresses: [recipientEmail],
     },
     Message: {
       Body: {
