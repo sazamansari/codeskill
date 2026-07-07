@@ -1,14 +1,22 @@
 const { SESClient, SendEmailCommand } = require("@aws-sdk/client-ses");
 
-// Read credentials from env
-const sesClient = new SESClient({
-  region: process.env.AWS_REGION || "us-east-1",
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    ...(process.env.AWS_SESSION_TOKEN && { sessionToken: process.env.AWS_SESSION_TOKEN }),
-  },
-});
+// Build SES client config — uses EC2 IAM role automatically if no explicit creds
+const sesConfig = {
+  region: process.env.AWS_REGION || "ap-south-1",
+};
+
+// Only set explicit credentials if they are real (not placeholders)
+const accessKey = process.env.AWS_ACCESS_KEY_ID;
+const secretKey = process.env.AWS_SECRET_ACCESS_KEY;
+if (accessKey && secretKey && !accessKey.startsWith("your_")) {
+  sesConfig.credentials = {
+    accessKeyId: accessKey,
+    secretAccessKey: secretKey,
+    ...(process.env.AWS_SESSION_TOKEN && !process.env.AWS_SESSION_TOKEN.startsWith("your_") && { sessionToken: process.env.AWS_SESSION_TOKEN }),
+  };
+}
+
+const sesClient = new SESClient(sesConfig);
 
 const sendOTPEmail = async (toEmail, otp) => {
   const senderEmail = (process.env.AWS_SES_SENDER || "noreply@evolvian.in").trim();
