@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
 
   const form = useForm<AdminLoginFormValues>({
     resolver: zodResolver(adminLoginSchema),
-    defaultValues: { email: "md.shadab.azam.ansari@gmail.com", password: "password123" },
+    defaultValues: { email: "", password: "" },
   });
 
   const onSubmit = async (data: AdminLoginFormValues) => {
@@ -82,7 +82,7 @@ export default function AdminLoginPage() {
             <label className="text-sm font-semibold text-[#334155]">Admin Email</label>
             <input
               type="email"
-              placeholder="md.shadab.azam.ansari@gmail.com"
+              placeholder="Enter email"
               disabled={showOTP}
               {...form.register("email")}
               className="w-full h-11 px-3 border border-gray-200 rounded-[6px] text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6] transition-all bg-white disabled:opacity-50"

@@ -309,31 +309,36 @@ router.post("/admin-login/verify", async (req, res) => {
 // @route   POST /api/auth/seed-admin
 router.post("/seed-admin", async (req, res) => {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || "md.shadab.azam.ansari@gmail.com";
+    const adminEmailsString = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || "md.shadab.azam.ansari@gmail.com";
+    const adminEmails = adminEmailsString.split(",").map(e => e.trim());
     const adminPassword = process.env.ADMIN_PASSWORD || "password123";
 
-    let admin = await User.findOne({ email: adminEmail });
-    
-    if (admin) {
-      if (!admin.isAdmin) {
-        admin.isAdmin = true;
-        // Optionally update password if they need local login, but if they use Google Auth, password might be empty.
-        // We will set the password so they can log in via the local admin form.
-        admin.password = adminPassword; 
-        await admin.save();
-        return res.json({ success: true, message: "Existing user upgraded to Admin", user: admin });
+    const results = [];
+    for (const email of adminEmails) {
+      if (!email) continue;
+      let admin = await User.findOne({ email });
+      
+      if (admin) {
+        if (!admin.isAdmin) {
+          admin.isAdmin = true;
+          admin.password = adminPassword; 
+          await admin.save();
+          results.push({ email, status: "Upgraded to Admin" });
+        } else {
+          results.push({ email, status: "Already Admin" });
+        }
+      } else {
+        await User.create({
+          name: "Admin User",
+          email,
+          password: adminPassword,
+          isAdmin: true
+        });
+        results.push({ email, status: "Created successfully" });
       }
-      return res.json({ success: true, message: "Admin already exists", user: admin });
     }
 
-    admin = await User.create({
-      name: "Admin User",
-      email: adminEmail,
-      password: adminPassword,
-      isAdmin: true
-    });
-
-    res.status(201).json({ success: true, message: `Admin created successfully (${adminEmail})` });
+    res.status(201).json({ success: true, message: "Admin seeding process completed", results });
   } catch (error) {
     console.error("Seed Admin Error:", error);
     res.status(500).json({ success: false, message: error.message });
