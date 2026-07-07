@@ -247,7 +247,10 @@ router.post("/admin-login", async (req, res) => {
       return res.status(400).json({ success: false, message: "Provide email and password" });
     }
 
-    const user = await User.findOne({ email }).select("+password");
+    // Normalize email to lowercase for consistent matching
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({ email: normalizedEmail }).select("+password");
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
@@ -257,8 +260,16 @@ router.post("/admin-login", async (req, res) => {
     }
 
     // Send OTP for 2FA instead of directly logging in
-    await sendOTP(email);
-    res.json({ success: true, requireOTP: true, message: "OTP sent successfully" });
+    try {
+      await sendOTP(normalizedEmail);
+      res.json({ success: true, requireOTP: true, message: "OTP sent successfully" });
+    } catch (otpError) {
+      console.error(`[Admin Login] Failed to send OTP to ${normalizedEmail}:`, otpError.message);
+      res.status(500).json({ 
+        success: false, 
+        message: `Failed to send OTP: ${otpError.message}` 
+      });
+    }
   } catch (error) {
     console.error("Admin Login Error:", error);
     res.status(500).json({ success: false, message: error.message });
@@ -274,9 +285,12 @@ router.post("/admin-login/verify", async (req, res) => {
       return res.status(400).json({ success: false, message: "Email and OTP are required" });
     }
 
-    await verifyOTP(email, otp);
+    // Normalize email to lowercase for consistent matching
+    const normalizedEmail = email.trim().toLowerCase();
 
-    const user = await User.findOne({ email });
+    await verifyOTP(normalizedEmail, otp);
+
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user || !user.isAdmin) {
       return res.status(403).json({ success: false, message: "Access denied" });
     }
@@ -310,31 +324,50 @@ router.post("/admin-login/verify", async (req, res) => {
 router.post("/seed-admin", async (req, res) => {
   try {
     const adminEmailsString = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || "md.shadab.azam.ansari@gmail.com";
-    const adminEmails = adminEmailsString.split(",").map(e => e.trim());
+    const adminEmails = adminEmailsString.split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
     const adminPassword = process.env.ADMIN_PASSWORD || "password123";
+
+    if (adminEmails.length === 0) {
+      return res.status(400).json({ success: false, message: "No admin emails configured in ADMIN_EMAILS" });
+    }
+
+    console.log(`[Seed Admin] Seeding ${adminEmails.length} admin(s): ${adminEmails.join(", ")}`);
 
     const results = [];
     for (const email of adminEmails) {
-      if (!email) continue;
-      let admin = await User.findOne({ email });
-      
-      if (admin) {
-        if (!admin.isAdmin) {
-          admin.isAdmin = true;
-          admin.password = adminPassword; 
-          await admin.save();
-          results.push({ email, status: "Upgraded to Admin" });
+      try {
+        let admin = await User.findOne({ email });
+        
+        // Generate a readable admin name from the email
+        const adminName = email.split("@")[0]
+          .replace(/[._-]/g, " ")
+          .replace(/\b\w/g, c => c.toUpperCase()) + " (Admin)";
+
+        if (admin) {
+          if (!admin.isAdmin) {
+            admin.isAdmin = true;
+            admin.password = adminPassword; 
+            await admin.save();
+            results.push({ email, status: "Upgraded to Admin" });
+            console.log(`[Seed Admin] ${email}: Upgraded to Admin`);
+          } else {
+            results.push({ email, status: "Already Admin" });
+            console.log(`[Seed Admin] ${email}: Already Admin`);
+          }
         } else {
-          results.push({ email, status: "Already Admin" });
+          await User.create({
+            name: adminName,
+            email,
+            password: adminPassword,
+            isAdmin: true
+          });
+          results.push({ email, status: "Created successfully" });
+          console.log(`[Seed Admin] ${email}: Created successfully as "${adminName}"`);
         }
-      } else {
-        await User.create({
-          name: "Admin User",
-          email,
-          password: adminPassword,
-          isAdmin: true
-        });
-        results.push({ email, status: "Created successfully" });
+      } catch (emailError) {
+        // Handle individual admin creation failure without breaking the loop
+        console.error(`[Seed Admin] Failed for ${email}:`, emailError.message);
+        results.push({ email, status: `Failed: ${emailError.message}` });
       }
     }
 

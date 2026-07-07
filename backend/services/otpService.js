@@ -8,20 +8,26 @@ const generateOTP = () => {
 };
 
 const sendOTP = async (email) => {
+  if (!email || typeof email !== "string") {
+    throw new Error("A valid email address is required to send OTP.");
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
   const redisClient = getRedisClient();
   if (redisClient.status !== 'ready') {
-    throw new Error("Redis is not connected");
+    throw new Error("Redis is not connected. Cannot send OTP.");
   }
 
   // Rate limiting (optional check) to prevent spamming
-  const rateLimitKey = `otp_ratelimit:${email}`;
+  const rateLimitKey = `otp_ratelimit:${normalizedEmail}`;
   const isRateLimited = await redisClient.get(rateLimitKey);
   if (isRateLimited) {
     throw new Error("Please wait before requesting another OTP.");
   }
 
   const otp = generateOTP();
-  const otpKey = `otp:${email}`;
+  const otpKey = `otp:${normalizedEmail}`;
 
   // Store OTP in Redis for 5 minutes (300 seconds)
   await redisClient.set(otpKey, otp, "EX", 300);
@@ -30,25 +36,40 @@ const sendOTP = async (email) => {
   await redisClient.set(rateLimitKey, "1", "EX", 60);
 
   // Send the email via AWS SES
-  await sendOTPEmail(email, otp);
+  try {
+    await sendOTPEmail(normalizedEmail, otp);
+  } catch (emailError) {
+    // If email send fails, clean up the OTP and rate limit from Redis
+    // so the user can retry immediately
+    console.error(`[OTP] Email send failed for ${normalizedEmail}, cleaning up Redis keys`);
+    await redisClient.del(otpKey).catch(() => {});
+    await redisClient.del(rateLimitKey).catch(() => {});
+    throw emailError;
+  }
 
   return { success: true, message: "OTP sent successfully" };
 };
 
 const verifyOTP = async (email, code) => {
-  const redisClient = getRedisClient();
-  if (redisClient.status !== 'ready') {
-    throw new Error("Redis is not connected");
+  if (!email || !code) {
+    throw new Error("Email and OTP code are required.");
   }
 
-  const otpKey = `otp:${email}`;
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const redisClient = getRedisClient();
+  if (redisClient.status !== 'ready') {
+    throw new Error("Redis is not connected. Cannot verify OTP.");
+  }
+
+  const otpKey = `otp:${normalizedEmail}`;
   const storedOTP = await redisClient.get(otpKey);
 
   if (!storedOTP) {
     throw new Error("OTP expired or not found. Please request a new one.");
   }
 
-  if (storedOTP !== code) {
+  if (storedOTP !== code.toString().trim()) {
     throw new Error("Invalid OTP code.");
   }
 
