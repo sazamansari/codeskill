@@ -21,8 +21,9 @@ export function Navbar() {
   const isTransparentOnLanding = pathname === "/" && !scrolled;
   const isAuthPage = pathname === "/login" || pathname === "/register";
   const isAdminPage = pathname.startsWith("/admin");
+  const isWorkspacePage = pathname.match(/^\/(problems|contest)\/[^/]+$/);
 
-  if (isAuthPage || isAdminPage) {
+  if (isAuthPage || isAdminPage || isWorkspacePage) {
     return null;
   }
 

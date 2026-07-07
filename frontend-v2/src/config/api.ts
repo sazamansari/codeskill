@@ -82,4 +82,14 @@ export const adminContestsAPI = {
   delete: (id: string) => api.delete(`/admin/contests/${id}`),
 };
 
+export const adminUsersAPI = {
+  getAll: (search = "", adminsOnly = false) => api.get(`/admin/users?search=${encodeURIComponent(search)}&adminsOnly=${adminsOnly}`),
+  promote: (userId: string) => api.put(`/admin/users/${userId}/promote`),
+  demote: (userId: string) => api.put(`/admin/users/${userId}/demote`),
+};
+
+export const adminDashboardAPI = {
+  getStats: () => api.get("/admin/dashboard/stats"),
+};
+
 export default api;

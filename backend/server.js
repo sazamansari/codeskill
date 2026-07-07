@@ -27,6 +27,8 @@ app.use("/api/submissions", require("./routes/submissions"));
 app.use("/api/run", require("./routes/run"));
 app.use("/api/admin/problems", require("./routes/admin/problems"));
 app.use("/api/admin/contests", require("./routes/admin/contests"));
+app.use("/api/admin/users", require("./routes/admin/users"));
+app.use("/api/admin/dashboard", require("./routes/admin/dashboard"));
 app.use("/api/contest-attempts", require("./routes/contest-attempts"));
 
 // Health check

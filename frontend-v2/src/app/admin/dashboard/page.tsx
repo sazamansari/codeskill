@@ -1,8 +1,33 @@
 "use client";
 
-import { Users, Code, Activity, ShieldAlert } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Users, Code, Activity, ShieldAlert, Loader2 } from "lucide-react";
+import { adminDashboardAPI } from "@/config/api";
 
 export default function AdminDashboardPage() {
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    codeSubmissions: 0,
+    activeToday: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await adminDashboardAPI.getStats();
+        if (res.data.success) {
+          setStats(res.data.stats);
+        }
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
   return (
     <div className="p-8 font-sans">
       <div className="mb-8 flex items-center justify-between">
@@ -20,7 +45,11 @@ export default function AdminDashboardPage() {
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">Total Users</p>
-            <p className="text-2xl font-bold text-gray-900">1,248</p>
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin text-gray-400 mt-1" />
+            ) : (
+              <p className="text-2xl font-bold text-gray-900">{stats.totalUsers.toLocaleString()}</p>
+            )}
           </div>
         </div>
 
@@ -30,7 +59,11 @@ export default function AdminDashboardPage() {
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">Code Submissions</p>
-            <p className="text-2xl font-bold text-gray-900">45,912</p>
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin text-gray-400 mt-1" />
+            ) : (
+              <p className="text-2xl font-bold text-gray-900">{stats.codeSubmissions.toLocaleString()}</p>
+            )}
           </div>
         </div>
 
@@ -40,7 +73,11 @@ export default function AdminDashboardPage() {
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">Active Today</p>
-            <p className="text-2xl font-bold text-gray-900">324</p>
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin text-gray-400 mt-1" />
+            ) : (
+              <p className="text-2xl font-bold text-gray-900">{stats.activeToday.toLocaleString()}</p>
+            )}
           </div>
         </div>
       </div>
