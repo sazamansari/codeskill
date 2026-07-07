@@ -55,9 +55,7 @@ const sendOTPEmail = async (toEmail, otp) => {
     return result;
   } catch (error) {
     console.error("[SES] Error sending email:", error.message || error);
-    // Fallback to simulated OTP if AWS is not properly configured or throws an error
-    console.warn(`[SES WARNING] Failed to send email via AWS SES. Simulated OTP for ${toEmail}: ${otp}`);
-    return { simulated: true, otp };
+    throw new Error("Failed to send OTP email. Please check AWS SES configuration.");
   }
 };
 

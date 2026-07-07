@@ -38,9 +38,6 @@ export default function AdminLoginPage() {
         const res = await adminLogin({ email: data.email, password: data.password });
         if (res.requireOTP) {
           setShowOTP(true);
-          if (res.simulatedOtp) {
-            form.setValue("otp", res.simulatedOtp);
-          }
         } else {
           router.push("/admin/dashboard");
         }

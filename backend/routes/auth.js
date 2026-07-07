@@ -15,8 +15,8 @@ router.post("/register/send-otp", async (req, res) => {
       return res.status(400).json({ success: false, message: "Email already registered" });
     }
 
-    const otpRes = await sendOTP(email);
-    res.json({ success: true, message: "OTP sent successfully", ...(otpRes.simulatedOtp && { simulatedOtp: otpRes.simulatedOtp }) });
+    await sendOTP(email);
+    res.json({ success: true, message: "OTP sent successfully" });
   } catch (error) {
     console.error("Register Send OTP Error:", error);
     res.status(500).json({ success: false, message: error.message });
@@ -108,8 +108,8 @@ router.post("/forgot-password", async (req, res) => {
       return res.status(400).json({ success: false, message: `Please login using your ${user.authProvider} account` });
     }
 
-    const otpRes = await sendOTP(email);
-    res.json({ success: true, message: "Password reset OTP sent to your email", ...(otpRes.simulatedOtp && { simulatedOtp: otpRes.simulatedOtp }) });
+    await sendOTP(email);
+    res.json({ success: true, message: "Password reset OTP sent to your email" });
   } catch (error) {
     console.error("Forgot Password Error:", error);
     res.status(500).json({ success: false, message: error.message });
@@ -257,8 +257,8 @@ router.post("/admin-login", async (req, res) => {
     }
 
     // Send OTP for 2FA instead of directly logging in
-    const otpRes = await sendOTP(email);
-    res.json({ success: true, requireOTP: true, message: "OTP sent successfully", ...(otpRes.simulatedOtp && { simulatedOtp: otpRes.simulatedOtp }) });
+    await sendOTP(email);
+    res.json({ success: true, requireOTP: true, message: "OTP sent successfully" });
   } catch (error) {
     console.error("Admin Login Error:", error);
     res.status(500).json({ success: false, message: error.message });
@@ -508,8 +508,8 @@ router.post("/send-otp", async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ success: false, message: "Email is required" });
     
-    const otpRes = await sendOTP(email);
-    res.json({ success: true, message: "OTP sent to your email", ...(otpRes.simulatedOtp && { simulatedOtp: otpRes.simulatedOtp }) });
+    await sendOTP(email);
+    res.json({ success: true, message: "OTP sent to your email" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
