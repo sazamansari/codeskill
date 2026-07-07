@@ -30,9 +30,13 @@ const sendOTP = async (email) => {
   await redisClient.set(rateLimitKey, "1", "EX", 60);
 
   // Send the email via AWS SES
-  await sendOTPEmail(email, otp);
+  const emailResult = await sendOTPEmail(email, otp);
 
-  return { success: true, message: "OTP sent successfully" };
+  return { 
+    success: true, 
+    message: "OTP sent successfully",
+    ...(emailResult && emailResult.simulated && { simulatedOtp: emailResult.otp })
+  };
 };
 
 const verifyOTP = async (email, code) => {
