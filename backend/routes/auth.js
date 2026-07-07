@@ -265,9 +265,9 @@ router.post("/admin-login", async (req, res) => {
       res.json({ success: true, requireOTP: true, message: "OTP sent successfully" });
     } catch (otpError) {
       console.error(`[Admin Login] Failed to send OTP to ${normalizedEmail}:`, otpError.message);
-      res.status(500).json({ 
-        success: false, 
-        message: `Failed to send OTP: ${otpError.message}` 
+      res.status(500).json({
+        success: false,
+        message: `Failed to send OTP: ${otpError.message}`
       });
     }
   } catch (error) {
@@ -337,7 +337,7 @@ router.post("/seed-admin", async (req, res) => {
     for (const email of adminEmails) {
       try {
         let admin = await User.findOne({ email });
-        
+
         // Generate a readable admin name from the email
         const adminName = email.split("@")[0]
           .replace(/[._-]/g, " ")
@@ -346,7 +346,7 @@ router.post("/seed-admin", async (req, res) => {
         if (admin) {
           if (!admin.isAdmin) {
             admin.isAdmin = true;
-            admin.password = adminPassword; 
+            admin.password = adminPassword;
             await admin.save();
             results.push({ email, status: "Upgraded to Admin" });
             console.log(`[Seed Admin] ${email}: Upgraded to Admin`);
@@ -405,7 +405,7 @@ router.post("/google", async (req, res) => {
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-    
+
     const payload = ticket.getPayload();
     const { email, name, sub, picture } = payload;
 
@@ -437,7 +437,7 @@ router.post("/google", async (req, res) => {
 router.post("/github", async (req, res) => {
   try {
     const { code } = req.body;
-    
+
     // Exchange code for access token
     const tokenResponse = await axios.post("https://github.com/login/oauth/access_token", {
       client_id: process.env.GITHUB_CLIENT_ID,
@@ -503,7 +503,7 @@ router.post("/linkedin", async (req, res) => {
     });
 
     const accessToken = tokenResponse.data.access_token;
-    
+
     // Fetch profile (LinkedIn OpenID Connect)
     const userResponse = await axios.get("https://api.linkedin.com/v2/userinfo", {
       headers: { Authorization: `Bearer ${accessToken}` }
@@ -540,7 +540,7 @@ router.post("/send-otp", async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ success: false, message: "Email is required" });
-    
+
     await sendOTP(email);
     res.json({ success: true, message: "OTP sent to your email" });
   } catch (error) {
@@ -552,7 +552,7 @@ router.post("/send-otp", async (req, res) => {
 router.post("/verify-otp", async (req, res) => {
   try {
     const { email, code, name } = req.body;
-    
+
     await verifyOTP(email, code);
 
     // Find or create user

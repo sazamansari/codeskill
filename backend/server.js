@@ -41,7 +41,7 @@ app.get("/api/health/redis", async (req, res) => {
     try {
       const ping = await redis.ping();
       return res.json({ status: "ok", redis: "connected", ping });
-    } catch(e) {
+    } catch (e) {
       return res.status(500).json({ status: "error", redis: "ping failed", message: e.message });
     }
   }
@@ -75,7 +75,7 @@ const shutdown = async () => {
     await closeRedis();
     process.exit(0);
   });
-  
+
   // Force exit after 10 seconds
   setTimeout(() => {
     console.error('[Server] Could not close connections in time, forcefully shutting down');
