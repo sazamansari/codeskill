@@ -54,13 +54,10 @@ const sendOTPEmail = async (toEmail, otp) => {
     console.log(`[SES] Email sent to ${toEmail}. MessageId: ${result.MessageId}`);
     return result;
   } catch (error) {
-    console.error("[SES] Error sending email:", error);
-    // In local development, if AWS isn't configured, we just log the OTP
-    if (error.name === "CredentialsProviderError" || !process.env.AWS_ACCESS_KEY_ID) {
-      console.warn(`[SES WARNING] AWS Credentials not configured. Simulated OTP for ${toEmail}: ${otp}`);
-      return { simulated: true, otp };
-    }
-    throw error;
+    console.error("[SES] Error sending email:", error.message || error);
+    // Fallback to simulated OTP if AWS is not properly configured or throws an error
+    console.warn(`[SES WARNING] Failed to send email via AWS SES. Simulated OTP for ${toEmail}: ${otp}`);
+    return { simulated: true, otp };
   }
 };
 

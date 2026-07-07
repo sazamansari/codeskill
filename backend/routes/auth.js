@@ -313,7 +313,16 @@ router.post("/seed-admin", async (req, res) => {
     const adminPassword = process.env.ADMIN_PASSWORD || "password123";
 
     let admin = await User.findOne({ email: adminEmail });
+    
     if (admin) {
+      if (!admin.isAdmin) {
+        admin.isAdmin = true;
+        // Optionally update password if they need local login, but if they use Google Auth, password might be empty.
+        // We will set the password so they can log in via the local admin form.
+        admin.password = adminPassword; 
+        await admin.save();
+        return res.json({ success: true, message: "Existing user upgraded to Admin", user: admin });
+      }
       return res.json({ success: true, message: "Admin already exists", user: admin });
     }
 
