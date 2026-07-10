@@ -8,6 +8,9 @@ let mongoServer;
 module.exports.setupDB = async () => {
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
+  if (mongoose.connection.readyState !== 0) {
+    await mongoose.disconnect();
+  }
   await mongoose.connect(uri);
 };
 
