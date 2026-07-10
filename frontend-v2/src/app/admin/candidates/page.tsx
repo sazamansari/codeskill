@@ -19,7 +19,7 @@ export default function CandidatesAdminPage() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await adminUsersAPI.getAll({ search });
+      const res = await adminUsersAPI.getAll(search);
       setUsers(res.data.users);
     } catch (err) {
       console.error("Failed to fetch users", err);
