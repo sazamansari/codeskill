@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { Loader2, ShieldCheck, AlertCircle } from "lucide-react";
 
 const adminLoginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -103,8 +103,11 @@ export default function AdminLoginPage() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             
             {form.formState.errors.root && (
-              <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-md">
-                {form.formState.errors.root.message}
+              <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                <p className="text-sm font-medium text-red-500 leading-snug">
+                  {form.formState.errors.root.message}
+                </p>
               </div>
             )}
 

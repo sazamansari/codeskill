@@ -158,7 +158,7 @@ export default function Home() {
             </motion.p>
 
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
-              <Link href="/problems" className={cn(buttonVariants({ size: "lg" }), "rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl shadow-primary/25 px-8 h-14 text-base font-medium group overflow-hidden relative w-full sm:w-auto")}>
+              <Link href="/problems" className={cn(buttonVariants({ size: "lg" }), "rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-xl shadow-black/20 dark:shadow-white/20 px-8 h-14 text-base font-medium group overflow-hidden relative w-full sm:w-auto transition-all")}>
                 Start Coding
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>

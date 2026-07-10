@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 
 const emailSchema = z.object({
@@ -115,8 +115,11 @@ export default function ForgotPasswordPage() {
           {step === 1 ? (
             <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4">
               {emailForm.formState.errors.root && (
-                <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-md">
-                  {emailForm.formState.errors.root.message}
+                <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                  <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                  <p className="text-sm font-medium text-red-500 leading-snug">
+                    {emailForm.formState.errors.root.message}
+                  </p>
                 </div>
               )}
 
@@ -143,8 +146,11 @@ export default function ForgotPasswordPage() {
           ) : (
             <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-4">
               {resetForm.formState.errors.root && (
-                <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-md">
-                  {resetForm.formState.errors.root.message}
+                <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                  <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                  <p className="text-sm font-medium text-red-500 leading-snug">
+                    {resetForm.formState.errors.root.message}
+                  </p>
                 </div>
               )}
 
