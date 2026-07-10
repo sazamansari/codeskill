@@ -45,17 +45,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex h-screen bg-[#F5F7FA] overflow-hidden font-sans">
+    <div className="flex h-screen bg-background overflow-hidden font-sans">
       <AdminSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header can go here if needed, or inside pages */}
-        <header className="bg-white border-b border-gray-200 h-16 flex items-center px-6 sticky top-0 z-10 shrink-0 shadow-sm">
+        <header className="bg-card/50 backdrop-blur-xl border-b border-border h-16 flex items-center px-6 sticky top-0 z-10 shrink-0 shadow-sm">
           <div className="flex-1" />
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-sm">
+            <div className="w-8 h-8 bg-red-500/10 border border-red-500/20 text-red-500 rounded-full flex items-center justify-center font-bold text-sm">
               {user?.name?.charAt(0) || "A"}
             </div>
-            <span className="text-sm font-medium hidden sm:block text-slate-700">{user?.name}</span>
+            <span className="text-sm font-medium hidden sm:block text-foreground">{user?.name}</span>
           </div>
         </header>
 

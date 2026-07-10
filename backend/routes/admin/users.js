@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../../models/User");
+const Submission = require("../../models/Submission");
 const { protect } = require("../../middleware/auth");
 
 // Admin authorization middleware
@@ -94,6 +95,44 @@ router.put("/:userId/demote", async (req, res) => {
     res.json({ success: true, message: `${user.email} is no longer an admin`, user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin } });
   } catch (error) {
     console.error("Admin Demote Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @route   GET /api/admin/users/:userId/report
+// @desc    Get a detailed report of a candidate/user
+router.get("/:userId/report", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).select("-password -__v");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Get recent submissions
+    const recentSubmissions = await Submission.find({ user: user._id })
+      .populate("problem", "title slug difficulty")
+      .sort({ createdAt: -1 })
+      .limit(20);
+
+    // Calculate acceptance rate from submissions
+    const totalSubmissions = await Submission.countDocuments({ user: user._id });
+    const acceptedSubmissions = await Submission.countDocuments({ user: user._id, status: "Accepted" });
+    const acceptanceRate = totalSubmissions > 0 ? ((acceptedSubmissions / totalSubmissions) * 100).toFixed(1) : 0;
+
+    res.json({
+      success: true,
+      report: {
+        user,
+        stats: {
+          totalSubmissions,
+          acceptedSubmissions,
+          acceptanceRate,
+        },
+        recentSubmissions
+      }
+    });
+  } catch (error) {
+    console.error("Admin Get User Report Error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 });

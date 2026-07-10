@@ -28,8 +28,17 @@ app.use("/api/run", require("./routes/run"));
 app.use("/api/admin/problems", require("./routes/admin/problems"));
 app.use("/api/admin/contests", require("./routes/admin/contests"));
 app.use("/api/admin/users", require("./routes/admin/users"));
+app.use("/api/admin/companies", require("./routes/admin/companies"));
+app.use("/api/admin/universities", require("./routes/admin/universities"));
 app.use("/api/admin/dashboard", require("./routes/admin/dashboard"));
 app.use("/api/contest-attempts", require("./routes/contest-attempts"));
+app.use("/api/company", require("./routes/company"));
+app.use("/api/company/jobs", require("./routes/company/jobs"));
+app.use("/api/company/team", require("./routes/company/team"));
+app.use("/api/company/applications", require("./routes/company/applications"));
+app.use("/api/campus", require("./routes/campus"));
+app.use("/api/campus/batches", require("./routes/campus/batches"));
+app.use("/api/campus/students", require("./routes/campus/students"));
 
 // Health check
 app.get("/api/health", (req, res) => {

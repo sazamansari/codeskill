@@ -65,6 +65,18 @@ const sendOTPEmail = async (toEmail, otp) => {
     throw new Error(`Invalid sender email configured: "${senderEmail}"`);
   }
 
+  // MOCK for local development if credentials are missing
+  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+    console.log(`
+=========================================
+[MOCK SES] Email sending bypassed (No AWS Credentials)
+To: ${recipientEmail}
+Subject: Your CodeSkill Login Code: ${otp}
+OTP CODE: ${otp}
+=========================================`);
+    return { MessageId: "mock-message-id-" + Date.now() };
+  }
+
   const params = {
     Destination: {
       ToAddresses: [recipientEmail],

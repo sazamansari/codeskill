@@ -63,23 +63,23 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <div className="p-8 font-sans max-w-6xl mx-auto">
+    <div className="p-8 font-sans max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Admin Management</h1>
-        <p className="text-gray-500 text-sm mt-1">Search users and manage administrative privileges.</p>
+        <h1 className="text-2xl font-bold text-foreground">Admin Management</h1>
+        <p className="text-muted-foreground text-sm mt-1">Search users and manage administrative privileges.</p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden flex flex-col">
         {/* Toolbar */}
-        <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row gap-4 justify-between items-center bg-gray-50">
-          <div className="relative w-full sm:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+        <div className="p-4 border-b border-border flex flex-col sm:flex-row gap-4 justify-between items-center">
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <input
               type="text"
               placeholder="Search by name or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-foreground"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -88,9 +88,9 @@ export default function AdminSettingsPage() {
               id="adminsOnly"
               checked={adminsOnly}
               onChange={(e) => setAdminsOnly(e.target.checked)}
-              className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"
+              className="rounded border-border text-blue-500 focus:ring-blue-500/20 w-4 h-4 bg-background"
             />
-            <label htmlFor="adminsOnly" className="text-sm text-gray-700 cursor-pointer select-none">
+            <label htmlFor="adminsOnly" className="text-sm font-medium text-muted-foreground cursor-pointer select-none">
               Show Admins Only
             </label>
           </div>
@@ -100,79 +100,86 @@ export default function AdminSettingsPage() {
         <div className="overflow-x-auto min-h-[400px]">
           {loading ? (
             <div className="flex items-center justify-center h-64">
-              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+              <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
             </div>
           ) : users.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-              <ShieldOff className="w-12 h-12 text-gray-300 mb-4" />
-              <p>No users found matching your search.</p>
+            <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+              <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
+                <ShieldOff className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <p className="text-foreground font-medium">No users found</p>
+              <p className="text-xs text-muted-foreground/70 mt-1">Try adjusting your search criteria.</p>
             </div>
           ) : (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
-                  <th className="p-4">User</th>
-                  <th className="p-4">Role</th>
-                  <th className="p-4">Joined</th>
-                  <th className="p-4 text-right">Actions</th>
+            <table className="w-full text-left text-sm text-muted-foreground">
+              <thead className="bg-muted/50 text-muted-foreground font-medium border-b border-border">
+                <tr>
+                  <th className="px-6 py-3">User Details</th>
+                  <th className="px-6 py-3">Role</th>
+                  <th className="px-6 py-3">Joined</th>
+                  <th className="px-6 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-border">
                 {users.map((u) => (
-                  <tr key={u._id} className="hover:bg-gray-50 transition-colors">
-                    <td className="p-4">
+                  <tr key={u._id} className="hover:bg-muted/30 transition-colors group">
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        {u.avatar ? (
-                          <img src={u.avatar} alt={u.name} className="w-10 h-10 rounded-full object-cover" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
-                            {u.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                        <div className="w-10 h-10 rounded-full border border-border bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                          {u.avatar ? (
+                            <img src={u.avatar} alt={u.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="font-bold text-lg text-muted-foreground">
+                              {u.name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
                         <div>
-                          <p className="font-medium text-gray-900">{u.name}</p>
-                          <p className="text-sm text-gray-500">{u.email}</p>
+                          <p className="font-medium text-foreground">{u.name}</p>
+                          <p className="text-xs text-muted-foreground font-mono mt-0.5">{u.email}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="p-4">
+                    <td className="px-6 py-4">
                       {u.isAdmin ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-500 border border-red-500/20">
                           <ShieldCheck className="w-3.5 h-3.5" /> Admin
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
                           User
                         </span>
                       )}
                     </td>
-                    <td className="p-4 text-sm text-gray-500">
-                      {new Date(u.createdAt).toLocaleDateString()}
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                      {new Date(u.createdAt).toLocaleDateString('en-GB')}
                     </td>
-                    <td className="p-4 text-right">
-                      {actionLoading === u._id ? (
-                        <Loader2 className="w-5 h-5 text-gray-400 animate-spin ml-auto" />
-                      ) : u.isAdmin ? (
-                        <button
-                          disabled={currentUser?.id === u._id}
-                          onClick={() => handleDemote(u._id)}
-                          className={`text-sm font-medium px-3 py-1.5 rounded-md transition-colors ${
-                            currentUser?.id === u._id
-                              ? "text-gray-400 bg-gray-50 cursor-not-allowed"
-                              : "text-red-600 bg-red-50 hover:bg-red-100 border border-red-200"
-                          }`}
-                          title={currentUser?.id === u._id ? "You cannot demote yourself" : "Remove admin access"}
-                        >
-                          Demote
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handlePromote(u._id)}
-                          className="text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-md transition-colors"
-                        >
-                          Promote to Admin
-                        </button>
-                      )}
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                        {actionLoading === u._id ? (
+                          <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
+                        ) : u.isAdmin ? (
+                          <button
+                            disabled={currentUser?.id === u._id}
+                            onClick={() => handleDemote(u._id)}
+                            className={`text-xs font-medium px-3 py-1.5 rounded-md transition-colors ${
+                              currentUser?.id === u._id
+                                ? "text-muted-foreground bg-muted/50 cursor-not-allowed"
+                                : "text-red-500 bg-red-500/10 hover:bg-red-500 hover:text-white"
+                            }`}
+                            title={currentUser?.id === u._id ? "You cannot demote yourself" : "Remove admin access"}
+                          >
+                            Demote
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handlePromote(u._id)}
+                            className="text-xs font-medium text-blue-500 bg-blue-500/10 hover:bg-blue-500 hover:text-white px-3 py-1.5 rounded-md transition-colors"
+                          >
+                            Promote to Admin
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -363,8 +363,86 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 prose dark:prose-invert prose-sm max-w-none text-foreground">
-              {problem.statement?.body ? (
-                <div dangerouslySetInnerHTML={{ __html: problem.statement.body }} />
+              {(problem.statement?.description || problem.description) ? (
+                <div>
+                  {/* Problem Description */}
+                  <div className="mb-6">
+                    <div dangerouslySetInnerHTML={{ __html: problem.statement?.description || problem.description || "" }} />
+                  </div>
+
+                  {/* Input Format */}
+                  {problem.statement?.inputFormat && (
+                    <div className="mb-6">
+                      <h3 className="text-base font-semibold text-foreground mb-2">Input Format</h3>
+                      <div dangerouslySetInnerHTML={{ __html: problem.statement.inputFormat }} />
+                    </div>
+                  )}
+
+                  {/* Output Format */}
+                  {problem.statement?.outputFormat && (
+                    <div className="mb-6">
+                      <h3 className="text-base font-semibold text-foreground mb-2">Output Format</h3>
+                      <div dangerouslySetInnerHTML={{ __html: problem.statement.outputFormat }} />
+                    </div>
+                  )}
+
+                  {/* Constraints */}
+                  {(problem.statement?.constraints || problem.constraints) && (
+                    <div className="mb-6">
+                      <h3 className="text-base font-semibold text-foreground mb-2">Constraints</h3>
+                      <div className="bg-muted/50 rounded-lg p-4 border border-border text-sm" dangerouslySetInnerHTML={{ __html: problem.statement?.constraints || problem.constraints || "" }} />
+                    </div>
+                  )}
+
+                  {/* Sample Test Cases */}
+                  {problem.statement?.samples && problem.statement.samples.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-base font-semibold text-foreground mb-3">Examples</h3>
+                      {problem.statement.samples.map((sample: any, idx: number) => (
+                        <div key={idx} className="mb-4 border border-border rounded-lg overflow-hidden">
+                          <div className="bg-muted/50 px-4 py-2 text-xs font-semibold text-muted-foreground border-b border-border">
+                            Example {idx + 1}
+                          </div>
+                          <div className="p-4 space-y-3">
+                            <div>
+                              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Input:</span>
+                              <pre className="mt-1 bg-muted/30 rounded-md px-3 py-2 text-sm font-mono whitespace-pre-wrap">{sample.input}</pre>
+                            </div>
+                            <div>
+                              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Output:</span>
+                              <pre className="mt-1 bg-muted/30 rounded-md px-3 py-2 text-sm font-mono whitespace-pre-wrap">{sample.output}</pre>
+                            </div>
+                            {sample.explanation && (
+                              <div>
+                                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Explanation:</span>
+                                <p className="mt-1 text-sm text-muted-foreground">{sample.explanation}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Hints */}
+                  {problem.hints && problem.hints.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-base font-semibold text-foreground mb-2">Hints</h3>
+                      <div className="space-y-2">
+                        {problem.hints.map((hint: string, idx: number) => (
+                          <details key={idx} className="border border-border rounded-lg overflow-hidden group">
+                            <summary className="px-4 py-2.5 text-sm font-medium cursor-pointer bg-muted/30 hover:bg-muted/50 transition-colors text-muted-foreground">
+                              💡 Hint {idx + 1}
+                            </summary>
+                            <div className="px-4 py-3 text-sm text-muted-foreground border-t border-border">
+                              {hint}
+                            </div>
+                          </details>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="text-muted-foreground">
                   <p className="mb-4">No detailed statement provided for this problem.</p>

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Users, Code, Activity, ShieldAlert, Loader2 } from "lucide-react";
 import { adminDashboardAPI } from "@/config/api";
+import { motion } from "framer-motion";
+import { fadeUp, staggerContainer } from "@/lib/animations";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState({
@@ -29,68 +31,85 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <div className="p-8 font-sans">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-          <p className="text-gray-500 text-sm mt-1">Welcome back, administrator. Here's what's happening today.</p>
-        </div>
-      </div>
+    <div className="p-8 font-sans relative min-h-full overflow-hidden">
+      {/* Landing Page Style Background */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-red-500/10 via-background to-background pointer-events-none" />
+      
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="show"
+        className="relative z-10 max-w-7xl mx-auto"
+      >
+        <motion.div variants={fadeUp} className="mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold font-heading text-foreground tracking-tight mb-3">
+            Admin <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-rose-500 to-red-400 animate-gradient bg-300%">Dashboard</span>
+          </h1>
+          <p className="text-lg text-muted-foreground">Welcome back, administrator. Here's your platform overview.</p>
+        </motion.div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
-            <Users className="w-6 h-6" />
+        {/* Stats Grid */}
+        <motion.div variants={fadeUp} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="bg-card/40 backdrop-blur-xl p-8 rounded-3xl border border-border/50 shadow-2xl shadow-black/10 flex flex-col gap-6 hover:border-red-500/30 transition-all relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-red-500/10 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-red-500/20 transition-colors pointer-events-none" />
+            <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform relative z-10">
+              <Users className="w-8 h-8" />
+            </div>
+            <div className="relative z-10">
+              <p className="text-sm font-medium text-muted-foreground mb-2 uppercase tracking-wider">Total Users</p>
+              {loading ? (
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              ) : (
+                <p className="text-5xl font-bold text-foreground font-heading">{stats.totalUsers.toLocaleString()}</p>
+              )}
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500">Total Users</p>
-            {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin text-gray-400 mt-1" />
-            ) : (
-              <p className="text-2xl font-bold text-gray-900">{stats.totalUsers.toLocaleString()}</p>
-            )}
-          </div>
-        </div>
 
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 bg-green-50 text-green-600 rounded-lg flex items-center justify-center">
-            <Code className="w-6 h-6" />
+          <div className="bg-card/40 backdrop-blur-xl p-8 rounded-3xl border border-border/50 shadow-2xl shadow-black/10 flex flex-col gap-6 hover:border-rose-500/30 transition-all relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-rose-500/10 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-rose-500/20 transition-colors pointer-events-none" />
+            <div className="w-16 h-16 bg-rose-500/10 text-rose-500 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform relative z-10">
+              <Code className="w-8 h-8" />
+            </div>
+            <div className="relative z-10">
+              <p className="text-sm font-medium text-muted-foreground mb-2 uppercase tracking-wider">Submissions</p>
+              {loading ? (
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              ) : (
+                <p className="text-5xl font-bold text-foreground font-heading">{stats.codeSubmissions.toLocaleString()}</p>
+              )}
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500">Code Submissions</p>
-            {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin text-gray-400 mt-1" />
-            ) : (
-              <p className="text-2xl font-bold text-gray-900">{stats.codeSubmissions.toLocaleString()}</p>
-            )}
-          </div>
-        </div>
 
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center">
-            <Activity className="w-6 h-6" />
+          <div className="bg-card/40 backdrop-blur-xl p-8 rounded-3xl border border-border/50 shadow-2xl shadow-black/10 flex flex-col gap-6 hover:border-orange-500/30 transition-all relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500/10 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-orange-500/20 transition-colors pointer-events-none" />
+            <div className="w-16 h-16 bg-orange-500/10 text-orange-500 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform relative z-10">
+              <Activity className="w-8 h-8" />
+            </div>
+            <div className="relative z-10">
+              <p className="text-sm font-medium text-muted-foreground mb-2 uppercase tracking-wider">Active Today</p>
+              {loading ? (
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              ) : (
+                <p className="text-5xl font-bold text-foreground font-heading">{stats.activeToday.toLocaleString()}</p>
+              )}
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500">Active Today</p>
-            {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin text-gray-400 mt-1" />
-            ) : (
-              <p className="text-2xl font-bold text-gray-900">{stats.activeToday.toLocaleString()}</p>
-            )}
-          </div>
-        </div>
-      </div>
+        </motion.div>
 
-      {/* Quick Actions / Recent Activity */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 text-center text-gray-500 py-16">
-        <ShieldAlert className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Admin Dashboard Ready</h3>
-        <p className="max-w-md mx-auto text-sm">
-          This is a secure area accessible only to users with administrative privileges. 
-          You can expand this dashboard to include user management, problem creation, and system monitoring.
-        </p>
-      </div>
+        {/* Quick Actions / Recent Activity */}
+        <motion.div variants={fadeUp} className="bg-card/30 backdrop-blur-xl rounded-3xl border border-border/50 shadow-2xl shadow-black/10 p-12 text-center py-24 relative overflow-hidden group hover:border-red-500/30 transition-all">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none opacity-50" />
+          <div className="absolute left-1/2 top-1/2 w-[600px] h-[600px] bg-red-500/5 blur-[120px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+          
+          <div className="relative z-10">
+            <ShieldAlert className="w-20 h-20 text-red-500/40 mx-auto mb-8 group-hover:text-red-500 transition-colors duration-500 group-hover:scale-110" />
+            <h3 className="text-3xl font-bold text-foreground mb-4 font-heading">Secure Workspace</h3>
+            <p className="max-w-xl mx-auto text-lg text-muted-foreground leading-relaxed">
+              You are currently authenticated with superuser privileges. All actions are monitored and logged. Navigate via the sidebar to manage platform resources.
+            </p>
+          </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

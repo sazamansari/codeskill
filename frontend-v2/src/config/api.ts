@@ -84,12 +84,70 @@ export const adminContestsAPI = {
 
 export const adminUsersAPI = {
   getAll: (search = "", adminsOnly = false) => api.get(`/admin/users?search=${encodeURIComponent(search)}&adminsOnly=${adminsOnly}`),
+  getReport: (userId: string) => api.get(`/admin/users/${userId}/report`),
   promote: (userId: string) => api.put(`/admin/users/${userId}/promote`),
   demote: (userId: string) => api.put(`/admin/users/${userId}/demote`),
 };
 
+export const adminCompaniesAPI = {
+  getAll: (search = "") => api.get(`/admin/companies?search=${encodeURIComponent(search)}`),
+  toggleVerify: (id: string) => api.put(`/admin/companies/${id}/verify`),
+  delete: (id: string) => api.delete(`/admin/companies/${id}`),
+};
+
+export const adminUniversitiesAPI = {
+  getAll: (search = "") => api.get(`/admin/universities?search=${encodeURIComponent(search)}`),
+  toggleVerify: (id: string) => api.put(`/admin/universities/${id}/verify`),
+  delete: (id: string) => api.delete(`/admin/universities/${id}`),
+};
+
 export const adminDashboardAPI = {
   getStats: () => api.get("/admin/dashboard/stats"),
+};
+
+export const companyAPI = {
+  register: (data: any) => api.post("/company", data),
+  getMyCompanies: () => api.get("/company/my-companies"),
+  getCompany: (id: string) => api.get(`/company/${id}`, { headers: { "X-Company-ID": id } }),
+  updateCompany: (id: string, data: any) => api.put(`/company/${id}`, data, { headers: { "X-Company-ID": id } }),
+};
+
+export const companyJobsAPI = {
+  getAll: (companyId: string) => api.get("/company/jobs", { headers: { "X-Company-ID": companyId } }),
+  create: (companyId: string, data: any) => api.post("/company/jobs", data, { headers: { "X-Company-ID": companyId } }),
+  update: (companyId: string, jobId: string, data: any) => api.put(`/company/jobs/${jobId}`, data, { headers: { "X-Company-ID": companyId } }),
+  delete: (companyId: string, jobId: string) => api.delete(`/company/jobs/${jobId}`, { headers: { "X-Company-ID": companyId } }),
+};
+
+export const companyTeamAPI = {
+  getAll: (companyId: string) => api.get("/company/team", { headers: { "X-Company-ID": companyId } }),
+  invite: (companyId: string, data: any) => api.post("/company/team/invite", data, { headers: { "X-Company-ID": companyId } }),
+  remove: (companyId: string, userId: string) => api.delete(`/company/team/${userId}`, { headers: { "X-Company-ID": companyId } }),
+};
+
+export const companyApplicationsAPI = {
+  getAll: (companyId: string) => api.get("/company/applications", { headers: { "X-Company-ID": companyId } }),
+  updateStage: (companyId: string, id: string, stage: string) => api.put(`/company/applications/${id}/stage`, { stage }, { headers: { "X-Company-ID": companyId } }),
+  generateMock: (companyId: string) => api.post("/company/applications/mock", {}, { headers: { "X-Company-ID": companyId } }),
+};
+
+export const campusAPI = {
+  register: (data: any) => api.post("/campus", data),
+  getMyUniversities: () => api.get("/campus/my-universities"),
+  getUniversity: (id: string) => api.get(`/campus/${id}`, { headers: { "X-University-ID": id } }),
+  updateUniversity: (id: string, data: any) => api.put(`/campus/${id}`, data, { headers: { "X-University-ID": id } }),
+};
+
+export const campusBatchesAPI = {
+  getAll: (universityId: string) => api.get("/campus/batches", { headers: { "X-University-ID": universityId } }),
+  create: (universityId: string, data: any) => api.post("/campus/batches", data, { headers: { "X-University-ID": universityId } }),
+  getStudents: (universityId: string, batchId: string) => api.get(`/campus/batches/${batchId}/students`, { headers: { "X-University-ID": universityId } }),
+  delete: (universityId: string, batchId: string) => api.delete(`/campus/batches/${batchId}`, { headers: { "X-University-ID": universityId } }),
+};
+
+export const campusStudentsAPI = {
+  getAll: (universityId: string) => api.get("/campus/students", { headers: { "X-University-ID": universityId } }),
+  generateMock: (universityId: string) => api.post("/campus/students/mock", {}, { headers: { "X-University-ID": universityId } }),
 };
 
 export default api;

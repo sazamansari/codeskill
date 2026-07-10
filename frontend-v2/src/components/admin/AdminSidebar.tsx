@@ -11,7 +11,8 @@ import {
   GraduationCap, 
   Settings,
   ShieldCheck,
-  LogOut
+  LogOut,
+  ExternalLink
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -30,10 +31,12 @@ export function AdminSidebar() {
   const { logout } = useAuth();
 
   return (
-    <div className="w-64 bg-[#0F172A] text-slate-300 flex flex-col h-full border-r border-slate-800">
-      <div className="h-16 flex items-center px-6 border-b border-slate-800">
+    <div className="w-64 bg-zinc-950 text-slate-300 flex flex-col h-full border-r border-border relative overflow-hidden z-20">
+      <div className="absolute top-0 inset-x-0 h-[300px] bg-red-500/10 blur-[80px] pointer-events-none" />
+      
+      <div className="h-16 flex items-center px-6 border-b border-border relative z-10">
         <Link href="/admin/dashboard" className="flex items-center gap-2 text-white group">
-          <ShieldCheck className="w-6 h-6 text-blue-500 group-hover:text-blue-400 transition-colors" />
+          <ShieldCheck className="w-6 h-6 text-red-500 group-hover:text-red-400 transition-colors" />
           <span className="font-bold text-lg tracking-tight">Admin Portal</span>
         </Link>
       </div>
@@ -48,24 +51,52 @@ export function AdminSidebar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors relative z-10 ${
                   isActive 
-                    ? "bg-blue-600/10 text-blue-500" 
-                    : "hover:bg-slate-800/50 hover:text-white"
+                    ? "bg-red-500/10 text-red-500 border border-red-500/20" 
+                    : "hover:bg-zinc-900 hover:text-white border border-transparent"
                 }`}
               >
-                <Icon className={`w-5 h-5 ${isActive ? "text-blue-500" : "text-slate-400"}`} />
+                <Icon className={`w-5 h-5 ${isActive ? "text-red-500" : "text-slate-400"}`} />
                 {item.name}
               </Link>
             );
           })}
         </nav>
+
+        <div className="mt-8 mb-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider relative z-10">
+          Portals
+        </div>
+        <nav className="space-y-1">
+          <Link
+            href="/company"
+            target="_blank"
+            className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-500/10 hover:text-blue-500 transition-colors relative z-10 group text-slate-400"
+          >
+            <div className="flex items-center gap-3">
+              <Building2 className="w-5 h-5 group-hover:text-blue-500" />
+              Company Portal
+            </div>
+            <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </Link>
+          <Link
+            href="/campus"
+            target="_blank"
+            className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-emerald-500/10 hover:text-emerald-500 transition-colors relative z-10 group text-slate-400"
+          >
+            <div className="flex items-center gap-3">
+              <GraduationCap className="w-5 h-5 group-hover:text-emerald-500" />
+              Campus Portal
+            </div>
+            <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </Link>
+        </nav>
       </div>
 
-      <div className="p-4 border-t border-slate-800">
+      <div className="p-4 border-t border-border relative z-10">
         <button 
           onClick={logout}
-          className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800/50 hover:text-white transition-colors"
+          className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-slate-400 hover:bg-zinc-900 hover:text-white transition-colors"
         >
           <LogOut className="w-5 h-5" />
           Log out
