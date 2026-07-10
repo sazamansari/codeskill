@@ -40,7 +40,6 @@ export default function ProfilePage() {
     if (!loading && !user) {
       router.push("/login");
     } else if (user) {
-      // Pre-fill form values
       reset({
         name: user.name || "",
         bio: user.bio || "",
@@ -53,8 +52,8 @@ export default function ProfilePage() {
 
   if (!mounted || loading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-[#F8FAFC]">
-        <div className="w-8 h-8 border-4 border-[#3B82F6]/30 border-t-[#3B82F6] rounded-full animate-spin" />
+      <div className="flex-1 flex items-center justify-center bg-background min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -76,8 +75,6 @@ export default function ProfilePage() {
         }
       });
       setSuccessMessage("Profile updated successfully.");
-      
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err: any) {
       setErrorMessage(err.message || "Failed to update profile.");
@@ -87,20 +84,20 @@ export default function ProfilePage() {
   };
 
   const stats = [
-    { label: "Total Solved", value: user.stats?.totalSolved || 0, icon: CheckCircle2, color: "text-[#10B981]", bg: "bg-[#10B981]/10" },
-    { label: "Current Streak", value: `${user.stats?.currentStreak || 0} days`, icon: Trophy, color: "text-[#F59E0B]", bg: "bg-[#F59E0B]/10" },
-    { label: "Total Submissions", value: user.stats?.totalSubmissions || 0, icon: Target, color: "text-[#3B82F6]", bg: "bg-[#3B82F6]/10" },
+    { label: "Total Solved", value: user.stats?.totalSolved || 0, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { label: "Current Streak", value: `${user.stats?.currentStreak || 0} days`, icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
+    { label: "Total Submissions", value: user.stats?.totalSubmissions || 0, icon: Target, color: "text-blue-500", bg: "bg-blue-500/10" },
   ];
 
   return (
-    <div className="flex-1 bg-[#F8FAFC] text-[#1E293B] font-sans min-h-screen">
-      <div className="max-w-[1000px] mx-auto w-full px-6 py-8 mt-16">
+    <div className="flex-1 bg-background text-foreground font-sans min-h-screen">
+      <div className="max-w-5xl mx-auto w-full px-6 py-8 mt-16 md:mt-24">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight mb-1">Profile Settings</h1>
-            <p className="text-[#64748B]">Manage your account details and preferences.</p>
+            <h1 className="text-3xl font-bold tracking-tight mb-1">Profile Settings</h1>
+            <p className="text-muted-foreground">Manage your account details and preferences.</p>
           </div>
         </div>
 
@@ -110,39 +107,38 @@ export default function ProfilePage() {
           <div className="space-y-6">
             
             {/* User Identification Card */}
-            <div className="bg-white rounded-[12px] border border-gray-200 shadow-sm p-6 text-center">
-              <div className="w-24 h-24 rounded-full bg-[#E2E8F0] border-4 border-white shadow-md mx-auto mb-4 flex items-center justify-center overflow-hidden relative group cursor-pointer">
+            <div className="bg-card rounded-xl border border-border p-6 text-center shadow-sm">
+              <div className="w-24 h-24 rounded-full bg-muted border border-border mx-auto mb-4 flex items-center justify-center overflow-hidden relative group cursor-pointer">
                 {user.avatar ? (
                   <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
-                  <UserIcon className="w-10 h-10 text-[#94A3B8]" />
+                  <UserIcon className="w-10 h-10 text-muted-foreground" />
                 )}
-                {/* Overlay for avatar edit (mock) */}
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-white text-xs font-semibold">Change</span>
+                <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-foreground text-xs font-medium">Change</span>
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-[#0F172A] mb-1">{user.name}</h2>
-              <p className="text-[#64748B] text-sm mb-4">{user.email}</p>
+              <h2 className="text-xl font-semibold mb-1">{user.name}</h2>
+              <p className="text-muted-foreground text-sm mb-4">{user.email}</p>
               
-              <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-[#F1F5F9] text-[#475569] text-xs font-semibold uppercase tracking-wider">
+              <div className="inline-flex items-center justify-center px-3 py-1 rounded-md bg-muted text-muted-foreground text-xs font-medium uppercase tracking-wider">
                 {user.profile?.role || "Student"}
               </div>
             </div>
 
             {/* Stats Summary */}
-            <div className="bg-white rounded-[12px] border border-gray-200 shadow-sm p-6">
-              <h3 className="text-lg font-bold text-[#0F172A] mb-4">Your Progress</h3>
+            <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Your Progress</h3>
               <div className="space-y-4">
                 {stats.map((stat, i) => (
                   <div key={i} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-[8px] flex items-center justify-center ${stat.bg} ${stat.color}`}>
+                      <div className={`w-8 h-8 rounded-md flex items-center justify-center ${stat.bg} ${stat.color}`}>
                         <stat.icon className="w-4 h-4" />
                       </div>
-                      <span className="text-[#334155] font-medium text-sm">{stat.label}</span>
+                      <span className="text-muted-foreground font-medium text-sm">{stat.label}</span>
                     </div>
-                    <span className="text-[#0F172A] font-bold">{stat.value}</span>
+                    <span className="font-semibold">{stat.value}</span>
                   </div>
                 ))}
               </div>
@@ -151,75 +147,71 @@ export default function ProfilePage() {
 
           {/* Right Column: Edit Form */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-[12px] border border-gray-200 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-                <h3 className="text-lg font-bold text-[#0F172A] flex items-center gap-2">
-                  <Settings className="w-5 h-5 text-[#64748B]" /> General Information
+            <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
+              <div className="p-6 border-b border-border bg-muted/30">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Settings className="w-5 h-5 text-muted-foreground" /> General Information
                 </h3>
               </div>
               
               <div className="p-6">
                 
                 {successMessage && (
-                  <div className="mb-6 p-4 bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] rounded-[8px] flex items-center gap-2 text-sm font-medium">
-                    <CheckCircle2 className="w-5 h-5 text-[#10B981]" /> {successMessage}
+                  <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-md flex items-center gap-2 text-sm font-medium">
+                    <CheckCircle2 className="w-4 h-4" /> {successMessage}
                   </div>
                 )}
                 
                 {errorMessage && (
-                  <div className="mb-6 p-4 bg-[#FEF2F2] border border-[#FECACA] text-[#991B1B] rounded-[8px] flex items-center gap-2 text-sm font-medium">
-                    <span className="w-5 h-5 flex items-center justify-center bg-[#EF4444] text-white rounded-full text-xs font-bold">!</span> 
+                  <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-md flex items-center gap-2 text-sm font-medium">
+                    <span className="w-4 h-4 flex items-center justify-center bg-destructive text-destructive-foreground rounded-full text-xs font-bold">!</span> 
                     {errorMessage}
                   </div>
                 )}
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   
-                  {/* Name field */}
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-[#334155]">Full Name</label>
+                    <label className="text-sm font-medium text-foreground">Full Name</label>
                     <input
                       type="text"
                       {...register("name", { required: "Name is required" })}
-                      className="w-full h-11 bg-white border border-gray-300 rounded-[6px] px-3 text-[#1E293B] placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all text-sm"
+                      className="w-full h-10 bg-transparent border border-border rounded-md px-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all text-sm"
                       placeholder="e.g. Jane Doe"
                     />
-                    {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+                    {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
                   </div>
 
-                  {/* Bio field */}
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-[#334155]">Bio</label>
+                    <label className="text-sm font-medium text-foreground">Bio</label>
                     <textarea
                       {...register("bio")}
                       rows={4}
-                      className="w-full bg-white border border-gray-300 rounded-[6px] p-3 text-[#1E293B] placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all text-sm resize-none"
+                      className="w-full bg-transparent border border-border rounded-md p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all text-sm resize-none"
                       placeholder="Tell us a little about yourself..."
                     />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Institution */}
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-[#334155] flex items-center gap-2">
-                        <Building2 className="w-4 h-4 text-[#64748B]" /> Institution / Company
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <Building2 className="w-4 h-4 text-muted-foreground" /> Institution / Company
                       </label>
                       <input
                         type="text"
                         {...register("institution")}
-                        className="w-full h-11 bg-white border border-gray-300 rounded-[6px] px-3 text-[#1E293B] placeholder:text-gray-400 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all text-sm"
+                        className="w-full h-10 bg-transparent border border-border rounded-md px-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all text-sm"
                         placeholder="e.g. Stanford University"
                       />
                     </div>
 
-                    {/* Role */}
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-[#334155] flex items-center gap-2">
-                        <GraduationCap className="w-4 h-4 text-[#64748B]" /> Primary Role
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <GraduationCap className="w-4 h-4 text-muted-foreground" /> Primary Role
                       </label>
                       <select
                         {...register("role")}
-                        className="w-full h-11 bg-white border border-gray-300 rounded-[6px] px-3 text-[#1E293B] focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all text-sm appearance-none cursor-pointer"
+                        className="w-full h-10 bg-transparent border border-border rounded-md px-3 text-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all text-sm appearance-none cursor-pointer"
                         style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: `right .5rem center`, backgroundRepeat: `no-repeat`, backgroundSize: `1.5em 1.5em`, paddingRight: `2.5rem` }}
                       >
                         <option value="student">Student</option>
@@ -230,28 +222,27 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  {/* Preferred Language */}
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-[#334155] flex items-center gap-2">
-                      <Code2 className="w-4 h-4 text-[#64748B]" /> Preferred Language
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <Code2 className="w-4 h-4 text-muted-foreground" /> Preferred Language
                     </label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {["python", "cpp", "java", "javascript"].map((lang) => (
                         <label key={lang} className="relative">
                           <input type="radio" value={lang} {...register("preferredLanguage")} className="peer sr-only" />
-                          <div className="h-11 flex items-center justify-center rounded-[6px] border border-gray-200 bg-white cursor-pointer peer-checked:border-[#2563EB] peer-checked:bg-[#EFF6FF] peer-checked:text-[#1D4ED8] hover:bg-gray-50 transition-all">
-                            <span className="text-sm font-semibold capitalize">{lang === "cpp" ? "C++" : lang}</span>
+                          <div className="h-10 flex items-center justify-center rounded-md border border-border bg-transparent cursor-pointer peer-checked:border-ring peer-checked:bg-foreground peer-checked:text-background hover:bg-muted transition-all">
+                            <span className="text-sm font-medium capitalize">{lang === "cpp" ? "C++" : lang}</span>
                           </div>
                         </label>
                       ))}
                     </div>
                   </div>
 
-                  <div className="pt-6 border-t border-gray-100 flex justify-end">
+                  <div className="pt-6 border-t border-border flex justify-end">
                     <button
                       disabled={isSaving}
                       type="submit"
-                      className="h-11 px-6 rounded-[6px] bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold text-sm transition-colors flex items-center justify-center disabled:opacity-70 shadow-sm"
+                      className="h-10 px-6 rounded-md bg-foreground hover:opacity-90 text-background font-medium text-sm transition-opacity flex items-center justify-center disabled:opacity-70 shadow-sm"
                     >
                       {isSaving ? (
                         <>

@@ -15,7 +15,6 @@ export default function ProblemsPage() {
   const [problems, setProblems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Backend Pagination state
   const ITEMS_PER_PAGE = 20;
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -36,7 +35,6 @@ export default function ProblemsPage() {
 
   const categories = ["All Topics", "Arrays", "Strings", "Dynamic Programming", "Trees", "Graphs", "Math"];
 
-  // Use the problems array directly since the backend does the filtering
   const filtered = problems;
 
   const getPageNumbers = () => {
@@ -56,28 +54,28 @@ export default function ProblemsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] w-full pt-24 pb-12 px-6 flex flex-col">
+    <div className="min-h-screen bg-background w-full pt-24 pb-12 px-6 flex flex-col font-sans text-foreground">
       <div className="max-w-[1600px] mx-auto flex-1 flex flex-col w-full h-full">
       <motion.div variants={staggerContainer} initial="hidden" animate="show" className="w-full space-y-8 flex-1 flex flex-col">
         
         <motion.div variants={fadeUp} className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight mb-2">Problems</h1>
-            <p className="text-[#64748B]">Master algorithms and data structures with our curated list.</p>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">Problems</h1>
+            <p className="text-muted-foreground">Master algorithms and data structures with our curated list.</p>
           </div>
           
           <div className="flex items-center gap-3">
             <div className="relative w-full md:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
                 placeholder="Search problems..." 
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="pl-9 h-11 bg-white border-gray-300 text-gray-900 rounded-[6px] focus-visible:ring-[#2563EB] placeholder:text-gray-500 shadow-sm"
+                className="pl-9 h-10 bg-transparent border-border text-foreground rounded-md focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring placeholder:text-muted-foreground shadow-sm"
               />
             </div>
-            <Button variant="outline" className="h-11 rounded-[6px] bg-white border-gray-300 text-gray-900 hover:bg-gray-50 shadow-sm">
-              <Filter className="w-4 h-4 mr-2 text-gray-500" />
+            <Button variant="outline" className="h-10 rounded-md bg-transparent border-border text-foreground hover:bg-muted shadow-sm font-medium">
+              <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
               Filters
             </Button>
           </div>
@@ -89,10 +87,10 @@ export default function ProblemsPage() {
             <button 
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all border ${
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
                 activeCategory === cat 
-                  ? "bg-[#EFF6FF] text-[#1D4ED8] border-[#2563EB]" 
-                  : "bg-white text-[#64748B] border-gray-200 hover:border-gray-300 hover:text-[#475569] shadow-sm"
+                  ? "bg-foreground text-background border-foreground" 
+                  : "bg-transparent text-muted-foreground border-border hover:border-foreground/30 hover:text-foreground shadow-sm"
               }`}
             >
               {cat}
@@ -101,29 +99,29 @@ export default function ProblemsPage() {
         </motion.div>
 
         {/* Table & Pagination Container */}
-        <motion.div variants={fadeUp} className="bg-white border border-gray-200 rounded-[12px] shadow-sm flex flex-col flex-1 overflow-hidden min-h-[500px]">
+        <motion.div variants={fadeUp} className="bg-card border border-border rounded-xl shadow-sm flex flex-col flex-1 overflow-hidden min-h-[500px]">
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left border-collapse min-w-[800px]">
-              <thead className="sticky top-0 bg-gray-50/95 backdrop-blur z-10 shadow-sm">
-                <tr className="border-b border-gray-200">
-                  <th className="px-6 py-4 text-sm font-semibold text-[#475569] w-16 text-center">Status</th>
-                  <th className="px-6 py-4 text-sm font-semibold text-[#475569]">Title</th>
-                  <th className="px-6 py-4 text-sm font-semibold text-[#475569]">Difficulty</th>
-                  <th className="px-6 py-4 text-sm font-semibold text-[#475569]">Category</th>
-                  <th className="px-6 py-4 text-sm font-semibold text-[#475569] text-right">Acceptance</th>
+              <thead className="sticky top-0 bg-muted/30 backdrop-blur z-10 shadow-sm border-b border-border">
+                <tr>
+                  <th className="px-6 py-4 text-sm font-semibold text-muted-foreground w-16 text-center">Status</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-muted-foreground">Title</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-muted-foreground">Difficulty</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-muted-foreground">Category</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-muted-foreground text-right">Acceptance</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-border">
                 <AnimatePresence mode="popLayout">
                   {loading ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-[#64748B]">
-                        <Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" />
+                      <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                        <Loader2 className="w-6 h-6 animate-spin mx-auto text-foreground" />
                       </td>
                     </tr>
                   ) : filtered.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-[#64748B]">
+                      <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
                         No problems found matching your criteria.
                       </td>
                     </tr>
@@ -136,34 +134,34 @@ export default function ProblemsPage() {
                         exit={{ opacity: 0, scale: 0.98 }}
                         transition={{ duration: 0.2 }}
                         key={problem._id} 
-                        className="group hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="group hover:bg-muted/50 transition-colors cursor-pointer"
                       >
                         <td className="px-6 py-4 text-center">
-                          {problem.status === "solved" && <CheckCircle2 className="w-5 h-5 text-[#10B981] mx-auto" />}
-                          {problem.status === "attempted" && <Circle className="w-5 h-5 text-[#F59E0B] mx-auto" />}
-                          {(!problem.status || problem.status === "unsolved") && <div className="w-5 h-5 rounded-full border-2 border-gray-300 mx-auto group-hover:border-gray-400 transition-colors" />}
+                          {problem.status === "solved" && <CheckCircle2 className="w-5 h-5 text-emerald-500 mx-auto" />}
+                          {problem.status === "attempted" && <Circle className="w-5 h-5 text-amber-500 mx-auto" />}
+                          {(!problem.status || problem.status === "unsolved") && <div className="w-5 h-5 rounded-full border-2 border-muted-foreground/30 mx-auto group-hover:border-foreground/50 transition-colors" />}
                         </td>
                         <td className="px-6 py-4">
-                          <Link href={`/problems/${problem.slug}`} className="font-bold text-[#0F172A] group-hover:text-[#2563EB] transition-colors flex items-center gap-2">
+                          <Link href={`/problems/${problem.slug}`} className="font-semibold text-foreground group-hover:underline transition-colors flex items-center gap-2">
                             {problem.title}
                           </Link>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
-                            problem.difficulty === 'Easy' ? 'bg-[#ECFDF5] text-[#059669]' :
-                            problem.difficulty === 'Medium' ? 'bg-[#FEF3C7] text-[#D97706]' :
-                            'bg-[#FEF2F2] text-[#DC2626]'
+                          <span className={`text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                            problem.difficulty === 'Easy' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
+                            problem.difficulty === 'Medium' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' :
+                            'bg-destructive/10 text-destructive'
                           }`}>
                             {problem.difficulty}
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-sm text-[#475569] bg-gray-100 px-3 py-1 rounded-[6px] font-medium">
+                          <span className="text-xs font-medium text-muted-foreground bg-muted px-2.5 py-1 rounded-md">
                             {problem.categories && problem.categories.length > 0 ? problem.categories[0] : 'General'}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <span className="font-medium text-[#334155]">{problem.stats?.acceptanceRate || 0}%</span>
+                          <span className="font-medium">{problem.stats?.acceptanceRate || 0}%</span>
                         </td>
                       </motion.tr>
                     ))
@@ -175,9 +173,9 @@ export default function ProblemsPage() {
           
           {/* Sticky Pagination Controls */}
           {totalPages > 1 && (
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-gray-200 bg-white sticky bottom-0 z-10 w-full shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-              <div className="text-sm text-gray-500 whitespace-nowrap text-center lg:text-left w-full lg:w-auto">
-                Showing <span className="font-medium text-gray-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="font-medium text-gray-900">{Math.min(currentPage * ITEMS_PER_PAGE, totalItems)}</span> of <span className="font-medium text-gray-900">{totalItems}</span> questions
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-border bg-card sticky bottom-0 z-10 w-full shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)]">
+              <div className="text-sm text-muted-foreground whitespace-nowrap text-center lg:text-left w-full lg:w-auto">
+                Showing <span className="font-medium text-foreground">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="font-medium text-foreground">{Math.min(currentPage * ITEMS_PER_PAGE, totalItems)}</span> of <span className="font-medium text-foreground">{totalItems}</span> questions
               </div>
               
               <div className="flex items-center gap-2 max-w-full overflow-x-auto pb-1 scrollbar-hide">
@@ -186,7 +184,7 @@ export default function ProblemsPage() {
                   size="sm" 
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1 || loading}
-                  className="shrink-0"
+                  className="shrink-0 bg-transparent border-border"
                 >
                   Previous
                 </Button>
@@ -194,13 +192,13 @@ export default function ProblemsPage() {
                 <div className="flex gap-1 items-center">
                   {getPageNumbers().map((pageNum, i) => (
                     pageNum === '...' ? (
-                      <span key={`ellipsis-${i}`} className="px-2 text-gray-400">...</span>
+                      <span key={`ellipsis-${i}`} className="px-2 text-muted-foreground">...</span>
                     ) : (
                       <Button
                         key={`${pageNum}-${i}`}
                         variant={currentPage === pageNum ? "default" : "outline"}
                         size="sm"
-                        className={`shrink-0 ${currentPage === pageNum ? "bg-[#2563EB] text-white hover:bg-[#1D4ED8] hover:text-white" : "text-gray-700"}`}
+                        className={`shrink-0 ${currentPage === pageNum ? "bg-foreground text-background hover:bg-foreground/90" : "bg-transparent border-border text-foreground hover:bg-muted"}`}
                         onClick={() => setCurrentPage(pageNum as number)}
                         disabled={loading}
                       >
@@ -215,7 +213,7 @@ export default function ProblemsPage() {
                   size="sm"
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages || loading}
-                  className="shrink-0"
+                  className="shrink-0 bg-transparent border-border"
                 >
                   Next
                 </Button>

@@ -401,12 +401,27 @@ const authResponse = (user, res) => {
 router.post("/google", async (req, res) => {
   try {
     const { token } = req.body;
-    const ticket = await googleClient.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+    let payload;
 
-    const payload = ticket.getPayload();
+    try {
+      // 1. Try to verify as ID Token (Standard GIS flow)
+      const ticket = await googleClient.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      payload = ticket.getPayload();
+    } catch (e) {
+      // 2. Fallback to access_token (Custom Button flow via useGoogleLogin)
+      try {
+        const response = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        payload = response.data;
+      } catch (err) {
+        throw new Error("Invalid Google token");
+      }
+    }
+
     const { email, name, sub, picture } = payload;
 
     let user = await User.findOne({ email });

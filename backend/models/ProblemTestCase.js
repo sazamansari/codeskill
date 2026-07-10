@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 
 const testCaseSchema = new mongoose.Schema({
-  input: { type: String, required: true },
-  output: { type: String, required: true },
+  input: { type: String },
+  output: { type: String },
   isHidden: { type: Boolean, default: false },
   explanation: { type: String }, // Mainly for public test cases
   weight: { type: Number, default: 1 }, // Score weight

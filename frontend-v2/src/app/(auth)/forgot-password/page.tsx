@@ -67,110 +67,138 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#F5F7FA] text-[#1E293B] font-sans items-center justify-center p-4">
-      <div className="w-full max-w-[420px] bg-white rounded-[12px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-8">
+    <div className="flex min-h-screen bg-background text-foreground font-sans">
+      
+      {/* Left Column - Brand/Graphic (Hidden on smaller screens) */}
+      <div className="hidden lg:flex flex-1 relative bg-black items-center justify-center overflow-hidden flex-col p-12 text-white text-center">
+        {/* Abstract Globe / Grid Background */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:32px_32px] opacity-20" />
+        <div className="absolute left-1/2 top-1/2 -z-10 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-[120px]" />
         
-        {/* Header */}
-        <div className="flex flex-col items-center mb-8">
-          <Link href="/" className="flex items-center gap-2 mb-6">
-            <img src="/logo-dark.svg" alt="CodeSkill Logo" className="w-8 h-8 object-contain filter invert" />
-            <span className="text-xl font-bold tracking-tight text-[#0F172A]">CodeSkill</span>
+        {/* Brand Content */}
+        <div className="relative z-10 max-w-md flex flex-col items-center">
+          <Link href="/" className="w-16 h-16 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center mb-8 shadow-2xl hover:bg-white/20 transition-colors">
+            <img src="/logo-dark.svg" alt="CodeSkill" className="w-10 h-10 object-contain" />
           </Link>
-          <h2 className="text-2xl font-bold tracking-tight text-[#0F172A] mb-2">Reset Password</h2>
-          <p className="text-[#64748B] text-sm text-center">
-            {step === 1 ? "Enter your email to receive a reset code." : `Enter the 6-digit code sent to ${email}`}
+          <h1 className="text-4xl font-bold tracking-tight mb-4">
+            Reset Your<br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Password</span>
+          </h1>
+          <p className="text-lg text-gray-400">
+            Securely regain access to your CodeSkill account and continue building your dream projects.
           </p>
         </div>
+      </div>
 
-        {step === 1 ? (
-          <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4">
-            {emailForm.formState.errors.root && (
-              <div className="p-3 bg-red-50 text-red-600 text-sm rounded-[6px]">
-                {emailForm.formState.errors.root.message}
+      {/* Right Column - Form */}
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 relative overflow-y-auto bg-white dark:bg-zinc-950">
+        {/* Subtle Background Pattern for Right Side */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] -z-10 min-h-[120%]" />
+
+        <div className="w-full max-w-[420px] flex flex-col gap-6 my-auto py-8">
+          
+          {/* Mobile Logo Header */}
+          <div className="flex lg:hidden flex-col items-center text-center mb-2">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-black/5 bg-card border border-border">
+              <img src="/logo.svg" alt="CodeSkill Logo" className="w-8 h-8 object-contain dark:hidden block" />
+              <img src="/logo-dark.svg" alt="CodeSkill Logo" className="w-8 h-8 object-contain hidden dark:block" />
+            </div>
+          </div>
+
+          <div className="mb-4 text-center">
+            <h2 className="text-3xl font-bold tracking-tight mb-2">Reset Password</h2>
+            <p className="text-sm text-muted-foreground mt-4">
+              {step === 1 ? "Enter your email to receive a reset code." : `Enter the 6-digit code sent to ${email}`}
+            </p>
+          </div>
+
+          {step === 1 ? (
+            <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4">
+              {emailForm.formState.errors.root && (
+                <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-md">
+                  {emailForm.formState.errors.root.message}
+                </div>
+              )}
+
+              <div className="space-y-1.5">
+                <input
+                  type="email"
+                  {...emailForm.register("email")}
+                  placeholder="Email Address"
+                  className="w-full h-12 bg-transparent border border-border rounded-md px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                />
+                {emailForm.formState.errors.email && (
+                  <p className="text-xs text-destructive mt-1">{emailForm.formState.errors.email.message}</p>
+                )}
               </div>
-            )}
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-[#334155]">Email Address</label>
-              <input
-                type="email"
-                {...emailForm.register("email")}
-                placeholder="you@example.com"
-                className="w-full h-11 bg-white border border-gray-300 rounded-[6px] px-3 text-[#1E293B] placeholder:text-gray-400 focus:outline-none focus:border-[#1E40AF] focus:ring-1 focus:ring-[#1E40AF] transition-all text-sm"
-              />
-              {emailForm.formState.errors.email && (
-                <p className="text-xs text-red-500 mt-1">{emailForm.formState.errors.email.message}</p>
+              <button
+                disabled={isLoading}
+                type="submit"
+                className="w-full h-12 rounded-md bg-zinc-900 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-black font-semibold text-sm transition-all flex items-center justify-center mt-2 disabled:opacity-70 shadow-md"
+              >
+                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Send Reset Code"}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-4">
+              {resetForm.formState.errors.root && (
+                <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-md">
+                  {resetForm.formState.errors.root.message}
+                </div>
               )}
-            </div>
 
-            <button
-              disabled={isLoading}
-              type="submit"
-              className="w-full h-11 rounded-[6px] bg-[#1E40AF] hover:bg-[#1E3A8A] text-white font-semibold text-sm transition-colors flex items-center justify-center mt-2 disabled:opacity-70 shadow-sm"
-            >
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Send Reset Code"}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-4">
-            {resetForm.formState.errors.root && (
-              <div className="p-3 bg-red-50 text-red-600 text-sm rounded-[6px]">
-                {resetForm.formState.errors.root.message}
+              <div className="space-y-1.5">
+                <input
+                  type="text"
+                  maxLength={6}
+                  {...resetForm.register("otp")}
+                  placeholder="6-Digit Code"
+                  className="w-full h-12 bg-transparent border border-border rounded-md px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm tracking-widest font-medium text-center"
+                />
+                {resetForm.formState.errors.otp && (
+                  <p className="text-xs text-destructive mt-1">{resetForm.formState.errors.otp.message}</p>
+                )}
               </div>
-            )}
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-[#334155]">6-Digit Code</label>
-              <input
-                type="text"
-                maxLength={6}
-                {...resetForm.register("otp")}
-                placeholder="123456"
-                className="w-full h-11 bg-white border border-gray-300 rounded-[6px] px-3 text-[#1E293B] placeholder:text-gray-400 focus:outline-none focus:border-[#1E40AF] focus:ring-1 focus:ring-[#1E40AF] transition-all text-sm text-center tracking-[0.5em] font-mono text-lg"
-              />
-              {resetForm.formState.errors.otp && (
-                <p className="text-xs text-red-500 mt-1">{resetForm.formState.errors.otp.message}</p>
-              )}
-            </div>
+              <div className="space-y-1.5">
+                <input
+                  type="password"
+                  {...resetForm.register("newPassword")}
+                  placeholder="New Password"
+                  className="w-full h-12 bg-transparent border border-border rounded-md px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                />
+                {resetForm.formState.errors.newPassword && (
+                  <p className="text-xs text-destructive mt-1">{resetForm.formState.errors.newPassword.message}</p>
+                )}
+              </div>
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-[#334155]">New Password</label>
-              <input
-                type="password"
-                {...resetForm.register("newPassword")}
-                placeholder="••••••••"
-                className="w-full h-11 bg-white border border-gray-300 rounded-[6px] px-3 text-[#1E293B] placeholder:text-gray-400 focus:outline-none focus:border-[#1E40AF] focus:ring-1 focus:ring-[#1E40AF] transition-all text-sm"
-              />
-              {resetForm.formState.errors.newPassword && (
-                <p className="text-xs text-red-500 mt-1">{resetForm.formState.errors.newPassword.message}</p>
-              )}
-            </div>
+              <button
+                disabled={isLoading}
+                type="submit"
+                className="w-full h-12 rounded-md bg-zinc-900 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-black font-semibold text-sm transition-all flex items-center justify-center mt-2 disabled:opacity-70 shadow-md"
+              >
+                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Reset Password"}
+              </button>
+              
+              <button
+                disabled={isLoading}
+                type="button"
+                onClick={() => setStep(1)}
+                className="w-full h-12 rounded-md bg-transparent border border-border hover:bg-muted text-foreground font-medium text-sm transition-colors flex items-center justify-center mt-2 disabled:opacity-70 shadow-sm"
+              >
+                Back
+              </button>
+            </form>
+          )}
 
-            <button
-              disabled={isLoading}
-              type="submit"
-              className="w-full h-11 rounded-[6px] bg-[#1E40AF] hover:bg-[#1E3A8A] text-white font-semibold text-sm transition-colors flex items-center justify-center mt-2 disabled:opacity-70 shadow-sm"
-            >
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Reset Password"}
-            </button>
-            
-            <button
-              disabled={isLoading}
-              type="button"
-              onClick={() => setStep(1)}
-              className="w-full h-11 rounded-[6px] bg-transparent border border-gray-200 hover:bg-gray-50 text-[#334155] font-semibold text-sm transition-colors flex items-center justify-center mt-2 disabled:opacity-70 shadow-sm"
-            >
-              Back
-            </button>
-          </form>
-        )}
+          <div className="mt-6 pt-6 border-t border-border text-center">
+            <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Return to Login
+            </Link>
+          </div>
 
-        <div className="mt-6 pt-6 border-t border-gray-100 text-center">
-          <Link href="/login" className="text-sm font-medium text-[#2563EB] hover:underline transition-colors">
-            Return to Login
-          </Link>
         </div>
-
       </div>
     </div>
   );

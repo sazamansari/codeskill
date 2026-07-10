@@ -109,9 +109,9 @@ export default function Home() {
   return (
     <div className="flex-1 flex flex-col w-full">
       
-      {/* 1. White Hero Section */}
-      <section className="relative w-full min-h-screen flex flex-col items-center justify-center bg-white text-[#09090B] overflow-hidden pt-32 pb-32">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-white to-white pointer-events-none" />
+      {/* 1. Hero Section */}
+      <section className="relative w-full min-h-screen flex flex-col items-center justify-center bg-background text-foreground overflow-hidden pt-32 pb-32">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none" />
         
         {/* Floating Code Snippets */}
         <motion.div 
@@ -131,8 +131,8 @@ export default function Home() {
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
           className="absolute bottom-[30%] right-[10%] hidden lg:block"
         >
-          <div className="bg-white border border-[#09090B]/10 text-[#09090B] p-4 rounded-xl shadow-2xl text-xs font-mono w-56">
-            <span className="text-primary">const</span> result = <span className="text-blue-600">optimize</span>();
+          <div className="bg-card border border-border text-card-foreground p-4 rounded-xl shadow-2xl text-xs font-mono w-56">
+            <span className="text-primary">const</span> result = <span className="text-blue-500">optimize</span>();
           </div>
         </motion.div>
 
@@ -143,12 +143,12 @@ export default function Home() {
             animate="show"
             className="flex flex-col items-center w-full"
           >
-            <motion.div variants={fadeUp} className="mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#09090B]/10 bg-[#09090B]/5 hover:bg-[#09090B]/10 transition-colors cursor-pointer">
+            <motion.div variants={fadeUp} className="mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-muted hover:bg-muted/80 transition-colors cursor-pointer">
               <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
               <span className="text-sm font-medium text-muted-foreground">CodeSkill 2.0 is now live</span>
             </motion.div>
 
-            <motion.h1 variants={fadeUp} className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold font-heading text-[#09090B] tracking-tight mb-8 leading-[1.05] max-w-4xl mx-auto">
+            <motion.h1 variants={fadeUp} className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold font-heading text-foreground tracking-tight mb-8 leading-[1.05] max-w-4xl mx-auto">
               Become the Developer <br className="hidden md:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-indigo-500 to-primary animate-gradient bg-300%">Companies Want to Hire.</span>
             </motion.h1>
@@ -158,11 +158,11 @@ export default function Home() {
             </motion.p>
 
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
-              <Link href="/problems" className={cn(buttonVariants({ size: "lg" }), "rounded-full bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/25 px-8 h-14 text-base font-medium group overflow-hidden relative w-full sm:w-auto")}>
+              <Link href="/problems" className={cn(buttonVariants({ size: "lg" }), "rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl shadow-primary/25 px-8 h-14 text-base font-medium group overflow-hidden relative w-full sm:w-auto")}>
                 Start Coding
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link href="/dashboard" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "rounded-full border-[#09090B]/10 bg-white text-[#09090B] hover:bg-[#09090B]/5 h-14 px-8 text-base font-medium overflow-hidden relative w-full sm:w-auto shadow-sm")}>
+              <Link href="/dashboard" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "rounded-full border-border bg-card text-card-foreground hover:bg-muted h-14 px-8 text-base font-medium overflow-hidden relative w-full sm:w-auto shadow-sm")}>
                 Explore Problems
               </Link>
             </motion.div>
