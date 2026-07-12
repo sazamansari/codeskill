@@ -5,16 +5,20 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const { randomUUID } = require("crypto");
+const { rateLimiter } = require("../redis");
 
 const TIMEOUT_MS = 5000; // 5 second timeout per test case
 
+// Apply strict rate limiting: Max 5 compilation/run requests per minute per User+IP
+router.use(rateLimiter('code_execution', 5, 60));
+
 /**
  * @route POST /api/run
- * @body { code: string, language: "javascript"|"python"|"cpp"|"java", testCases: Array<{ id, input, expected }> }
+ * @body { code: string, language: "javascript"|"python"|"cpp"|"java", testCases: Array<{ id, input, expected }>, config?: Object }
  * @desc Execute user code against test cases and return results
  */
 router.post("/", async (req, res) => {
-  const { code, language, testCases } = req.body;
+  const { code, language, testCases, config = {} } = req.body;
 
   if (!code || !language || !testCases || !Array.isArray(testCases)) {
     return res.status(400).json({ success: false, message: "Missing code, language, or testCases" });
@@ -27,19 +31,28 @@ router.post("/", async (req, res) => {
   try {
     const startTime = Date.now();
     let results;
+    
+    // Apply execution profiles if available
+    let currentTimeout = TIMEOUT_MS;
+    if (config.executionProfiles && config.executionProfiles[language]) {
+       currentTimeout = TIMEOUT_MS * (config.executionProfiles[language].timeLimitMultiplier || 1);
+    }
+
+    // Pass config down to runners
+    const runOpts = { timeout: currentTimeout, config };
 
     switch (language) {
       case "javascript":
-        results = await runJavaScript(code, testCases);
+        results = await runJavaScript(code, testCases, runOpts);
         break;
       case "python":
-        results = await runPython(code, testCases);
+        results = await runPython(code, testCases, runOpts);
         break;
       case "cpp":
-        results = await runCpp(code, testCases);
+        results = await runCpp(code, testCases, runOpts);
         break;
       case "java":
-        results = await runJava(code, testCases);
+        results = await runJava(code, testCases, runOpts);
         break;
     }
 
@@ -61,13 +74,26 @@ router.post("/", async (req, res) => {
   }
 });
 
+// ── Utility to write multi-file project files ──
+function writeProjectFiles(tmpDir, config) {
+  if (config.isMultiFile && config.projectFiles && Array.isArray(config.projectFiles)) {
+    for (const file of config.projectFiles) {
+      const filePath = path.join(tmpDir, file.filename);
+      // Create subdirectories if filename contains paths
+      fs.mkdirSync(path.dirname(filePath), { recursive: true });
+      fs.writeFileSync(filePath, file.content);
+    }
+  }
+}
+
 // ── JavaScript Runner (Node.js child process) ──
-async function runJavaScript(code, testCases) {
+async function runJavaScript(code, testCases, runOpts) {
   const results = [];
 
   for (const tc of testCases) {
     const tmpDir = path.join(os.tmpdir(), `cs_js_${randomUUID()}`);
     fs.mkdirSync(tmpDir, { recursive: true });
+    writeProjectFiles(tmpDir, runOpts.config);
 
     const script = `
 const __logs = [];
@@ -101,7 +127,7 @@ __origLog(JSON.stringify({ __result, __logs }));
     fs.writeFileSync(filePath, script);
 
     try {
-      const output = await execInChild("node", [filePath], TIMEOUT_MS);
+      const output = await execInChild("node", [filePath], runOpts.timeout);
       const parsed = JSON.parse(output.stdout.trim());
 
       if (parsed.__error) {
@@ -127,12 +153,13 @@ __origLog(JSON.stringify({ __result, __logs }));
 }
 
 // ── Python Runner ──
-async function runPython(code, testCases) {
+async function runPython(code, testCases, runOpts) {
   const results = [];
 
   for (const tc of testCases) {
     const tmpDir = path.join(os.tmpdir(), `cs_py_${randomUUID()}`);
     fs.mkdirSync(tmpDir, { recursive: true });
+    writeProjectFiles(tmpDir, runOpts.config);
 
     const script = `
 import json, sys, io
@@ -161,7 +188,7 @@ except Exception as e:
     fs.writeFileSync(filePath, script);
 
     try {
-      const output = await execInChild("python3", [filePath], TIMEOUT_MS);
+      const output = await execInChild("python3", [filePath], runOpts.timeout);
       const stdout = output.stdout.trim();
       const parsed = JSON.parse(stdout);
 
@@ -188,10 +215,11 @@ except Exception as e:
 }
 
 // ── C++ Runner ──
-async function runCpp(code, testCases) {
+async function runCpp(code, testCases, runOpts) {
   const results = [];
   const tmpDir = path.join(os.tmpdir(), `cs_cpp_${randomUUID()}`);
   fs.mkdirSync(tmpDir, { recursive: true });
+  writeProjectFiles(tmpDir, runOpts.config);
 
   // For C++, we wrap the user's code with a main() that reads JSON input
   // and outputs JSON result. The user should define a twoSum method in a Solution class
@@ -241,7 +269,7 @@ int main() {
     try {
       // Compile
       try {
-        execSync(`g++ -std=c++17 -o "${binPath}" "${srcPath}" 2>&1`, { timeout: TIMEOUT_MS });
+        execSync(`g++ -std=c++17 -o "${binPath}" "${srcPath}" 2>&1`, { timeout: runOpts.timeout });
       } catch (compileErr) {
         const msg = compileErr.stdout ? compileErr.stdout.toString() : compileErr.message;
         results.push({ id: tc.id, passed: false, output: "Compilation Error", expected: JSON.stringify(tc.expected), error: msg.substring(0, 500), logs: [] });
@@ -249,7 +277,7 @@ int main() {
       }
 
       // Run
-      const output = await execInChild(binPath, [], TIMEOUT_MS);
+      const output = await execInChild(binPath, [], runOpts.timeout);
       const stdout = output.stdout.trim();
 
       let parsed;
@@ -281,12 +309,13 @@ int main() {
 const JAVAC_PATH = "javac";
 const JAVA_PATH = "java";
 
-async function runJava(code, testCases) {
+async function runJava(code, testCases, runOpts) {
   const results = [];
 
   for (const tc of testCases) {
     const tmpDir = path.join(os.tmpdir(), `cs_java_${randomUUID()}`);
     fs.mkdirSync(tmpDir, { recursive: true });
+    writeProjectFiles(tmpDir, runOpts.config);
 
     const fullCode = `
 import java.util.*;
@@ -316,7 +345,7 @@ public class Solution {
     try {
       // Compile
       try {
-        execSync(`"${JAVAC_PATH}" "${srcPath}" 2>&1`, { timeout: TIMEOUT_MS });
+        execSync(`"${JAVAC_PATH}" "${srcPath}" 2>&1`, { timeout: runOpts.timeout });
       } catch (compileErr) {
         const msg = compileErr.stdout ? compileErr.stdout.toString() : compileErr.message;
         results.push({ id: tc.id, passed: false, output: "Compilation Error", expected: JSON.stringify(tc.expected), error: msg.substring(0, 500), logs: [] });
@@ -324,7 +353,7 @@ public class Solution {
       }
 
       // Run
-      const output = await execInChild(JAVA_PATH, ["-cp", tmpDir, "Solution"], TIMEOUT_MS);
+      const output = await execInChild(JAVA_PATH, ["-cp", tmpDir, "Solution"], runOpts.timeout);
       const stdout = output.stdout.trim();
 
       let parsed;

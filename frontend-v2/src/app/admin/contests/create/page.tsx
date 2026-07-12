@@ -33,7 +33,7 @@ export default function CreateContestPage() {
     const fetchProblems = async () => {
       try {
         const res = await adminProblemsAPI.getAll();
-        setAllProblems(res.data.data || []);
+        setAllProblems(res.data.problems || []);
       } catch (err) {
         console.error("Failed to fetch problems", err);
       }

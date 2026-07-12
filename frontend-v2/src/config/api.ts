@@ -4,8 +4,18 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
 const api = axios.create({ baseURL: API_BASE });
 
-// Attach JWT token to every request
+// Attach JWT token to every request and fix URL resolution
 api.interceptors.request.use((config) => {
+  // Normalize URL resolution:
+  // If baseURL does not end with a slash, append it.
+  if (config.baseURL && !config.baseURL.endsWith("/")) {
+    config.baseURL += "/";
+  }
+  // If the request URL starts with a slash, remove it so it appends correctly to baseURL.
+  if (config.url && config.url.startsWith("/")) {
+    config.url = config.url.substring(1);
+  }
+
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("codeskill_token");
     if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -37,10 +47,19 @@ export const authAPI = {
   googleLogin: (token: string) => api.post("/auth/google", { token }),
   getMe: () => api.get("/auth/me"),
   updateProfile: (data: any) => api.put("/auth/profile", data),
+  uploadAvatar: (formData: FormData) => api.post("/auth/avatar", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  }),
   saveNote: (problemId: string, note: string) => api.put(`/auth/notes/${problemId}`, { note }),
   toggleBookmark: (problemId: string) => api.put(`/auth/bookmark/${problemId}`),
   forgotPassword: (data: { email: string }) => api.post("/auth/forgot-password", data),
   resetPassword: (data: any) => api.post("/auth/reset-password", data),
+};
+
+export const usersAPI = {
+  getPublicProfile: (identifier: string) => api.get(`/users/${identifier}`),
 };
 
 // ── Public Problems ──
@@ -62,7 +81,25 @@ export const submissionAPI = {
 };
 
 export const runAPI = {
-  run: (data: { code: string; language: string; testCases: any[] }) => api.post("/run", data),
+  run: (data: { code: string; language: string; testCases: any[] }) => api.post("/execution/run", data),
+};
+
+// ── Discussions ──
+export const discussionsAPI = {
+  getThreads: (problemId: string, params?: { page?: number; sort?: string; tag?: string }) =>
+    api.get(`/discussions/problem/${problemId}`, { params }),
+  getThread: (threadId: string) => api.get(`/discussions/${threadId}`),
+  createThread: (data: { problemId: string; title: string; body: string; tags?: string[] }) =>
+    api.post("/discussions", data),
+  deleteThread: (threadId: string) => api.delete(`/discussions/${threadId}`),
+  voteThread: (threadId: string, direction: "up" | "down") =>
+    api.put(`/discussions/${threadId}/vote`, { direction }),
+  getReplies: (threadId: string) => api.get(`/discussions/${threadId}/replies`),
+  createReply: (threadId: string, data: { body: string; parentReply?: string }) =>
+    api.post(`/discussions/${threadId}/replies`, data),
+  deleteReply: (replyId: string) => api.delete(`/discussions/replies/${replyId}`),
+  voteReply: (replyId: string, direction: "up" | "down") =>
+    api.put(`/discussions/replies/${replyId}/vote`, { direction }),
 };
 
 // ── Admin ──

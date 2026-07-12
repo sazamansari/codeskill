@@ -20,7 +20,10 @@ const rateLimiter = (routeName, maxRequests = 200, windowSeconds = 60 * 15) => {
 
     try {
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-      const key = keys.rateLimit(ip, routeName);
+      const userId = req.user ? req.user._id.toString() : 'guest';
+      const identifier = `${userId}:${ip}`;
+      
+      const key = keys.rateLimit(identifier, routeName);
 
       // We use a transaction (MULTI) to ensure atomicity
       const [incrResult, ttlResult] = await redis

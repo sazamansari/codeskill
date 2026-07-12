@@ -17,7 +17,7 @@ export default function QuestionsAdminPage() {
   const fetchProblems = async () => {
     try {
       const res = await adminProblemsAPI.getAll();
-      setProblems(res.data.data);
+      setProblems(res.data.problems || []);
     } catch (err) {
       console.error("Failed to fetch problems", err);
     } finally {

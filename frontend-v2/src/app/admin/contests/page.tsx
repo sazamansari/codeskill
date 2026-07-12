@@ -17,7 +17,7 @@ export default function ContestsAdminPage() {
   const fetchContests = async () => {
     try {
       const res = await adminContestsAPI.getAll();
-      setContests(res.data.data);
+      setContests(res.data.contests || []);
     } catch (err) {
       console.error("Failed to fetch contests", err);
     } finally {

@@ -2,14 +2,15 @@ const mongoose = require("mongoose");
 
 const problemStatementSchema = new mongoose.Schema(
   {
-    metadataId: { type: mongoose.Schema.Types.ObjectId, ref: "ProblemMetadata", required: true },
+    versionId: { type: mongoose.Schema.Types.ObjectId, ref: "ProblemVersion" },
+    
     description: { type: String, required: true }, // Main problem markdown
     inputFormat: { type: String },
     outputFormat: { type: String },
     constraints: { type: String },
     
     // Sample test cases that are displayed in the problem description
-    samples: [
+    sampleExamples: [
       {
         input: { type: String },
         output: { type: String },

@@ -9,7 +9,7 @@ import { fadeUp, staggerContainer } from "@/lib/animations";
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState({
     totalUsers: 0,
-    codeSubmissions: 0,
+    totalSubmissions: 0,
     activeToday: 0,
   });
   const [loading, setLoading] = useState(true);
@@ -60,7 +60,7 @@ export default function AdminDashboardPage() {
               {loading ? (
                 <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
               ) : (
-                <p className="text-5xl font-bold text-foreground font-heading">{stats.totalUsers.toLocaleString()}</p>
+                <p className="text-5xl font-bold text-foreground font-heading">{(stats.totalUsers || 0).toLocaleString()}</p>
               )}
             </div>
           </div>
@@ -75,7 +75,7 @@ export default function AdminDashboardPage() {
               {loading ? (
                 <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
               ) : (
-                <p className="text-5xl font-bold text-foreground font-heading">{stats.codeSubmissions.toLocaleString()}</p>
+                <p className="text-5xl font-bold text-foreground font-heading">{(stats.totalSubmissions || 0).toLocaleString()}</p>
               )}
             </div>
           </div>
@@ -90,7 +90,7 @@ export default function AdminDashboardPage() {
               {loading ? (
                 <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
               ) : (
-                <p className="text-5xl font-bold text-foreground font-heading">{stats.activeToday.toLocaleString()}</p>
+                <p className="text-5xl font-bold text-foreground font-heading">{(stats.activeToday || 0).toLocaleString()}</p>
               )}
             </div>
           </div>

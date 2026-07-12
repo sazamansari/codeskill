@@ -1,21 +1,32 @@
 const mongoose = require("mongoose");
 
-const testCaseSchema = new mongoose.Schema({
+const testCaseItemSchema = new mongoose.Schema({
   input: { type: String },
   output: { type: String },
   isHidden: { type: Boolean, default: false },
-  explanation: { type: String }, // Mainly for public test cases
-  weight: { type: Number, default: 1 }, // Score weight
+  explanation: { type: String }, 
+  weight: { type: Number, default: 1 }, 
 });
 
 const problemTestCaseSchema = new mongoose.Schema(
   {
-    metadataId: { type: mongoose.Schema.Types.ObjectId, ref: "ProblemMetadata", required: true },
-    cases: [testCaseSchema],
+    versionId: { type: mongoose.Schema.Types.ObjectId, ref: "ProblemVersion" },
     
-    // Future integration points for massive test cases
+    smallTestCases: [testCaseItemSchema],
+    
+    // Massive testcases stored externally
     s3BucketUrl: { type: String },
-    testCaseGeneratorCode: { type: String }, 
+    
+    // Automated generation and validation
+    generatorScript: { 
+      language: { type: String, default: 'python' },
+      code: { type: String }
+    },
+    
+    validatorScript: { 
+      language: { type: String, default: 'python' },
+      code: { type: String }
+    }, 
   },
   { timestamps: true }
 );

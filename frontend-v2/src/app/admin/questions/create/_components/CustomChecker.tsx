@@ -1,12 +1,14 @@
 "use client";
 
-import { useQuestionStore } from "../_store/useQuestionStore";
+import { useCreateProblemStore } from "@/store/createProblemStore";
 import SectionCard from "./SectionCard";
-import Editor from "@monaco-editor/react";
+import { MonacoEditor } from "@/components/editor/MonacoEditor";
 import { Shield } from "lucide-react";
+import { useState } from "react";
 
 export default function CustomChecker() {
-  const { customChecker, updateCustomChecker, isDarkMode } = useQuestionStore();
+  const { solution, updateSolution } = useCreateProblemStore();
+  const [activeLang, setActiveLang] = useState<string>("cpp");
 
   return (
     <SectionCard
@@ -23,13 +25,13 @@ export default function CustomChecker() {
         <label className="flex items-center gap-3 cursor-pointer">
           <div
             className={`relative w-11 h-6 rounded-full transition-colors ${
-              customChecker.enabled ? "bg-indigo-600 dark:bg-indigo-500" : "bg-gray-300 dark:bg-slate-600"
+              solution.hasCustomChecker ? "bg-indigo-600 dark:bg-indigo-500" : "bg-gray-300 dark:bg-slate-600"
             }`}
-            onClick={() => updateCustomChecker({ enabled: !customChecker.enabled })}
+            onClick={() => updateSolution({ hasCustomChecker: !solution.hasCustomChecker })}
           >
             <div
               className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${
-                customChecker.enabled ? "translate-x-6" : "translate-x-1"
+                solution.hasCustomChecker ? "translate-x-6" : "translate-x-1"
               }`}
             />
           </div>
@@ -38,7 +40,7 @@ export default function CustomChecker() {
           </span>
         </label>
 
-        {customChecker.enabled && (
+        {solution.hasCustomChecker && (
           <div className="space-y-4 pt-2">
             {/* Language selector */}
             <div className="space-y-1.5">
@@ -52,9 +54,9 @@ export default function CustomChecker() {
                   <button
                     key={lang.id}
                     type="button"
-                    onClick={() => updateCustomChecker({ language: lang.id })}
+                    onClick={() => setActiveLang(lang.id)}
                     className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
-                      customChecker.language === lang.id
+                      activeLang === lang.id
                         ? "bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-500/10 dark:border-indigo-500/20 dark:text-indigo-300"
                         : "bg-gray-50 border-gray-200 text-gray-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-600"
                     }`}
@@ -65,21 +67,17 @@ export default function CustomChecker() {
               </div>
             </div>
 
-            {/* Monaco Editor */}
+            {/* Reusable Monaco Editor */}
             <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden bg-[#1e1e1e]">
-              <Editor
+              <MonacoEditor
                 height="300px"
-                language={customChecker.language === "cpp" ? "cpp" : customChecker.language === "java" ? "java" : "python"}
-                theme="vs-dark"
-                value={customChecker.code}
-                onChange={(value) => updateCustomChecker({ code: value || "" })}
-                options={{
-                  minimap: { enabled: false },
-                  padding: { top: 16 },
-                  fontSize: 14,
-                  scrollBeyondLastLine: false,
-                  renderLineHighlightOnlyWhenFocus: true,
-                }}
+                language={activeLang === "cpp" ? "cpp" : activeLang === "java" ? "java" : "python"}
+                value={solution.customCheckerCode[activeLang] || ""}
+                onChange={(val) => 
+                  updateSolution({ 
+                    customCheckerCode: { ...solution.customCheckerCode, [activeLang]: val || "" } 
+                  })
+                }
               />
             </div>
           </div>

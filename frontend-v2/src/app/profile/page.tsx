@@ -13,9 +13,11 @@ import {
   CheckCircle2,
   Loader2,
   Building2,
-  GraduationCap
+  GraduationCap,
+  Upload
 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { authAPI } from "@/config/api";
 
 type ProfileFormValues = {
   name: string;
@@ -30,6 +32,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -83,6 +86,32 @@ export default function ProfilePage() {
     }
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage("Image must be less than 5MB");
+      return;
+    }
+
+    setIsUploading(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+    try {
+      const formData = new FormData();
+      formData.append("avatar", file);
+      
+      await authAPI.uploadAvatar(formData);
+      setSuccessMessage("Profile picture updated successfully!");
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (err: any) {
+      setErrorMessage(err.response?.data?.message || err.message || "Failed to upload image.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const stats = [
     { label: "Total Solved", value: user.stats?.totalSolved || 0, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10" },
     { label: "Current Streak", value: `${user.stats?.currentStreak || 0} days`, icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
@@ -109,14 +138,25 @@ export default function ProfilePage() {
             {/* User Identification Card */}
             <div className="bg-card rounded-xl border border-border p-6 text-center shadow-sm">
               <div className="w-24 h-24 rounded-full bg-muted border border-border mx-auto mb-4 flex items-center justify-center overflow-hidden relative group cursor-pointer">
-                {user.avatar ? (
+                {isUploading ? (
+                  <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+                ) : user.avatar ? (
                   <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
                   <UserIcon className="w-10 h-10 text-muted-foreground" />
                 )}
-                <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                
+                <label className="absolute inset-0 bg-background/60 backdrop-blur-sm flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                  <Upload className="w-5 h-5 text-foreground mb-1" />
                   <span className="text-foreground text-xs font-medium">Change</span>
-                </div>
+                  <input 
+                    type="file" 
+                    accept="image/png, image/jpeg, image/jpg, image/gif" 
+                    className="hidden" 
+                    onChange={handleAvatarUpload}
+                    disabled={isUploading}
+                  />
+                </label>
               </div>
               <h2 className="text-xl font-semibold mb-1">{user.name}</h2>
               <p className="text-muted-foreground text-sm mb-4">{user.email}</p>

@@ -10,7 +10,20 @@ connectDB();
 // Initialize Redis
 getRedisClient();
 
+const { ApolloServer } = require("apollo-server-express");
+const typeDefs = require("./graphql/schema");
+const resolvers = require("./graphql/resolvers");
+
 const app = express();
+
+// Initialize Apollo Server
+async function startApolloServer() {
+  const server = new ApolloServer({ typeDefs, resolvers });
+  await server.start();
+  server.applyMiddleware({ app, path: '/graphql' });
+  console.log(`[Apollo] GraphQL Server ready at /graphql`);
+}
+startApolloServer();
 
 // Middleware
 app.use(cors({ origin: [process.env.CLIENT_URL || "http://localhost:5173", "http://localhost:3000", "http://localhost:3001"], credentials: true }));
@@ -68,9 +81,11 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 const http = require("http");
 const { initSocketIO } = require("./websockets/contestGateway");
+const { initAIGateway } = require("./websockets/aiGateway");
 
 const server = http.createServer(app);
-initSocketIO(server);
+const io = initSocketIO(server);
+initAIGateway(io);
 
 server.listen(PORT, () => {
   console.log(`\n🚀 CodeSkill API running on port ${PORT}`);
