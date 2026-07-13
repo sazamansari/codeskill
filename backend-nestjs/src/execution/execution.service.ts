@@ -84,69 +84,7 @@ export class ExecutionService {
     });
   }
 
-  private execInDocker(
-    image: string,
-    mountDir: string,
-    command: string,
-    args: string[],
-    timeout: number,
-  ): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const dockerArgs = [
-        'run',
-        '--rm',
-        '--network',
-        'none',
-        '--memory',
-        '256m',
-        '--cpus',
-        '1',
-        '-v',
-        `${mountDir}:/app`,
-        '-w',
-        '/app',
-        image,
-        command,
-        ...args,
-      ];
 
-      execFile(
-        'docker',
-        dockerArgs,
-        { timeout: timeout + 2000, maxBuffer: 1024 * 1024 },
-        (error: any, stdout, stderr) => {
-          if (error) {
-            const fullError = (
-              error.message +
-              ' ' +
-              (stderr || '')
-            ).toLowerCase();
-            if (
-              fullError.includes('failed to connect') ||
-              fullError.includes('daemon is running') ||
-              fullError.includes('cannot connect to the docker daemon') ||
-              fullError.includes('no such file or directory')
-            ) {
-              this.logger.warn(
-                `Docker not running, falling back to local execution for ${command}`,
-              );
-              this.execInChild(command, args, timeout, mountDir)
-                .then(resolve)
-                .catch(reject);
-              return;
-            }
-            if (error.killed) {
-              return reject(new Error('Time Limit Exceeded (5s)'));
-            } else {
-              const errMsg = stderr ? stderr.substring(0, 500) : error.message;
-              return reject(new Error(errMsg));
-            }
-          }
-          resolve({ stdout, stderr });
-        },
-      );
-    });
-  }
 
   private compareArrays(actual: any, expected: any) {
     if (!Array.isArray(actual) || !Array.isArray(expected)) return false;
@@ -220,12 +158,11 @@ __origLog(JSON.stringify({ __result, __logs }));
       fs.writeFileSync(filePath, script);
 
       try {
-        const output = await this.execInDocker(
-          'node:18-alpine',
-          tmpDir,
+        const output = await this.execInChild(
           'node',
           ['solution.js'],
           runOpts.timeout,
+          tmpDir,
         );
         const parsed = JSON.parse(output.stdout.trim());
 
@@ -315,12 +252,11 @@ except Exception as e:
       fs.writeFileSync(filePath, script);
 
       try {
-        const output = await this.execInDocker(
-          'python:3.9-alpine',
-          tmpDir,
+        const output = await this.execInChild(
           'python3',
           ['solution.py'],
           runOpts.timeout,
+          tmpDir,
         );
         const parsed = JSON.parse(output.stdout.trim());
 
@@ -440,12 +376,11 @@ int main() {
           continue;
         }
 
-        const output = await this.execInDocker(
-          'gcc:11',
-          tmpDir,
+        const output = await this.execInChild(
           'sh',
           ['-c', `./solution_${tc.id}`],
           runOpts.timeout,
+          tmpDir,
         );
         const stdout = output.stdout.trim();
 
@@ -554,12 +489,11 @@ public class Solution {
           continue;
         }
 
-        const output = await this.execInDocker(
-          'eclipse-temurin:17-alpine',
-          tmpDir,
+        const output = await this.execInChild(
           'java',
           ['Solution'],
           runOpts.timeout,
+          tmpDir,
         );
         const stdout = output.stdout.trim();
 
