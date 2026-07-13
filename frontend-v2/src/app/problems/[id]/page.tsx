@@ -1263,7 +1263,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                       Log In to Account
                     </Button>
                   </Link>
-                  <Link href="/signup" className="w-full block">
+                  <Link href="/register" className="w-full block">
                     <Button variant="outline" className="w-full border-border hover:bg-muted transition-all">
                       Create an Account
                     </Button>
