@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 
@@ -63,6 +63,34 @@ export class S3Service {
     } catch (error) {
       this.logger.error('Error uploading file to S3', error);
       throw new InternalServerErrorException('Failed to upload file to S3');
+    }
+  }
+
+  async deleteFile(fileUrl: string): Promise<void> {
+    if (!this.bucketName) {
+      return;
+    }
+
+    try {
+      // Expecting URL format: https://bucketName.s3.region.amazonaws.com/folder/filename.ext
+      // We need to extract 'folder/filename.ext'
+      const url = new URL(fileUrl);
+      // pathname has a leading slash, e.g., '/avatars/uuid.ext'
+      const key = url.pathname.substring(1); 
+      
+      if (!key) return;
+
+      const command = new DeleteObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      });
+
+      await this.s3Client.send(command);
+      this.logger.log(`Successfully deleted old file from S3: ${key}`);
+    } catch (error) {
+      this.logger.error(`Error deleting file from S3: ${fileUrl}`, error);
+      // We usually don't throw an error here to prevent failing the avatar update 
+      // if the old file is already deleted or missing.
     }
   }
 }

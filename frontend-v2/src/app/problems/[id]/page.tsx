@@ -8,7 +8,7 @@ import {
   List, MessageSquare, Lightbulb, Sparkles, StickyNote, Tag, BarChart3,
   Trophy, Flame, Copy, RotateCcw, History, Eye, EyeOff, Plus, Trash2,
   ThumbsUp, ThumbsDown, ArrowLeft, Hash, Zap, Target, Award, TrendingUp,
-  Code2, FileText, Brain
+  Code2, FileText, Brain, User
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useCallback, use, useRef } from "react";
@@ -109,6 +109,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
   const [threadSubmitting, setThreadSubmitting] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [replySubmitting, setReplySubmitting] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -364,7 +365,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
           console.error("Failed to save submission to database", err);
         }
       } else if (!localStorage.getItem("codeskill_token")) {
-        alert("Please log in to save your submission.");
+        setShowLoginModal(true);
       }
     } catch (err: any) {
       setRunResult({
@@ -1224,6 +1225,62 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
           </PanelGroup>
         </div>
       </div>
+
+      {/* Login Prompt Modal */}
+      <AnimatePresence>
+        {showLoginModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+            onClick={() => setShowLoginModal(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              onClick={(e: any) => e.stopPropagation()}
+              className="bg-card border border-border rounded-2xl p-8 max-w-sm w-full shadow-2xl relative overflow-hidden"
+            >
+              {/* Decorative background gradients */}
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="relative z-10 text-center">
+                <div className="w-16 h-16 bg-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-indigo-500/20">
+                  <User className="w-8 h-8 text-indigo-400" />
+                </div>
+                
+                <h3 className="text-xl font-bold text-foreground mb-2">Login Required</h3>
+                <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
+                  You need to be logged in to save your code submissions and track your progress.
+                </p>
+                
+                <div className="flex flex-col gap-3">
+                  <Link href="/login" className="w-full block">
+                    <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 transition-all border-0">
+                      Log In to Account
+                    </Button>
+                  </Link>
+                  <Link href="/signup" className="w-full block">
+                    <Button variant="outline" className="w-full border-border hover:bg-muted transition-all">
+                      Create an Account
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              
+              <button 
+                onClick={() => setShowLoginModal(false)}
+                className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

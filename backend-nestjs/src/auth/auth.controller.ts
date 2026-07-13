@@ -159,8 +159,16 @@ export class AuthController {
       throw new BadRequestException('File is required');
     }
 
+    // Get the current user to find the old avatar URL
+    const currentUser = await this.authService.getMe(userId);
+
     // Upload the memory buffer directly to S3
     const avatarUrl = await this.s3Service.uploadFile(file, 'avatars');
+
+    // Delete the old avatar from S3 if it exists (run in background)
+    if (currentUser && currentUser.avatar && currentUser.avatar.includes('amazonaws.com')) {
+      this.s3Service.deleteFile(currentUser.avatar).catch(() => {});
+    }
 
     const user = await this.authService.updateAvatar(userId, avatarUrl);
     return { user, avatarUrl };
