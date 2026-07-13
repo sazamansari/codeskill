@@ -55,8 +55,20 @@ export function useAntiCheatMaster(
   // Central Violation Handler
   const handleViolation = useCallback(
     async (type: string, metadata: any = {}) => {
-      setLastViolation(type);
-      setIsWarningDialogOpen(true);
+      let isLocked = false;
+      setWarnings((prev) => {
+        const newWarnings = prev + 1;
+        if (newWarnings >= config.warningLimit) {
+          isLocked = true;
+          onAutoSubmit();
+        }
+        return newWarnings;
+      });
+
+      if (!isLocked) {
+        setLastViolation(type);
+        setIsWarningDialogOpen(true);
+      }
 
       try {
         const res = await api.post("/contest-attempts/violation", {
@@ -65,17 +77,19 @@ export function useAntiCheatMaster(
           metadata,
         });
 
-        if (res.data.success) {
-          setWarnings(res.data.warnings);
+        // Backend may override warnings if we choose to sync
+        if (res.data?.success) {
+          if (res.data.warnings !== undefined) setWarnings(res.data.warnings);
           if (res.data.forceSubmit) {
             onAutoSubmit();
           }
         }
       } catch (err) {
-        console.error("Failed to report violation:", err);
+        // Backend not ready or offline, but local state already caught the cheat.
+        console.warn("Failed to report violation to backend, using local state.", err);
       }
     },
-    [contestId, onAutoSubmit]
+    [contestId, config.warningLimit, onAutoSubmit]
   );
 
   // Initialize individual hooks

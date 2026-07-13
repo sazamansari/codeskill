@@ -282,7 +282,7 @@ export class AuthService {
 
   async updateProfile(userId: string, data: any) {
     const updates: any = {};
-    const allowedFields = ['name', 'bio', 'avatar'];
+    const allowedFields = ['name', 'bio', 'avatar', 'username'];
     const allowedProfileFields = [
       'institution',
       'role',
@@ -300,6 +300,23 @@ export class AuthService {
         if (data.profile[key] !== undefined) {
           updates[`profile.${key}`] = data.profile[key];
         }
+      }
+    }
+
+    if (updates.username) {
+      // Validate username format (lowercase, alphanumeric, underscores)
+      const usernameRegex = /^[a-z0-9_]+$/;
+      if (!usernameRegex.test(updates.username)) {
+        throw new BadRequestException('Username can only contain lowercase letters, numbers, and underscores');
+      }
+
+      // Check if username is taken by another user
+      const existingUser = await this.userModel.findOne({
+        username: updates.username,
+        _id: { $ne: userId }
+      });
+      if (existingUser) {
+        throw new BadRequestException('Username is already taken');
       }
     }
 

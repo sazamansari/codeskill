@@ -21,6 +21,7 @@ import { authAPI } from "@/config/api";
 
 type ProfileFormValues = {
   name: string;
+  username: string;
   bio: string;
   institution: string;
   role: string;
@@ -45,6 +46,7 @@ export default function ProfilePage() {
     } else if (user) {
       reset({
         name: user.name || "",
+        username: user.username || "",
         bio: user.bio || "",
         institution: user.profile?.institution || "",
         role: user.profile?.role || "student",
@@ -70,6 +72,7 @@ export default function ProfilePage() {
     try {
       await updateProfile({
         name: data.name,
+        username: data.username,
         bio: data.bio,
         profile: {
           institution: data.institution,
@@ -220,6 +223,26 @@ export default function ProfilePage() {
                       placeholder="e.g. Jane Doe"
                     />
                     {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Username</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">@</span>
+                      <input
+                        type="text"
+                        {...register("username", { 
+                          required: "Username is required",
+                          pattern: {
+                            value: /^[a-z0-9_]+$/,
+                            message: "Only lowercase letters, numbers, and underscores are allowed"
+                          }
+                        })}
+                        className="w-full h-10 bg-transparent border border-border rounded-md pl-8 pr-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all text-sm"
+                        placeholder="e.g. jane_doe"
+                      />
+                    </div>
+                    {errors.username && <p className="text-xs text-destructive">{errors.username.message}</p>}
                   </div>
 
                   <div className="space-y-2">

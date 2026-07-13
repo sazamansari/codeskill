@@ -39,7 +39,7 @@ export default function ContestAttemptPage() {
         enablePasteProtect: true,
         enableDevToolsDetect: true,
         enableTabSwitchDetect: true,
-        warningLimit: 5,
+        warningLimit: 3,
         enableWatermark: true,
       });
       setLoading(false);
@@ -80,7 +80,7 @@ export default function ContestAttemptPage() {
       enablePasteProtect: false,
       enableDevToolsDetect: false,
       enableTabSwitchDetect: false,
-      warningLimit: 5
+      warningLimit: 3
     },
     handleAutoSubmit
   );

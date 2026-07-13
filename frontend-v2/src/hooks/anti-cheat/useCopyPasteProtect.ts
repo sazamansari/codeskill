@@ -38,17 +38,17 @@ export function useCopyPasteProtect({
       onViolation("Mouse_ContextMenu");
     };
 
-    // Attach globally
-    document.addEventListener("copy", handleCopy);
-    document.addEventListener("cut", handleCut);
-    document.addEventListener("paste", handlePaste);
-    document.addEventListener("contextmenu", handleContextMenu);
+    // Attach globally with capture phase to prevent Monaco from intercepting
+    document.addEventListener("copy", handleCopy, true);
+    document.addEventListener("cut", handleCut, true);
+    document.addEventListener("paste", handlePaste, true);
+    document.addEventListener("contextmenu", handleContextMenu, true);
 
     return () => {
-      document.removeEventListener("copy", handleCopy);
-      document.removeEventListener("cut", handleCut);
-      document.removeEventListener("paste", handlePaste);
-      document.removeEventListener("contextmenu", handleContextMenu);
+      document.removeEventListener("copy", handleCopy, true);
+      document.removeEventListener("cut", handleCut, true);
+      document.removeEventListener("paste", handlePaste, true);
+      document.removeEventListener("contextmenu", handleContextMenu, true);
     };
   }, [enableCopyProtect, enablePasteProtect, onViolation]);
 }
