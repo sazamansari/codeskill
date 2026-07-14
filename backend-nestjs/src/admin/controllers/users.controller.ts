@@ -44,4 +44,13 @@ export class AdminUsersController {
   async getReport(@Param('id') id: string) {
     return this.adminService.getReport(id);
   }
+
+  @Put(':id/promote')
+  @ApiOperation({ summary: 'Promote user to admin' })
+  async promoteUser(@Param('id') id: string) {
+    return this.adminService.updateUserRole(id, { 
+      isAdmin: true, 
+      'profile.role': 'admin' 
+    });
+  }
 }
