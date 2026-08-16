@@ -33,6 +33,8 @@ import {
   LinkedinAuthDto,
   AdminLoginDto,
   AdminVerifyOtpDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
 } from './dto/auth.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -172,5 +174,19 @@ export class AuthController {
 
     const user = await this.authService.updateAvatar(userId, avatarUrl);
     return { user, avatarUrl };
+  }
+
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Send password reset OTP' })
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto);
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Reset password using OTP' })
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
   }
 }
