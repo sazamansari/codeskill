@@ -21,12 +21,16 @@ export class Submission {
   @Prop({
     required: true,
     enum: [
+      'pending',
       'accepted',
       'wrong_answer',
       'runtime_error',
       'time_limit',
       'compile_error',
+      'memory_limit',
+      'system_error',
     ],
+    default: 'pending',
   })
   status: string;
 
@@ -47,6 +51,14 @@ export class Submission {
 
   @Prop({ enum: ['Easy', 'Medium', 'Hard'] })
   difficulty?: string;
+
+  /** Compiler output for compilation errors */
+  @Prop()
+  compileOutput?: string;
+
+  /** Per-test-case detailed results from the judge */
+  @Prop({ type: [Object] })
+  testResults?: Record<string, any>[];
 }
 
 export const SubmissionSchema = SchemaFactory.createForClass(Submission);

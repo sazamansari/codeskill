@@ -81,7 +81,8 @@ export const submissionAPI = {
 };
 
 export const runAPI = {
-  run: (data: { code: string; language: string; testCases: any[] }) => api.post("/execution/run", data),
+  run: (data: { code: string; language: string; testCases: any[]; config?: any }) =>
+    api.post("/execution/run", data, { timeout: 60000 }), // 60s timeout for compilation + execution
 };
 
 // ── Discussions ──

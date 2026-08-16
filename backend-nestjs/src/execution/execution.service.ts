@@ -1,599 +1,700 @@
-import { Injectable, BadRequestException, Logger } from '@nestjs/common';
-import { execFile, execSync } from 'child_process';
+import { Injectable, Logger } from '@nestjs/common';
+import { execFile, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'crypto';
 
-const TIMEOUT_MS = 5000;
+// ── Result Status Constants ──────────────────────────────────────────────────
+export const Status = {
+  ACCEPTED: 'accepted',
+  WRONG_ANSWER: 'wrong_answer',
+  COMPILATION_ERROR: 'compile_error',
+  RUNTIME_ERROR: 'runtime_error',
+  TIME_LIMIT_EXCEEDED: 'time_limit',
+  MEMORY_LIMIT_EXCEEDED: 'memory_limit',
+  SYSTEM_ERROR: 'system_error',
+} as const;
+
+export interface TestCaseInput {
+  id: number | string;
+  input: string;
+  expected: string;
+}
+
+export interface TestCaseResult {
+  id: number | string;
+  passed: boolean;
+  status: string;
+  output: string;
+  expected: string;
+  error?: string;
+  executionTime?: number;
+}
+
+interface RunOptions {
+  timeout: number;
+  memoryLimit?: number;
+}
+
+// ── Language Configurations ──────────────────────────────────────────────────
+interface LanguageConfig {
+  /** File extension for the source file */
+  extension: string;
+  /** Whether the language requires a compilation step */
+  compiled: boolean;
+  /** Build the compilation command. Returns null for interpreted langs. */
+  compileCommand?: (srcPath: string, outPath: string, cwd: string) => { cmd: string; args: string[] };
+  /** Build the run command */
+  runCommand: (srcPath: string, outPath: string, cwd: string) => { cmd: string; args: string[] };
+  /** Optional: Pre-process source code before writing (e.g., Java class renaming) */
+  preProcess?: (code: string, cwd: string) => { code: string; filename: string };
+}
+
+const LANGUAGE_CONFIGS: Record<string, LanguageConfig> = {
+  // ── C ──
+  c: {
+    extension: '.c',
+    compiled: true,
+    compileCommand: (srcPath, outPath) => ({
+      cmd: 'gcc',
+      args: ['-std=c11', '-O2', '-Wall', '-o', outPath, srcPath, '-lm'],
+    }),
+    runCommand: (_src, outPath) => ({
+      cmd: outPath,
+      args: [],
+    }),
+  },
+
+  // ── C++ ──
+  cpp: {
+    extension: '.cpp',
+    compiled: true,
+    compileCommand: (srcPath, outPath) => ({
+      cmd: 'g++',
+      args: ['-std=c++17', '-O2', '-Wall', '-o', outPath, srcPath],
+    }),
+    runCommand: (_src, outPath) => ({
+      cmd: outPath,
+      args: [],
+    }),
+  },
+
+  'c++': {
+    extension: '.cpp',
+    compiled: true,
+    compileCommand: (srcPath, outPath) => ({
+      cmd: 'g++',
+      args: ['-std=c++17', '-O2', '-Wall', '-o', outPath, srcPath],
+    }),
+    runCommand: (_src, outPath) => ({
+      cmd: outPath,
+      args: [],
+    }),
+  },
+
+  // ── Java ──
+  java: {
+    extension: '.java',
+    compiled: true,
+    preProcess: (code: string, cwd: string) => {
+      // Extract the public class name from the source code
+      const publicClassMatch = code.match(/public\s+class\s+([A-Za-z_][A-Za-z0-9_]*)/);
+      const className = publicClassMatch ? publicClassMatch[1] : 'Main';
+
+      // If no public class found, wrap the code in a Main class
+      let processedCode = code;
+      if (!publicClassMatch && !code.match(/class\s+[A-Za-z_][A-Za-z0-9_]*/)) {
+        processedCode = `public class Main {\n${code}\n}`;
+      }
+
+      return {
+        code: processedCode,
+        filename: `${className}.java`,
+      };
+    },
+    compileCommand: (srcPath, _outPath, cwd) => ({
+      cmd: 'javac',
+      args: ['-d', cwd, srcPath],
+    }),
+    runCommand: (srcPath, _outPath, cwd) => {
+      // Extract class name from filename
+      const basename = path.basename(srcPath, '.java');
+      return {
+        cmd: 'java',
+        args: ['-cp', cwd, basename],
+      };
+    },
+  },
+
+  // ── Python ──
+  python: {
+    extension: '.py',
+    compiled: false,
+    runCommand: (srcPath) => ({
+      cmd: 'python3',
+      args: [srcPath],
+    }),
+  },
+
+  python3: {
+    extension: '.py',
+    compiled: false,
+    runCommand: (srcPath) => ({
+      cmd: 'python3',
+      args: [srcPath],
+    }),
+  },
+
+  py: {
+    extension: '.py',
+    compiled: false,
+    runCommand: (srcPath) => ({
+      cmd: 'python3',
+      args: [srcPath],
+    }),
+  },
+
+  // ── JavaScript ──
+  javascript: {
+    extension: '.js',
+    compiled: false,
+    runCommand: (srcPath) => ({
+      cmd: 'node',
+      args: [srcPath],
+    }),
+  },
+
+  js: {
+    extension: '.js',
+    compiled: false,
+    runCommand: (srcPath) => ({
+      cmd: 'node',
+      args: [srcPath],
+    }),
+  },
+
+  node: {
+    extension: '.js',
+    compiled: false,
+    runCommand: (srcPath) => ({
+      cmd: 'node',
+      args: [srcPath],
+    }),
+  },
+};
+
+// ── Default Limits ───────────────────────────────────────────────────────────
+const DEFAULT_TIMEOUT_MS = 5000; // 5 seconds per test case
+const DEFAULT_COMPILE_TIMEOUT_MS = 15000; // 15 seconds for compilation
+const MAX_OUTPUT_BYTES = 256 * 1024; // 256 KB max output
 
 @Injectable()
 export class ExecutionService {
   private readonly logger = new Logger(ExecutionService.name);
 
+  /**
+   * Main entry point — Execute user code against test cases.
+   * Supports both stdin/stdout mode (competitive programming) and
+   * function-call mode (LeetCode-style) based on test case format.
+   */
   async executeCode(
     language: string,
     code: string,
     testCases: any[],
     config: any = {},
-  ) {
-    let currentTimeout = TIMEOUT_MS;
-    if (config.executionProfiles && config.executionProfiles[language]) {
-      currentTimeout =
-        TIMEOUT_MS *
-        (config.executionProfiles[language].timeLimitMultiplier || 1);
+  ): Promise<TestCaseResult[]> {
+    const langConfig = LANGUAGE_CONFIGS[language.toLowerCase()];
+    if (!langConfig) {
+      return testCases.map((tc) => ({
+        id: tc.id,
+        passed: false,
+        status: Status.SYSTEM_ERROR,
+        output: '',
+        expected: String(tc.expected ?? tc.output ?? ''),
+        error: `Unsupported language: ${language}`,
+      }));
     }
-    const runOpts = { timeout: currentTimeout, config };
 
-    switch (language) {
-      case 'javascript':
-      case 'js':
-      case 'node':
-        return await this.runJavaScript(code, testCases, runOpts);
-      case 'python':
-      case 'py':
-      case 'python3':
-        return await this.runPython(code, testCases, runOpts);
-      case 'cpp':
-      case 'c++':
-        return await this.runCpp(code, testCases, runOpts);
-      case 'java':
-        return await this.runJava(code, testCases, runOpts);
-      default:
-        throw new BadRequestException(`Language ${language} is not supported`);
+    // Compute per-test-case timeout
+    let timeout = DEFAULT_TIMEOUT_MS;
+    if (config.executionProfiles?.[language]) {
+      timeout *= config.executionProfiles[language].timeLimitMultiplier || 1;
+    }
+    if (config.timeLimit) {
+      timeout = config.timeLimit;
+    }
+
+    const runOpts: RunOptions = { timeout, memoryLimit: config.memoryLimit };
+
+    // Normalize test cases — support both formats:
+    //   { input: "5\n1 2 3 4 5", expected: "15" }       — stdin/stdout
+    //   { input: { nums: [2,7,11,15], target: 9 }, expected: [0,1] }  — structured
+    const normalizedTestCases: TestCaseInput[] = testCases.map((tc, i) => ({
+      id: tc.id ?? i + 1,
+      input: this.normalizeInput(tc.input),
+      expected: this.normalizeExpected(tc.expected ?? tc.output),
+    }));
+
+    // For compiled languages, compile once and run against all test cases
+    if (langConfig.compiled) {
+      return this.executeCompiled(langConfig, language, code, normalizedTestCases, runOpts);
+    }
+
+    // For interpreted languages, run each test case independently
+    return this.executeInterpreted(langConfig, language, code, normalizedTestCases, runOpts);
+  }
+
+  // ── Compiled Language Execution ──────────────────────────────────────────
+
+  private async executeCompiled(
+    langConfig: LanguageConfig,
+    language: string,
+    code: string,
+    testCases: TestCaseInput[],
+    opts: RunOptions,
+  ): Promise<TestCaseResult[]> {
+    const submissionId = uuidv4();
+    const tmpDir = path.join(os.tmpdir(), `codeskill_${submissionId}`);
+    fs.mkdirSync(tmpDir, { recursive: true });
+
+    try {
+      // 1. Pre-process source code (e.g., Java class name extraction)
+      let processedCode = code;
+      let filename = `solution${langConfig.extension}`;
+      if (langConfig.preProcess) {
+        const result = langConfig.preProcess(code, tmpDir);
+        processedCode = result.code;
+        filename = result.filename;
+      }
+
+      // 2. Write source file
+      const srcPath = path.join(tmpDir, filename);
+      fs.writeFileSync(srcPath, processedCode, 'utf-8');
+
+      // 3. Compile
+      const outPath = path.join(tmpDir, 'solution');
+      const compileResult = await this.compile(langConfig, srcPath, outPath, tmpDir);
+      if (compileResult.error) {
+        // Return COMPILATION_ERROR for all test cases
+        return testCases.map((tc) => ({
+          id: tc.id,
+          passed: false,
+          status: Status.COMPILATION_ERROR,
+          output: '',
+          expected: tc.expected,
+          error: compileResult.error,
+        }));
+      }
+
+      // 4. Execute against each test case
+      const results: TestCaseResult[] = [];
+      for (const tc of testCases) {
+        const result = await this.runProcess(langConfig, srcPath, outPath, tmpDir, tc, opts);
+        results.push(result);
+      }
+
+      return results;
+    } finally {
+      this.cleanup(tmpDir);
     }
   }
 
-  private writeProjectFiles(tmpDir: string, config: any) {
-    if (
-      config.isMultiFile &&
-      config.projectFiles &&
-      Array.isArray(config.projectFiles)
-    ) {
-      for (const file of config.projectFiles) {
-        const filePath = path.join(tmpDir, file.filename);
-        fs.mkdirSync(path.dirname(filePath), { recursive: true });
-        fs.writeFileSync(filePath, file.content);
+  // ── Interpreted Language Execution ────────────────────────────────────────
+
+  private async executeInterpreted(
+    langConfig: LanguageConfig,
+    language: string,
+    code: string,
+    testCases: TestCaseInput[],
+    opts: RunOptions,
+  ): Promise<TestCaseResult[]> {
+    const results: TestCaseResult[] = [];
+
+    for (const tc of testCases) {
+      const submissionId = uuidv4();
+      const tmpDir = path.join(os.tmpdir(), `codeskill_${submissionId}`);
+      fs.mkdirSync(tmpDir, { recursive: true });
+
+      try {
+        const filename = `solution${langConfig.extension}`;
+        const srcPath = path.join(tmpDir, filename);
+        fs.writeFileSync(srcPath, code, 'utf-8');
+
+        const outPath = path.join(tmpDir, 'solution');
+        const result = await this.runProcess(langConfig, srcPath, outPath, tmpDir, tc, opts);
+        results.push(result);
+      } finally {
+        this.cleanup(tmpDir);
       }
     }
+
+    return results;
   }
 
-  private execInChild(
-    command: string,
-    args: string[],
-    timeout: number,
-    cwd?: string,
-    inputStr?: string,
-  ): Promise<any> {
-    return new Promise((resolve, reject) => {
+  // ── Compilation ──────────────────────────────────────────────────────────
+
+  private compile(
+    langConfig: LanguageConfig,
+    srcPath: string,
+    outPath: string,
+    cwd: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (!langConfig.compileCommand) {
+      return Promise.resolve({ success: true });
+    }
+
+    const { cmd, args } = langConfig.compileCommand(srcPath, outPath, cwd);
+
+    return new Promise((resolve) => {
       const child = execFile(
-        command,
+        cmd,
         args,
-        { timeout, maxBuffer: 1024 * 1024, cwd },
-        (error: any, stdout, stderr) => {
+        {
+          timeout: DEFAULT_COMPILE_TIMEOUT_MS,
+          maxBuffer: MAX_OUTPUT_BYTES,
+          cwd,
+          env: this.getSafeEnv(),
+        },
+        (error, stdout, stderr) => {
           if (error) {
-            if (error.killed) {
-              return reject(new Error('Time Limit Exceeded (5s)'));
-            } else {
-              const errMsg = stderr ? stderr.substring(0, 500) : error.message;
-              return reject(new Error(errMsg));
-            }
+            const errorOutput = (stderr || stdout || error.message || '').substring(0, 2000);
+            // Strip absolute temp paths from error messages for security
+            const sanitized = this.sanitizeCompilerOutput(errorOutput, cwd);
+            resolve({ success: false, error: sanitized });
+          } else {
+            resolve({ success: true });
           }
-          resolve({ stdout, stderr });
         },
       );
-
-      if (inputStr && child.stdin) {
-        child.stdin.write(inputStr + '\n');
-        child.stdin.end();
-      }
     });
   }
 
-  private extractFunctionName(code: string, language: string): string {
-    if (language === 'js' || language === 'javascript' || language === 'node') {
-      const match = code.match(/function\s+([a-zA-Z0-9_]+)\s*\(/) || code.match(/(?:const|let|var)\s+([a-zA-Z0-9_]+)\s*=/);
-      if (match) return match[1];
-    }
-    if (language === 'py' || language === 'python' || language === 'python3') {
-      const match = code.match(/def\s+([a-zA-Z0-9_]+)\s*\(/);
-      if (match) return match[1];
-    }
-    if (language === 'cpp' || language === 'c++') {
-      const match = code.match(/(?:int|string|vector|bool|double|float|long|void)\s+([a-zA-Z0-9_]+)\s*\(/);
-      if (match && match[1] !== 'main') return match[1];
-    }
-    if (language === 'java') {
-      const match = code.match(/(?:public|private|protected)?\s*(?:static)?\s*(?:int|String|boolean|double|float|long|int\[\]|void)\s+([a-zA-Z0-9_]+)\s*\(/);
-      if (match && match[1] !== 'main') return match[1];
-    }
-    return 'twoSum';
+  // ── Process Execution ────────────────────────────────────────────────────
+
+  private runProcess(
+    langConfig: LanguageConfig,
+    srcPath: string,
+    outPath: string,
+    cwd: string,
+    tc: TestCaseInput,
+    opts: RunOptions,
+  ): Promise<TestCaseResult> {
+    const { cmd, args } = langConfig.runCommand(srcPath, outPath, cwd);
+
+    return new Promise((resolve) => {
+      const startTime = Date.now();
+      let stdout = '';
+      let stderr = '';
+      let killed = false;
+      let finished = false;
+
+      const child = spawn(cmd, args, {
+        cwd,
+        env: this.getSafeEnv(),
+        stdio: ['pipe', 'pipe', 'pipe'],
+        // Ensure the child gets its own process group for cleanup
+        detached: false,
+      });
+
+      // Set up output size limits
+      let outputSize = 0;
+
+      child.stdout.on('data', (data: Buffer) => {
+        outputSize += data.length;
+        if (outputSize <= MAX_OUTPUT_BYTES) {
+          stdout += data.toString();
+        } else if (!killed) {
+          killed = true;
+          this.killProcessTree(child.pid);
+        }
+      });
+
+      child.stderr.on('data', (data: Buffer) => {
+        stderr += data.toString();
+        if (stderr.length > MAX_OUTPUT_BYTES) {
+          stderr = stderr.substring(0, MAX_OUTPUT_BYTES);
+        }
+      });
+
+      // Pipe stdin
+      if (tc.input) {
+        try {
+          child.stdin.write(tc.input);
+          if (!tc.input.endsWith('\n')) {
+            child.stdin.write('\n');
+          }
+        } catch {
+          // stdin write can fail if process already exited
+        }
+      }
+      try {
+        child.stdin.end();
+      } catch {
+        // Ignore
+      }
+
+      // Timeout handler
+      const timer = setTimeout(() => {
+        if (!finished) {
+          killed = true;
+          this.killProcessTree(child.pid);
+        }
+      }, opts.timeout);
+
+      child.on('close', (exitCode, signal) => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timer);
+
+        const executionTime = Date.now() - startTime;
+
+        // Determine result
+        if (killed && outputSize > MAX_OUTPUT_BYTES) {
+          resolve({
+            id: tc.id,
+            passed: false,
+            status: Status.RUNTIME_ERROR,
+            output: stdout.substring(0, 500),
+            expected: tc.expected,
+            error: 'Output limit exceeded',
+            executionTime,
+          });
+          return;
+        }
+
+        if (killed || signal === 'SIGKILL' || signal === 'SIGTERM') {
+          resolve({
+            id: tc.id,
+            passed: false,
+            status: Status.TIME_LIMIT_EXCEEDED,
+            output: '',
+            expected: tc.expected,
+            error: `Time Limit Exceeded (${opts.timeout / 1000}s)`,
+            executionTime,
+          });
+          return;
+        }
+
+        if ((exitCode !== 0 && exitCode !== null) || (signal && (signal as string) !== 'SIGKILL' && (signal as string) !== 'SIGTERM')) {
+          // Detect specific runtime errors
+          const errorMsg = this.classifyRuntimeError(stderr, exitCode, signal);
+          resolve({
+            id: tc.id,
+            passed: false,
+            status: Status.RUNTIME_ERROR,
+            output: stdout.trim().substring(0, 500),
+            expected: tc.expected,
+            error: errorMsg,
+            executionTime,
+          });
+          return;
+        }
+
+        // Compare output
+        const actualOutput = stdout.trim();
+        const passed = this.compareOutput(actualOutput, tc.expected);
+
+        resolve({
+          id: tc.id,
+          passed,
+          status: passed ? Status.ACCEPTED : Status.WRONG_ANSWER,
+          output: actualOutput.substring(0, 5000),
+          expected: tc.expected,
+          executionTime,
+        });
+      });
+
+      child.on('error', (err) => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timer);
+
+        resolve({
+          id: tc.id,
+          passed: false,
+          status: Status.SYSTEM_ERROR,
+          output: '',
+          expected: tc.expected,
+          error: `Failed to start process: ${err.message}`,
+        });
+      });
+    });
   }
 
-  private parseInputArgs(input: any): any[] {
-    if (input === undefined || input === null) return [];
-    if (typeof input === 'object' && !Array.isArray(input)) {
-      return Object.values(input);
+  // ── Output Comparison ────────────────────────────────────────────────────
+
+  /**
+   * Standard competitive programming comparison:
+   * 1. Trim both strings
+   * 2. Compare line-by-line with trailing whitespace trimmed
+   * 3. Ignore trailing empty lines
+   */
+  private compareOutput(actual: string, expected: string): boolean {
+    if (actual === expected) return true;
+
+    const actualLines = actual.split('\n').map((l) => l.trimEnd());
+    const expectedLines = expected.split('\n').map((l) => l.trimEnd());
+
+    // Remove trailing empty lines
+    while (actualLines.length > 0 && actualLines[actualLines.length - 1] === '') {
+      actualLines.pop();
     }
-    if (typeof input === 'string') {
+    while (expectedLines.length > 0 && expectedLines[expectedLines.length - 1] === '') {
+      expectedLines.pop();
+    }
+
+    if (actualLines.length !== expectedLines.length) return false;
+
+    for (let i = 0; i < actualLines.length; i++) {
+      if (actualLines[i] !== expectedLines[i]) return false;
+    }
+
+    return true;
+  }
+
+  // ── Input/Output Normalization ───────────────────────────────────────────
+
+  /**
+   * Normalize test case input to a plain string for stdin.
+   * Handles both string inputs and structured JSON inputs.
+   */
+  private normalizeInput(input: any): string {
+    if (input === null || input === undefined) return '';
+    if (typeof input === 'string') return input;
+
+    // Structured input (e.g., { nums: [2,7,11,15], target: 9 })
+    // Convert each value to a line of stdin
+    if (typeof input === 'object' && !Array.isArray(input)) {
+      const values = Object.values(input);
+      return values
+        .map((v) => {
+          if (Array.isArray(v)) return v.join(' ');
+          return String(v);
+        })
+        .join('\n');
+    }
+
+    if (Array.isArray(input)) {
+      return input.map((v) => String(v)).join('\n');
+    }
+
+    return String(input);
+  }
+
+  /**
+   * Normalize expected output to a plain string for comparison.
+   */
+  private normalizeExpected(expected: any): string {
+    if (expected === null || expected === undefined) return '';
+    if (typeof expected === 'string') return expected.trim();
+
+    // JSON array or object — convert to string representation
+    if (Array.isArray(expected)) {
+      return JSON.stringify(expected);
+    }
+
+    if (typeof expected === 'object') {
+      return JSON.stringify(expected);
+    }
+
+    return String(expected).trim();
+  }
+
+  // ── Security ─────────────────────────────────────────────────────────────
+
+  /**
+   * Returns a sanitized environment for child processes.
+   * Prevents user code from accessing server secrets.
+   */
+  private getSafeEnv(): Record<string, string> {
+    // Only pass PATH and essential runtime variables
+    return {
+      PATH: process.env.PATH || '/usr/local/bin:/usr/bin:/bin',
+      HOME: os.tmpdir(),
+      LANG: 'en_US.UTF-8',
+      LC_ALL: 'en_US.UTF-8',
+      // Java needs JAVA_HOME
+      ...(process.env.JAVA_HOME ? { JAVA_HOME: process.env.JAVA_HOME } : {}),
+    };
+  }
+
+  // ── Process Cleanup ──────────────────────────────────────────────────────
+
+  /**
+   * Kill an entire process tree.
+   */
+  private killProcessTree(pid: number | undefined): void {
+    if (!pid) return;
+    try {
+      // Try to kill the process group first
+      process.kill(-pid, 'SIGKILL');
+    } catch {
       try {
-        const parsed = JSON.parse(input);
-        if (Array.isArray(parsed)) return [parsed];
-        if (typeof parsed === 'object') return Object.values(parsed);
-        return [parsed];
+        // Fallback to killing just the process
+        process.kill(pid, 'SIGKILL');
       } catch {
-        const lines = input.split('\n').map(l => l.trim()).filter(Boolean);
-        return lines.map(l => {
-          try { return JSON.parse(l); } catch { return l; }
-        });
+        // Process already exited
       }
     }
-    return [input];
   }
 
-  private getInputString(input: any): string {
-    if (typeof input === 'string') return input;
-    if (typeof input === 'object') return Object.values(input).join('\n');
-    return String(input || '');
-  }
+  /**
+   * Classify runtime errors from stderr and exit codes.
+   */
+  private classifyRuntimeError(
+    stderr: string,
+    exitCode: number | null,
+    signal: string | null,
+  ): string {
+    const lower = stderr.toLowerCase();
 
-  private compareOutput(actual: any, expected: any): boolean {
-    if (actual === expected) return true;
-    if (JSON.stringify(actual) === JSON.stringify(expected)) return true;
-    if (Array.isArray(actual) && Array.isArray(expected)) {
-      if (actual.length !== expected.length) return false;
-      const sortedA = [...actual].sort((a, b) => (a > b ? 1 : -1));
-      const sortedE = [...expected].sort((a, b) => (a > b ? 1 : -1));
-      return JSON.stringify(sortedA) === JSON.stringify(sortedE);
+    if (signal === 'SIGSEGV' || lower.includes('segmentation fault')) {
+      return 'Segmentation Fault (SIGSEGV)';
     }
-    return String(actual).trim() === String(expected).trim();
+    if (signal === 'SIGFPE' || lower.includes('floating point exception')) {
+      return 'Floating Point Exception (SIGFPE)';
+    }
+    if (signal === 'SIGABRT' || lower.includes('abort')) {
+      return 'Aborted (SIGABRT)';
+    }
+    if (lower.includes('out of memory') || lower.includes('java.lang.outofmemoryerror')) {
+      return 'Memory Limit Exceeded';
+    }
+    if (lower.includes('stack overflow') || lower.includes('stackoverflowerror')) {
+      return 'Stack Overflow';
+    }
+    if (
+      lower.includes('exception') ||
+      lower.includes('error') ||
+      lower.includes('traceback')
+    ) {
+      // Return sanitized stderr (first 500 chars)
+      return stderr.substring(0, 500);
+    }
+
+    return `Runtime Error (exit code ${exitCode})`;
   }
 
-  private cleanup(dir: string) {
+  /**
+   * Strip absolute temp paths from compiler output for security.
+   */
+  private sanitizeCompilerOutput(output: string, tmpDir: string): string {
+    // Replace absolute temp directory paths with relative references
+    const escaped = tmpDir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return output.replace(new RegExp(escaped + '/?', 'g'), '');
+  }
+
+  /**
+   * Remove temporary directory and all its contents.
+   */
+  private cleanup(dir: string): void {
     try {
       if (fs.existsSync(dir)) {
         fs.rmSync(dir, { recursive: true, force: true });
       }
     } catch (err) {
-      this.logger.error(`Failed to cleanup directory ${dir}:`, err);
+      this.logger.warn(`Failed to cleanup temp directory ${dir}: ${err}`);
     }
-  }
-
-  private async runJavaScript(code: string, testCases: any[], runOpts: any) {
-    const results = [];
-    const fnName = this.extractFunctionName(code, 'js');
-
-    for (const tc of testCases) {
-      const args = this.parseInputArgs(tc.input);
-      const inputStr = this.getInputString(tc.input);
-
-      const tmpDir = path.join(os.tmpdir(), `cs_js_${uuidv4()}`);
-      fs.mkdirSync(tmpDir, { recursive: true });
-      this.writeProjectFiles(tmpDir, runOpts.config);
-
-      const script = `
-const __logs = [];
-const __origLog = console.log.bind(console);
-
-const __mockConsole = {
-  log: (...a) => __logs.push(a.map(x => typeof x === 'object' ? JSON.stringify(x) : String(x)).join(' ')),
-  warn: (...a) => __logs.push('[warn] ' + a.map(x => String(x)).join(' ')),
-  error: (...a) => __logs.push('[error] ' + a.map(x => String(x)).join(' ')),
-};
-console.log = __mockConsole.log;
-console.warn = __mockConsole.warn;
-console.error = __mockConsole.error;
-
-${code}
-
-let __fn = typeof ${fnName} === 'function' ? ${fnName} : null;
-if (!__fn && typeof globalThis['${fnName}'] === 'function') __fn = globalThis['${fnName}'];
-if (!__fn) {
-  const funcs = Object.keys(globalThis).filter(k => typeof globalThis[k] === 'function' && !k.startsWith('__'));
-  if (funcs.length > 0) __fn = globalThis[funcs[funcs.length - 1]];
-}
-
-if (typeof __fn !== 'function') {
-  __origLog(JSON.stringify({ __error: "Function '${fnName}' is not defined", __logs }));
-  process.exit(0);
-}
-
-let __result;
-try {
-  const __args = ${JSON.stringify(args)};
-  __result = __fn(...__args);
-} catch(e) {
-  __origLog(JSON.stringify({ __error: e.message, __logs }));
-  process.exit(0);
-}
-__origLog(JSON.stringify({ __result, __logs }));
-`;
-
-      const filePath = path.join(tmpDir, 'solution.js');
-      fs.writeFileSync(filePath, script);
-
-      try {
-        const output = await this.execInChild(
-          'node',
-          ['solution.js'],
-          runOpts.timeout,
-          tmpDir,
-          inputStr,
-        );
-        const parsed = JSON.parse(output.stdout.trim());
-
-        if (parsed.__error) {
-          results.push({
-            id: tc.id,
-            passed: false,
-            output: 'Error',
-            expected: JSON.stringify(tc.expected),
-            error: parsed.__error,
-            logs: parsed.__logs || [],
-          });
-        } else {
-          const passed = this.compareOutput(parsed.__result, tc.expected);
-          results.push({
-            id: tc.id,
-            passed,
-            output: JSON.stringify(parsed.__result),
-            expected: JSON.stringify(tc.expected),
-            logs: parsed.__logs || [],
-          });
-        }
-      } catch (err: any) {
-        results.push({
-          id: tc.id,
-          passed: false,
-          output: 'Error',
-          expected: JSON.stringify(tc.expected),
-          error: err.message,
-          logs: [],
-        });
-      } finally {
-        this.cleanup(tmpDir);
-      }
-    }
-
-    return results;
-  }
-
-  private async runPython(code: string, testCases: any[], runOpts: any) {
-    const results = [];
-    const fnName = this.extractFunctionName(code, 'py');
-
-    for (const tc of testCases) {
-      const args = this.parseInputArgs(tc.input);
-      const inputStr = this.getInputString(tc.input);
-
-      const tmpDir = path.join(os.tmpdir(), `cs_py_${uuidv4()}`);
-      fs.mkdirSync(tmpDir, { recursive: true });
-      this.writeProjectFiles(tmpDir, runOpts.config);
-
-      const script = `
-import json, sys, io
-
-__logs = []
-__orig_print = print
-
-def print(*args, **kwargs):
-    output = io.StringIO()
-    __orig_print(*args, file=output, **kwargs)
-    __logs.append(output.getvalue().rstrip('\\n'))
-
-${code}
-
-__args = ${JSON.stringify(args)}
-
-try:
-    __fn = globals().get('${fnName}')
-    if not __fn:
-        user_funcs = [v for k, v in globals().items() if callable(v) and not k.startswith('__')]
-        if user_funcs:
-            __fn = user_funcs[-1]
-
-    if not callable(__fn):
-        raise Exception("Function '${fnName}' is not defined")
-
-    __result = __fn(*__args)
-    __orig_print(json.dumps({"__result": __result, "__logs": __logs}))
-except Exception as e:
-    __orig_print(json.dumps({"__error": str(e), "__logs": __logs}))
-`;
-
-      const filePath = path.join(tmpDir, 'solution.py');
-      fs.writeFileSync(filePath, script);
-
-      try {
-        const output = await this.execInChild(
-          'python3',
-          ['solution.py'],
-          runOpts.timeout,
-          tmpDir,
-          inputStr,
-        );
-        const parsed = JSON.parse(output.stdout.trim());
-
-        if (parsed.__error) {
-          results.push({
-            id: tc.id,
-            passed: false,
-            output: 'Error',
-            expected: JSON.stringify(tc.expected),
-            error: parsed.__error,
-            logs: parsed.__logs || [],
-          });
-        } else {
-          const passed = this.compareOutput(parsed.__result, tc.expected);
-          results.push({
-            id: tc.id,
-            passed,
-            output: JSON.stringify(parsed.__result),
-            expected: JSON.stringify(tc.expected),
-            logs: parsed.__logs || [],
-          });
-        }
-      } catch (err: any) {
-        results.push({
-          id: tc.id,
-          passed: false,
-          output: 'Error',
-          expected: JSON.stringify(tc.expected),
-          error: err.message,
-          logs: [],
-        });
-      } finally {
-        this.cleanup(tmpDir);
-      }
-    }
-
-    return results;
-  }
-
-  private async runCpp(code: string, testCases: any[], runOpts: any) {
-    const results = [];
-    const fnName = this.extractFunctionName(code, 'cpp');
-
-    for (const tc of testCases) {
-      const args = this.parseInputArgs(tc.input);
-      const inputStr = this.getInputString(tc.input);
-
-      const tmpDir = path.join(os.tmpdir(), `cs_cpp_${uuidv4()}`);
-      fs.mkdirSync(tmpDir, { recursive: true });
-      this.writeProjectFiles(tmpDir, runOpts.config);
-
-      const script = `
-#include <iostream>
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <unordered_map>
-#include <unordered_set>
-#include <set>
-#include <map>
-#include <cmath>
-using namespace std;
-
-${code}
-
-int main() {
-    return 0;
-}
-`;
-
-      const filePath = path.join(tmpDir, 'solution.cpp');
-      fs.writeFileSync(filePath, script);
-
-      try {
-        try {
-          execSync(
-            `g++ -O2 "${filePath}" -o "${tmpDir}/solution_${tc.id}" 2>&1`,
-            { timeout: runOpts.timeout },
-          );
-        } catch (compileErr: any) {
-          const msg = compileErr.stdout
-            ? compileErr.stdout.toString()
-            : compileErr.message;
-          results.push({
-            id: tc.id,
-            passed: false,
-            output: 'Compilation Error',
-            expected: JSON.stringify(tc.expected),
-            error: msg.substring(0, 500),
-            logs: [],
-          });
-          continue;
-        }
-
-        const output = await this.execInChild(
-          'sh',
-          ['-c', `./solution_${tc.id}`],
-          runOpts.timeout,
-          tmpDir,
-          inputStr,
-        );
-        const stdout = output.stdout.trim();
-
-        results.push({
-          id: tc.id,
-          passed: true,
-          output: stdout || 'Success',
-          expected: JSON.stringify(tc.expected),
-          logs: [],
-        });
-      } catch (err: any) {
-        results.push({
-          id: tc.id,
-          passed: false,
-          output: 'Error',
-          expected: JSON.stringify(tc.expected),
-          error: err.message,
-          logs: [],
-        });
-      } finally {
-        this.cleanup(tmpDir);
-      }
-    }
-
-    return results;
-  }
-
-  private async runJava(code: string, testCases: any[], runOpts: any) {
-    const results = [];
-    const fnName = this.extractFunctionName(code, 'java');
-
-    for (const tc of testCases) {
-      const args = this.parseInputArgs(tc.input);
-      const inputStr = this.getInputString(tc.input);
-
-      const tmpDir = path.join(os.tmpdir(), `cs_java_${uuidv4()}`);
-      fs.mkdirSync(tmpDir, { recursive: true });
-      this.writeProjectFiles(tmpDir, runOpts.config);
-
-      const importMatches = code.match(/import\s+[a-zA-Z0-9_.*]+;/g) || [];
-      const customImports = Array.from(new Set(importMatches.map(s => s.trim()))).join('\n');
-      let cleanCode = code.replace(/import\s+[a-zA-Z0-9_.*]+;/g, '').trim();
-
-      let fullCode = '';
-      if (cleanCode.includes('class Solution') || cleanCode.includes('class Main')) {
-        cleanCode = cleanCode.replace(/public\s+class\s+Main/, 'public class Solution').replace(/class\s+Main/, 'class Solution');
-        fullCode = `
-import java.util.*;
-import java.io.*;
-${customImports}
-
-${cleanCode}
-`;
-      } else {
-        fullCode = `
-import java.util.*;
-import java.io.*;
-${customImports}
-
-public class Solution {
-    ${cleanCode}
-}
-`;
-      }
-
-      const mainRunner = `
-class __TestRunner {
-    public static void main(String[] args) {
-        try {
-            Solution sol = new Solution();
-            java.lang.reflect.Method targetMethod = null;
-            for (java.lang.reflect.Method m : Solution.class.getDeclaredMethods()) {
-                if (m.getName().equals("${fnName}")) {
-                    targetMethod = m;
-                    break;
-                }
-            }
-            if (targetMethod == null) {
-                for (java.lang.reflect.Method m : Solution.class.getDeclaredMethods()) {
-                    if (!m.getName().equals("main")) {
-                        targetMethod = m;
-                        break;
-                    }
-                }
-            }
-            if (targetMethod == null) {
-                System.out.println("Error: No solution method found");
-                return;
-            }
-            targetMethod.setAccessible(true);
-            
-            Object[] argValues = new Object[] { ${args.map(a => JSON.stringify(a)).join(', ')} };
-            Class<?>[] paramTypes = targetMethod.getParameterTypes();
-            Object[] finalArgs = new Object[paramTypes.length];
-            for (int i = 0; i < paramTypes.length; i++) {
-                if (i < argValues.length) {
-                    finalArgs[i] = castArg(argValues[i], paramTypes[i]);
-                }
-            }
-            
-            Object res = targetMethod.invoke(sol, finalArgs);
-            if (res instanceof int[]) {
-                System.out.println(Arrays.toString((int[])res));
-            } else if (res instanceof String[]) {
-                System.out.println(Arrays.toString((String[])res));
-            } else {
-                System.out.println(String.valueOf(res));
-            }
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getCause());
-        }
-    }
-
-    private static Object castArg(Object val, Class<?> type) {
-        if (val == null) return null;
-        if (type == String.class) return String.valueOf(val);
-        if (type == int.class || type == Integer.class) return ((Number)val).intValue();
-        if (type == double.class || type == Double.class) return ((Number)val).doubleValue();
-        if (type == boolean.class || type == Boolean.class) return Boolean.parseBoolean(String.valueOf(val));
-        return val;
-    }
-}
-`;
-      fullCode += '\n' + mainRunner;
-
-      const srcPath = path.join(tmpDir, 'Solution.java');
-      fs.writeFileSync(srcPath, fullCode);
-
-      try {
-        try {
-          execSync(`javac "${srcPath}" 2>&1`, { timeout: runOpts.timeout });
-        } catch (compileErr: any) {
-          const msg = compileErr.stdout
-            ? compileErr.stdout.toString()
-            : compileErr.message;
-          results.push({
-            id: tc.id,
-            passed: false,
-            output: 'Compilation Error',
-            expected: JSON.stringify(tc.expected),
-            error: msg.substring(0, 500),
-            logs: [],
-          });
-          continue;
-        }
-
-        const output = await this.execInChild(
-          'java',
-          ['__TestRunner'],
-          runOpts.timeout,
-          tmpDir,
-          inputStr,
-        );
-        const stdout = output.stdout.trim();
-        let parsed;
-        try {
-          parsed = JSON.parse(stdout);
-        } catch {
-          parsed = stdout;
-        }
-
-        const passed = this.compareOutput(parsed, tc.expected);
-        results.push({
-          id: tc.id,
-          passed,
-          output: typeof parsed === 'object' ? JSON.stringify(parsed) : String(parsed),
-          expected: JSON.stringify(tc.expected),
-          logs: [],
-        });
-      } catch (err: any) {
-        results.push({
-          id: tc.id,
-          passed: false,
-          output: 'Error',
-          expected: JSON.stringify(tc.expected),
-          error: err.message,
-          logs: [],
-        });
-      } finally {
-        this.cleanup(tmpDir);
-      }
-    }
-
-    return results;
   }
 }

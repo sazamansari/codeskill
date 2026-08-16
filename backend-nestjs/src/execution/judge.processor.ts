@@ -1,13 +1,21 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
-import { ExecutionService } from './execution.service';
+import { ExecutionService, Status } from './execution.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
   Submission,
   SubmissionDocument,
 } from '../database/schemas/submission.schema';
+import {
+  ProblemMetadata,
+  ProblemMetadataDocument,
+} from '../database/schemas/problem-metadata.schema';
+import {
+  ProblemTestCase,
+  ProblemTestCaseDocument,
+} from '../database/schemas/problem-testcase.schema';
 import { AppGateway } from '../gateway/app.gateway';
 
 @Processor('submissions')
@@ -18,82 +26,147 @@ export class JudgeProcessor extends WorkerHost {
     private readonly executionService: ExecutionService,
     @InjectModel(Submission.name)
     private submissionModel: Model<SubmissionDocument>,
+    @InjectModel(ProblemMetadata.name)
+    private problemModel: Model<ProblemMetadataDocument>,
+    @InjectModel(ProblemTestCase.name)
+    private testCaseModel: Model<ProblemTestCaseDocument>,
     private readonly appGateway: AppGateway,
   ) {
     super();
   }
 
   async process(job: Job<any, any, string>): Promise<any> {
-    this.logger.log(`Processing job ${job.id} of type ${job.name}`);
+    this.logger.log(
+      `[Judge] Processing job ${job.id} — type: ${job.name}`,
+    );
 
     if (job.name === 'evaluate-code') {
       const { submissionId, problemId, code, language, userId } = job.data;
 
       try {
-        // Fetch test cases from DB (mocked here for now, or we can use problems service)
-        // In a real app we'd fetch the actual test cases for the problem
-        const testCases = [
-          {
-            id: 1,
-            input: { nums: [2, 7, 11, 15], target: 9 },
-            expected: [0, 1],
-          },
-          { id: 2, input: { nums: [3, 2, 4], target: 6 }, expected: [1, 2] },
-          { id: 3, input: { nums: [3, 3], target: 6 }, expected: [0, 1] },
-        ];
+        // 1. Fetch actual test cases from DB
+        const problem = await this.problemModel
+          .findById(problemId)
+          .populate('testCases')
+          .lean();
 
-        // 1. Notify user that execution has started
+        if (!problem) {
+          throw new Error(`Problem not found: ${problemId}`);
+        }
+
+        let testCases: any[] = [];
+        const populatedTestCases = problem.testCases as any;
+
+        if (populatedTestCases?.cases && Array.isArray(populatedTestCases.cases)) {
+          testCases = populatedTestCases.cases.map((tc: any, i: number) => ({
+            id: i + 1,
+            input: tc.input || '',
+            expected: tc.output || '',
+          }));
+        }
+
+        if (testCases.length === 0) {
+          // Fallback: try fetching test cases directly
+          const testCaseDoc = await this.testCaseModel
+            .findOne({ metadataId: problemId })
+            .lean();
+          if (testCaseDoc?.cases && Array.isArray(testCaseDoc.cases)) {
+            testCases = testCaseDoc.cases.map((tc: any, i: number) => ({
+              id: i + 1,
+              input: tc.input || '',
+              expected: tc.output || '',
+            }));
+          }
+        }
+
+        if (testCases.length === 0) {
+          this.logger.warn(`[Judge] No test cases found for problem ${problemId}`);
+          await this.submissionModel.findByIdAndUpdate(submissionId, {
+            status: Status.SYSTEM_ERROR,
+            compileOutput: 'No test cases configured for this problem',
+          });
+          this.appGateway.emitToUser(userId, 'execution_error', {
+            submissionId,
+            status: Status.SYSTEM_ERROR,
+            error: 'No test cases configured for this problem',
+          });
+          return { status: Status.SYSTEM_ERROR };
+        }
+
+        // 2. Notify user that execution has started
         this.appGateway.emitToUser(userId, 'execution_update', {
           submissionId,
           status: 'running',
-          message: 'Executing your code...',
+          message: `Executing your ${language} code against ${testCases.length} test case(s)...`,
         });
 
-        // 2. Execute code
+        // 3. Build execution config from problem
+        const config: any = {};
+        const problemConfig = problem.config as any;
+        if (problemConfig) {
+          if (problemConfig.timeLimit) config.timeLimit = problemConfig.timeLimit;
+          if (problemConfig.memoryLimit) config.memoryLimit = problemConfig.memoryLimit;
+        }
+
+        // 4. Execute code
         const start = Date.now();
         const results = await this.executionService.executeCode(
           language,
           code,
           testCases,
-          {},
+          config,
         );
         const runtime = Date.now() - start;
 
-        // 3. Evaluate results
-        let allPassed = true;
+        // 5. Evaluate results
         let passedCount = 0;
-        let hasError = false;
+        let hasCompileError = false;
+        let hasRuntimeError = false;
+        let hasTLE = false;
+        let compileOutput = '';
 
         for (const res of results) {
           if (res.passed) {
             passedCount++;
-          } else {
-            allPassed = false;
-            if (res.error) hasError = true;
           }
+          if (res.status === Status.COMPILATION_ERROR) {
+            hasCompileError = true;
+            compileOutput = res.error || '';
+          }
+          if (res.status === Status.RUNTIME_ERROR) hasRuntimeError = true;
+          if (res.status === Status.TIME_LIMIT_EXCEEDED) hasTLE = true;
         }
 
-        const status = allPassed
-          ? 'accepted'
-          : hasError
-            ? 'error'
-            : 'wrong_answer';
+        const allPassed = passedCount === testCases.length;
+        let status: string;
+        if (allPassed) {
+          status = Status.ACCEPTED;
+        } else if (hasCompileError) {
+          status = Status.COMPILATION_ERROR;
+        } else if (hasRuntimeError) {
+          status = Status.RUNTIME_ERROR;
+        } else if (hasTLE) {
+          status = Status.TIME_LIMIT_EXCEEDED;
+        } else {
+          status = Status.WRONG_ANSWER;
+        }
 
-        // 4. Update DB
-        const submission = await this.submissionModel.findByIdAndUpdate(
+        // 6. Update DB
+        await this.submissionModel.findByIdAndUpdate(
           submissionId,
           {
             status,
-            runtime,
-            memory: 0,
+            runtime: `${runtime}ms`,
+            memory: '0',
             testCasesPassed: passedCount,
             totalTestCases: testCases.length,
-            details: results,
+            compileOutput: compileOutput || undefined,
+            testResults: results,
           },
           { new: true },
         );
 
-        // 5. Notify user of completion
+        // 7. Notify user of completion
         this.appGateway.emitToUser(userId, 'execution_complete', {
           submissionId,
           status,
@@ -103,21 +176,25 @@ export class JudgeProcessor extends WorkerHost {
           results,
         });
 
+        this.logger.log(
+          `[Judge] Submission ${submissionId}: ${status} (${passedCount}/${testCases.length}) in ${runtime}ms`,
+        );
+
         return { status, passedCount, totalCount: testCases.length };
       } catch (err: any) {
         this.logger.error(
-          `Error processing submission ${submissionId}: ${err.message}`,
+          `[Judge] Error processing submission ${submissionId}: ${err.message}`,
           err.stack,
         );
 
         await this.submissionModel.findByIdAndUpdate(submissionId, {
-          status: 'error',
-          error: err.message,
+          status: Status.SYSTEM_ERROR,
+          compileOutput: `Internal error: ${err.message}`,
         });
 
         this.appGateway.emitToUser(userId, 'execution_error', {
           submissionId,
-          status: 'error',
+          status: Status.SYSTEM_ERROR,
           error: 'An internal error occurred during execution.',
         });
 

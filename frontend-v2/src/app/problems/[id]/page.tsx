@@ -18,11 +18,11 @@ import { submissionAPI, runAPI, problemsAPI, discussionsAPI } from "@/config/api
 import { useTheme } from "next-themes";
 
 const LANGUAGES = [
-  { id: "c", name: "C", ext: "main.c", defaultCode: "#include <stdio.h>\n\nint main() {\n    // Write your code here\n    return 0;\n}" },
-  { id: "cpp", name: "C++", ext: "main.cpp", defaultCode: "#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your code here\n    return 0;\n}" },
-  { id: "java", name: "Java", ext: "Solution.java", defaultCode: "public class Solution {\n    public static void main(String[] args) {\n        // Write your code here\n    }\n}" },
-  { id: "javascript", name: "JavaScript", ext: "solution.js", defaultCode: "function solve() {\n  // Write your code here\n}\n" },
-  { id: "python", name: "Python 3", ext: "solution.py", defaultCode: "def solve():\n    # Write your code here\n    pass\n" }
+  { id: "c", name: "C", ext: "main.c", defaultCode: "#include <stdio.h>\n\nint main() {\n    // Read input\n    // Write your solution here\n    return 0;\n}" },
+  { id: "cpp", name: "C++", ext: "main.cpp", defaultCode: "#include <iostream>\nusing namespace std;\n\nint main() {\n    // Read input\n    // Write your solution here\n    return 0;\n}" },
+  { id: "java", name: "Java", ext: "Main.java", defaultCode: "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // Read input and write your solution here\n    }\n}" },
+  { id: "javascript", name: "JavaScript", ext: "solution.js", defaultCode: "// Read from stdin, write to stdout\nconst readline = require('readline');\nconst rl = readline.createInterface({ input: process.stdin });\n\nconst lines = [];\nrl.on('line', (line) => lines.push(line));\nrl.on('close', () => {\n  // Process input and solve\n  console.log('Hello World');\n});\n" },
+  { id: "python", name: "Python 3", ext: "solution.py", defaultCode: "# Read from stdin, write to stdout\nimport sys\ninput_data = sys.stdin.read().split()\n# Process input and solve\nprint('Hello World')\n" }
 ];
 
 const DIFFICULTY_COLORS: Record<string, string> = {
@@ -34,13 +34,17 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 interface TestResult {
   id: number;
   passed: boolean;
+  status: string;
   output: string;
   expected: string;
   error?: string;
+  executionTime?: number;
 }
 
+type SubmissionStatus = "accepted" | "wrong_answer" | "compile_error" | "runtime_error" | "time_limit" | "memory_limit" | "system_error" | "error";
+
 interface RunResult {
-  status: "accepted" | "wrong_answer" | "error";
+  status: SubmissionStatus;
   results: TestResult[];
   runtime: number;
   logs: string[];
@@ -294,21 +298,28 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
 
     let resultState: RunResult;
     if (!data.success) {
-      resultState = { status: "error", results: [], runtime: 0, logs: [], passedCount: 0, totalCount: 0 };
+      resultState = {
+        status: (data.status as SubmissionStatus) || "error",
+        results: data.results || [],
+        runtime: data.runtime || 0,
+        logs: data.message ? [data.message] : [],
+        passedCount: data.passedCount || 0,
+        totalCount: data.totalCount || 0,
+      };
     } else {
       const allLogs: string[] = [];
-      for (const r of data.results) {
+      for (const r of data.results || []) {
         if (r.logs && r.logs.length > 0) {
           allLogs.push(...r.logs);
         }
       }
       resultState = {
-        status: data.status,
-        results: data.results,
-        runtime: data.runtime,
+        status: data.status as SubmissionStatus,
+        results: data.results || [],
+        runtime: data.runtime || 0,
         logs: allLogs,
-        passedCount: data.passedCount,
-        totalCount: data.totalCount,
+        passedCount: data.passedCount || 0,
+        totalCount: data.totalCount || 0,
       };
     }
     
@@ -1098,7 +1109,9 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                       {runResult && (
                         <span className={`ml-1.5 w-2 h-2 rounded-full inline-block ${
                           runResult.status === "accepted" ? "bg-emerald-500" :
-                          runResult.status === "wrong_answer" ? "bg-rose-500" : "bg-amber-500"
+                          runResult.status === "wrong_answer" ? "bg-rose-500" :
+                          runResult.status === "compile_error" ? "bg-orange-500" :
+                          runResult.status === "time_limit" ? "bg-yellow-500" : "bg-amber-500"
                         }`} />
                       )}
                     </TabButton>
@@ -1155,14 +1168,25 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                             {/* Status Header */}
                             <div className={`flex items-center gap-2 font-semibold mb-3 text-sm font-sans ${
                               runResult.status === "accepted" ? "text-emerald-400" :
-                              runResult.status === "wrong_answer" ? "text-rose-400" : "text-amber-400"
+                              runResult.status === "wrong_answer" ? "text-rose-400" :
+                              runResult.status === "compile_error" ? "text-orange-400" :
+                              runResult.status === "time_limit" ? "text-yellow-400" :
+                              runResult.status === "runtime_error" ? "text-amber-400" : "text-rose-400"
                             }`}>
                               {runResult.status === "accepted" ? (
                                 <><CheckCircle2 className="w-4.5 h-4.5" /> Accepted</>
                               ) : runResult.status === "wrong_answer" ? (
                                 <><XCircle className="w-4.5 h-4.5" /> Wrong Answer</>
-                              ) : (
+                              ) : runResult.status === "compile_error" ? (
+                                <><AlertTriangle className="w-4.5 h-4.5" /> Compilation Error</>
+                              ) : runResult.status === "time_limit" ? (
+                                <><Clock className="w-4.5 h-4.5" /> Time Limit Exceeded</>
+                              ) : runResult.status === "runtime_error" ? (
                                 <><AlertTriangle className="w-4.5 h-4.5" /> Runtime Error</>
+                              ) : runResult.status === "system_error" ? (
+                                <><AlertTriangle className="w-4.5 h-4.5" /> System Error</>
+                              ) : (
+                                <><AlertTriangle className="w-4.5 h-4.5" /> Error</>
                               )}
                               <span className="text-muted-foreground ml-auto text-[10px] font-sans font-medium bg-muted/40 px-2 py-0.5 rounded-full border border-border">
                                 {runResult.passedCount}/{runResult.totalCount} passed

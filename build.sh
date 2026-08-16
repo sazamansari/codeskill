@@ -8,10 +8,7 @@ echo " Starting CodeSkill Build Process "
 echo "=================================="
 
 # 1. Backend Build Process
-echo "--> Installing backend dependencies..."
-cd backend
-npm install --production
-cd ..
+echo "--> Skipping old backend..."
 
 # 2. Frontend Build Process
 echo "--> Installing frontend dependencies..."
