@@ -1,0 +1,16 @@
+{
+  "name": "codeskill-platform",
+  "version": "1.0.0",
+  "description": "Root package for managing CodeSkill platform builds",
+  "private": true,
+  "scripts": {
+    "install:backend": "npm install --prefix backend",
+    "install:frontend": "npm install --prefix frontend-v2",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "build:frontend": "npm run build --prefix frontend-v2",
+    "build": "npm run install:all && npm run build:frontend",
+    "start": "pm2 start ecosystem.config.js",
+    "stop": "pm2 stop ecosystem.config.js",
+    "restart": "pm2 restart ecosystem.config.js"
+  }
+}
