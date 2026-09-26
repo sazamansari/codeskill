@@ -378,13 +378,13 @@ function EditQuestionContent() {
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.5 }}
-        className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-200 dark:border-white/[0.04] p-4 shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.2)] z-50"
+        className="fixed bottom-0 left-0 right-0 bg-card/90 backdrop-blur-xl border-t border-border p-4 shadow-2xl z-50"
       >
         <div className="max-w-[1600px] mx-auto flex items-center justify-between px-2">
           <button 
             type="button" 
             onClick={() => router.push("/admin/questions")}
-            className="text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white font-medium text-sm transition-colors"
+            className="text-muted-foreground hover:text-foreground font-medium text-sm transition-colors"
           >
             Cancel
           </button>
@@ -393,20 +393,20 @@ function EditQuestionContent() {
             <button 
               type="button" 
               onClick={handleSaveDraft}
-              className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors shadow-sm whitespace-nowrap"
+              className="px-5 py-2.5 text-sm font-medium text-foreground bg-card border border-border rounded-xl hover:bg-muted/60 transition-colors shadow-sm whitespace-nowrap"
             >
               Save Draft
             </button>
             <button 
               type="button" 
               onClick={handleValidate}
-              className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors shadow-sm whitespace-nowrap"
+              className="px-5 py-2.5 text-sm font-medium text-foreground bg-card border border-border rounded-xl hover:bg-muted/60 transition-colors shadow-sm whitespace-nowrap"
             >
               Validate
             </button>
             <button 
               type="button" 
-              className="px-5 py-2.5 text-sm font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors shadow-sm whitespace-nowrap"
+              className="px-5 py-2.5 text-sm font-medium text-primary bg-primary/10 border border-primary/20 rounded-xl hover:bg-primary/20 transition-colors shadow-sm whitespace-nowrap"
             >
               Preview
             </button>
@@ -414,7 +414,7 @@ function EditQuestionContent() {
               type="submit" 
               form="question-form"
               disabled={loading}
-              className="flex items-center justify-center gap-2 px-8 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors shadow-sm shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              className="flex items-center justify-center gap-2 px-8 py-2.5 text-sm font-semibold text-white bg-primary hover:bg-primary/90 rounded-xl transition-colors shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
               Update Question

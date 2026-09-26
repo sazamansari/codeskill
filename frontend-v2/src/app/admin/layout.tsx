@@ -66,8 +66,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading || isVerifying) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#F5F7FA]">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -80,14 +80,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="flex h-screen bg-background overflow-hidden font-sans">
       <AdminSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Header can go here if needed, or inside pages */}
-        <header className="bg-card/50 backdrop-blur-xl border-b border-border h-16 flex items-center px-6 sticky top-0 z-10 shrink-0 shadow-sm">
-          <div className="flex-1" />
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-red-500/10 border border-red-500/20 text-red-500 rounded-full flex items-center justify-center font-bold text-sm">
+        {/* Standardized Admin Header with CU Branding */}
+        <header className="bg-card/70 backdrop-blur-md border-b border-border h-16 flex items-center justify-between px-6 sticky top-0 z-10 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-md overflow-hidden bg-white shrink-0">
+              <img src="/cu-logo.jpg" alt="CU" className="w-full h-full object-contain" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-foreground leading-tight">Chandigarh University</p>
+              <p className="text-[10px] text-muted-foreground">Assessment Management System</p>
+            </div>
+            <div className="hidden md:flex items-center gap-1.5 ml-2 px-2 py-0.5 bg-emerald-500/10 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-semibold text-emerald-500">Live</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-primary/10 border border-primary/20 text-primary rounded-full flex items-center justify-center font-bold text-xs">
               {user?.name?.charAt(0) || "A"}
             </div>
-            <span className="text-sm font-medium hidden sm:block text-foreground">{user?.name}</span>
+            <div className="hidden sm:block">
+              <p className="text-xs font-semibold text-foreground">{user?.name || "Administrator"}</p>
+              <p className="text-[10px] text-muted-foreground">Admin</p>
+            </div>
           </div>
         </header>
 

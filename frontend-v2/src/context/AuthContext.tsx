@@ -19,6 +19,8 @@ interface AuthContextType {
   registerSendOTP: (data: { email: string }) => Promise<any>;
   register: (data: any) => Promise<any>;
   login: (data: any) => Promise<any>;
+  studentLogin: (data: { uid: string; password: string }) => Promise<any>;
+  forceChangePassword: (data: { currentPassword: string; newPassword: string }) => Promise<any>;
   googleLogin: (token: string) => Promise<any>;
   adminLogin: (data: any) => Promise<any>;
   adminLoginVerify: (data: { email: string; otp: string }) => Promise<any>;
@@ -99,12 +101,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const studentLogin = useCallback(async (data: { uid: string; password: string }) => {
+    try {
+      setError(null);
+      const res = await authAPI.studentLogin(data);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("codeskill_token", res.data.token);
+      }
+      setUser(res.data.user);
+      return res.data;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Student login failed";
+      setError(msg);
+      throw new Error(msg);
+    }
+  }, []);
+
+  const forceChangePassword = useCallback(async (data: { currentPassword: string; newPassword: string }) => {
+    try {
+      setError(null);
+      const res = await authAPI.forceChangePassword(data);
+      if (res.data?.user) {
+        setUser((prev) => (prev ? { ...prev, ...res.data.user, forcePasswordChange: false } : prev));
+      }
+      return res.data;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Failed to update password";
+      setError(msg);
+      throw new Error(msg);
+    }
+  }, []);
+
 
   const adminLogin = useCallback(async (data: any) => {
     try {
       setError(null);
       const res = await authAPI.adminLogin(data);
-      // Removed token setting and user setting because it only returns requireOTP now
+      if (res.data?.token) {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("codeskill_token", res.data.token);
+        }
+        setUser(res.data.user);
+      }
       return res.data;
     } catch (err: any) {
       const msg = err.response?.data?.message || "Admin login failed";
@@ -198,6 +236,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         registerSendOTP,
         register: registerUser,
         login: loginUser,
+        studentLogin,
+        forceChangePassword,
         googleLogin: googleLoginUser,
         adminLogin,
         adminLoginVerify,

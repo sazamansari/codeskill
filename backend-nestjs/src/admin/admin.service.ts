@@ -398,6 +398,28 @@ export class AdminService {
     return { universities, total, page, pages: Math.ceil(total / limit) };
   }
 
+  async createUniversity(data: {
+    name: string;
+    domain?: string;
+    website?: string;
+    location?: string;
+    contactEmail?: string;
+  }) {
+    const existing = await this.universityModel.findOne({ name: data.name }).lean();
+    if (existing) {
+      return { success: false, message: 'A university with this name already exists' };
+    }
+    const university = await this.universityModel.create({
+      name: data.name,
+      domain: data.domain || '',
+      website: data.website || '',
+      location: data.location || '',
+      contactEmail: data.contactEmail || '',
+      isVerified: true,
+    });
+    return { success: true, university };
+  }
+
   async toggleUniversityVerification(id: string) {
     const university = await this.universityModel.findById(id);
     if (!university) throw new NotFoundException('University not found');

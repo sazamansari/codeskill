@@ -70,16 +70,16 @@ export default function MorphHero() {
         >
           <Link
             href="/problems"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-xl shadow-indigo-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl text-base font-semibold text-primary-foreground bg-primary hover:bg-primary/90 shadow-xl shadow-primary/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             Start Coding Now
             <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
-            href="/dashboard"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-base font-semibold text-foreground bg-white/80 dark:bg-slate-900/80 border border-gray-200 dark:border-slate-800 backdrop-blur-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-all shadow-sm"
+            href="/assessments"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-base font-semibold text-foreground bg-card border border-border backdrop-blur-xl hover:bg-muted transition-all shadow-sm"
           >
-            Explore Dashboard
+            MCQ Assessments
           </Link>
         </motion.div>
 
@@ -88,28 +88,28 @@ export default function MorphHero() {
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="w-full max-w-4xl rounded-2xl border border-gray-200/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl p-4 sm:p-6 shadow-2xl relative overflow-hidden"
+          className="w-full max-w-4xl rounded-2xl border border-border bg-card/90 backdrop-blur-2xl p-4 sm:p-6 shadow-2xl relative overflow-hidden"
         >
           {/* Top Window Bar */}
-          <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-800 pb-3 mb-4">
+          <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500/80" />
+              <div className="w-3 h-3 rounded-full bg-rose-500/80" />
               <div className="w-3 h-3 rounded-full bg-amber-500/80" />
               <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
               <span className="text-xs font-mono text-muted-foreground ml-2">solution.ts</span>
             </div>
-            <div className="flex items-center gap-2 text-xs font-mono text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+            <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
               <Terminal className="w-3 h-3" /> Runtime: 38ms
             </div>
           </div>
 
           {/* Code Window */}
-          <div className="font-mono text-left text-xs sm:text-sm leading-relaxed text-gray-800 dark:text-slate-200 space-y-1 overflow-x-auto p-2">
-            <div><span className="text-purple-600 dark:text-purple-400 font-semibold">function</span> <span className="text-blue-600 dark:text-blue-400 font-semibold">twoSum</span>(nums: <span className="text-amber-600 dark:text-amber-300">number[]</span>, target: <span className="text-amber-600 dark:text-amber-300">number</span>) {'{'}</div>
-            <div className="pl-6"><span className="text-purple-600 dark:text-purple-400">const</span> map = <span className="text-purple-600 dark:text-purple-400">new</span> <span className="text-emerald-600 dark:text-emerald-400">Map</span>&lt;<span className="text-amber-600 dark:text-amber-300">number</span>, <span className="text-amber-600 dark:text-amber-300">number</span>&gt;();</div>
-            <div className="pl-6"><span className="text-purple-600 dark:text-purple-400">for</span> (<span className="text-purple-600 dark:text-purple-400">let</span> i = 0; i &lt; nums.length; i++) {'{'}</div>
-            <div className="pl-12"><span className="text-purple-600 dark:text-purple-400">const</span> diff = target - nums[i];</div>
-            <div className="pl-12"><span className="text-purple-600 dark:text-purple-400">if</span> (map.has(diff)) <span className="text-purple-600 dark:text-purple-400">return</span> [map.get(diff)!, i];</div>
+          <div className="font-mono text-left text-xs sm:text-sm leading-relaxed text-foreground/90 space-y-1 overflow-x-auto p-2">
+            <div><span className="text-primary font-semibold">function</span> <span className="text-blue-400 font-semibold">twoSum</span>(nums: <span className="text-amber-400">number[]</span>, target: <span className="text-amber-400">number</span>) {'{'}</div>
+            <div className="pl-6"><span className="text-primary">const</span> map = <span className="text-primary">new</span> <span className="text-emerald-400">Map</span>&lt;<span className="text-amber-400">number</span>, <span className="text-amber-400">number</span>&gt;();</div>
+            <div className="pl-6"><span className="text-primary">for</span> (<span className="text-primary">let</span> i = 0; i &lt; nums.length; i++) {'{'}</div>
+            <div className="pl-12"><span className="text-primary">const</span> diff = target - nums[i];</div>
+            <div className="pl-12"><span className="text-primary">if</span> (map.has(diff)) <span className="text-primary">return</span> [map.get(diff)!, i];</div>
             <div className="pl-12">map.set(nums[i], i);</div>
             <div className="pl-6">{'}'}</div>
             <div>{'}'}</div>
@@ -119,14 +119,14 @@ export default function MorphHero() {
         {/* Stats Grid */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.5 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-5xl mt-16 pt-8 border-t border-gray-200/60 dark:border-white/[0.06]"
+          className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-5xl mt-16 pt-8 border-t border-border"
         >
           {STATS.map((stat, idx) => (
             <div key={idx} className="flex flex-col items-center">
               <div className="flex items-center gap-2 mb-1">
-                <stat.icon className="w-4 h-4 text-indigo-500" />
+                <stat.icon className="w-4 h-4 text-primary" />
                 <span className="text-2xl sm:text-3xl font-extrabold text-foreground">{stat.value}</span>
               </div>
               <span className="text-xs font-medium text-muted-foreground">{stat.label}</span>

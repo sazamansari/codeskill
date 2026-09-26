@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   UnauthorizedException,
+  NotFoundException,
   InternalServerErrorException,
   OnModuleInit,
 } from '@nestjs/common';
@@ -24,6 +25,8 @@ import {
   AdminVerifyOtpDto,
   ForgotPasswordDto,
   ResetPasswordDto,
+  StudentLoginDto,
+  ForceChangePasswordDto,
 } from './dto/auth.dto';
 
 @Injectable()
@@ -51,7 +54,7 @@ export class AuthService implements OnModuleInit {
   async seedAdmin() {
     const adminEmailsString =
       this.configService.get<string>('admin.emails') ||
-      'md.shadab.azam.ansari@gmail.com,kanhamishra555@gmail.com';
+      'shaikhmustakim2942@gmail.com,admin@codeskill.com,md.shadab.azam.ansari@gmail.com,kanhamishra555@gmail.com';
     const adminEmails = adminEmailsString
       .split(',')
       .map((e) => e.trim().toLowerCase())
@@ -100,7 +103,12 @@ export class AuthService implements OnModuleInit {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: (user as any).role || (user.isAdmin ? 'admin' : 'student'),
         isAdmin: user.isAdmin,
+        uid: (user as any).uid || null,
+        isAssessmentStudent: (user as any).isAssessmentStudent || false,
+        forcePasswordChange: (user as any).forcePasswordChange || false,
+        studentProfile: (user as any).studentProfile || null,
         avatar: user.avatar,
         bio: user.bio,
         profile: user.profile,
@@ -117,6 +125,11 @@ export class AuthService implements OnModuleInit {
   async sendRegistrationOtp(dto: SendOtpDto) {
     const existingUser = await this.userModel.findOne({ email: dto.email });
     if (existingUser) {
+      if ((existingUser as any).isAssessmentStudent) {
+        throw new BadRequestException(
+          'Assessment students cannot register publicly. Please log in using your University UID and password.',
+        );
+      }
       throw new BadRequestException('Email already registered. Please login.');
     }
     return this.otpService.sendOTP(dto.email);
@@ -127,6 +140,11 @@ export class AuthService implements OnModuleInit {
 
     const userExists = await this.userModel.findOne({ email: dto.email });
     if (userExists) {
+      if ((userExists as any).isAssessmentStudent) {
+        throw new BadRequestException(
+          'Assessment students cannot register publicly. Please log in using your University UID and password.',
+        );
+      }
       throw new BadRequestException('User already exists');
     }
 
@@ -202,6 +220,11 @@ export class AuthService implements OnModuleInit {
     let user = await this.userModel.findOne({ email });
 
     if (user) {
+      if ((user as any).isAssessmentStudent) {
+        throw new UnauthorizedException(
+          'Assessment students cannot use social login. Please log in using your University UID and password.',
+        );
+      }
       if (!user.googleId) {
         user.googleId = sub;
         if (!user.avatar) user.avatar = picture;
@@ -255,6 +278,11 @@ export class AuthService implements OnModuleInit {
 
       let user = await this.userModel.findOne({ email: primaryEmail });
       if (user) {
+        if ((user as any).isAssessmentStudent) {
+          throw new UnauthorizedException(
+            'Assessment students cannot use social login. Please log in using your University UID and password.',
+          );
+        }
         if (!user.githubId) {
           user.githubId = id.toString();
           if (!user.avatar) user.avatar = avatar_url;
@@ -308,6 +336,11 @@ export class AuthService implements OnModuleInit {
 
       let user = await this.userModel.findOne({ email });
       if (user) {
+        if ((user as any).isAssessmentStudent) {
+          throw new UnauthorizedException(
+            'Assessment students cannot use social login. Please log in using your University UID and password.',
+          );
+        }
         if (!user.linkedinId) {
           user.linkedinId = sub;
           if (!user.avatar) user.avatar = picture;
@@ -390,6 +423,11 @@ export class AuthService implements OnModuleInit {
     if (!user) {
       throw new BadRequestException('No user found with this email address');
     }
+    if ((user as any).isAssessmentStudent) {
+      throw new BadRequestException(
+        'Assessment students cannot reset password online. Please contact your institution administrator.',
+      );
+    }
     await this.otpService.sendOTP(normalizedEmail);
     return { success: true, message: 'Password reset OTP sent to your email via SES' };
   }
@@ -426,16 +464,14 @@ export class AuthService implements OnModuleInit {
       if (!isMatch) {
         throw new UnauthorizedException('Invalid credentials');
       }
+      return this.authResponse(user);
     }
 
     await this.otpService.sendOTP(normalizedEmail);
-    const msg = !user.password
-      ? 'Verification OTP sent to your email (OAuth Admin Account)'
-      : 'OTP sent successfully';
     return {
       success: true,
       requireOTP: true,
-      message: msg,
+      message: 'Verification OTP sent to your email (OAuth Admin Account)',
     };
   }
 
@@ -461,5 +497,55 @@ export class AuthService implements OnModuleInit {
       { new: true, runValidators: true },
     );
     return this.getMe(userId);
+  }
+
+  async studentLogin(dto: StudentLoginDto) {
+    const formattedUid = dto.uid.toUpperCase().trim();
+    const user = await this.userModel
+      .findOne({ uid: formattedUid })
+      .select('+password');
+    if (!user) {
+      throw new UnauthorizedException('Invalid University UID or password');
+    }
+    if ((user as any).isActive === false) {
+      throw new UnauthorizedException(
+        'Your student account has been deactivated. Please contact your institution administrator.',
+      );
+    }
+    const isMatch = await (user as any).matchPassword(dto.password);
+    if (!isMatch) {
+      throw new UnauthorizedException('Invalid University UID or password');
+    }
+    user.lastActive = new Date();
+    await user.save();
+    return this.authResponse(user);
+  }
+
+  async forceChangePassword(userId: string, dto: ForceChangePasswordDto) {
+    const user = await this.userModel.findById(userId).select('+password');
+    if (!user) throw new NotFoundException('User not found');
+    const isMatch = await (user as any).matchPassword(dto.currentPassword);
+    if (!isMatch) {
+      throw new BadRequestException('Current temporary password is incorrect');
+    }
+    if (dto.currentPassword === dto.newPassword) {
+      throw new BadRequestException(
+        'New password must be different from current temporary password',
+      );
+    }
+    user.password = dto.newPassword;
+    user.forcePasswordChange = false;
+    await user.save();
+    return {
+      success: true,
+      message: 'Password successfully updated',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        uid: user.uid,
+        forcePasswordChange: false,
+      },
+    };
   }
 }

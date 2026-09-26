@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ExecutionController } from './execution.controller';
 import { ExecutionService } from './execution.service';
+import { AzureExecutionService } from './azure-execution.service';
 import { JudgeProcessor } from './judge.processor';
 import {
   Submission,
@@ -27,7 +28,7 @@ import { GatewayModule } from '../gateway/gateway.module';
     GatewayModule,
   ],
   controllers: [ExecutionController],
-  providers: [ExecutionService, JudgeProcessor],
-  exports: [ExecutionService],
+  providers: [ExecutionService, AzureExecutionService, JudgeProcessor],
+  exports: [ExecutionService, AzureExecutionService],
 })
 export class ExecutionModule {}

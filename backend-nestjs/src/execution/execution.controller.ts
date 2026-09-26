@@ -8,11 +8,15 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { ExecutionService, Status } from './execution.service';
+import { AzureExecutionService } from './azure-execution.service';
 
 @ApiTags('Execution')
 @Controller('execution')
 export class ExecutionController {
-  constructor(private readonly executionService: ExecutionService) {}
+  constructor(
+    private readonly executionService: ExecutionService,
+    private readonly azureExecutionService: AzureExecutionService,
+  ) {}
 
   @Post('run')
   @HttpCode(HttpStatus.OK)
@@ -136,6 +140,86 @@ export class ExecutionController {
         runtime: 0,
         passedCount: 0,
         totalCount: testCases.length,
+      };
+    }
+  }
+
+  /**
+   * Azure-backed code execution endpoint.
+   * For 3000+ concurrent students — routes to Microsoft Azure ACI via Judge0.
+   * Falls back to local execution if Azure is not configured.
+   */
+  @Post('azure-run')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Execute code via Azure Container Instances (Microsoft-powered, high scale)' })
+  async azureRun(
+    @Body()
+    body: {
+      code: string;
+      language: string;
+      stdin?: string;
+      testCases?: Array<{ id: string; input: string; expected: string }>;
+      timeoutMs?: number;
+      memoryMB?: number;
+    },
+  ) {
+    if (!body.code || !body.language) {
+      throw new BadRequestException('code and language are required');
+    }
+
+    // If Azure is not configured, fall back to local executor
+    if (!this.azureExecutionService.isAvailable) {
+      const testCases = body.testCases || [
+        { id: 'run', input: body.stdin || '', expected: '' },
+      ];
+      const results = await this.executionService.runCode(
+        body.code,
+        body.language,
+        testCases.map((tc) => ({ id: tc.id, input: tc.input, expected: tc.expected })),
+        { timeout: body.timeoutMs || 10000 },
+      );
+      return {
+        success: true,
+        engine: 'local',
+        results,
+      };
+    }
+
+    try {
+      if (body.testCases && body.testCases.length > 0) {
+        const results = await this.azureExecutionService.executeWithTestCases(
+          body.code,
+          body.language,
+          body.testCases,
+          { timeoutMs: body.timeoutMs, memoryMB: body.memoryMB },
+        );
+        const passedCount = results.filter((r) => r.passed).length;
+        return {
+          success: true,
+          engine: 'azure',
+          passedCount,
+          totalCount: results.length,
+          results,
+        };
+      } else {
+        const result = await this.azureExecutionService.execute({
+          code: body.code,
+          language: body.language,
+          stdin: body.stdin,
+          timeoutMs: body.timeoutMs,
+          memoryMB: body.memoryMB,
+        });
+        return {
+          success: true,
+          engine: 'azure',
+          result,
+        };
+      }
+    } catch (err: any) {
+      return {
+        success: false,
+        engine: 'azure',
+        error: err.message,
       };
     }
   }

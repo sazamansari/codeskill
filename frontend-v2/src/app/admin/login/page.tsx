@@ -84,22 +84,22 @@ export default function AdminLoginPage() {
       </div>
 
       {/* Right Column - Admin Login Form */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 relative bg-white dark:bg-zinc-950">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 relative bg-background text-foreground">
         {/* Subtle Background Pattern for Right Side */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] -z-10" />
 
-        <div className="w-full max-w-[420px] flex flex-col gap-6">
+        <div className="w-full max-w-[420px] flex flex-col gap-6 bg-card border border-border p-8 rounded-2xl shadow-xl">
           
           {/* Mobile Logo Header */}
           <div className="flex lg:hidden flex-col items-center text-center mb-2">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-black/5 bg-card border border-border">
-              <ShieldCheck className="w-7 h-7 text-red-500" />
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-black/5 bg-muted border border-border">
+              <ShieldCheck className="w-7 h-7 text-primary" />
             </div>
           </div>
 
-          <div className="mb-4 text-center">
-            <h2 className="text-3xl font-bold tracking-tight mb-2">Admin Access</h2>
-            <p className="text-sm text-muted-foreground mt-4">Authorized personnel only.</p>
+          <div className="mb-2 text-center">
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">Admin Access</h2>
+            <p className="text-xs text-muted-foreground mt-1">Authorized personnel and faculty only.</p>
           </div>
 
           {/* Form */}
@@ -115,9 +115,9 @@ export default function AdminLoginPage() {
             )}
 
             {infoMessage && (
-              <div className="p-4 bg-blue-500/10 border border-blue-500/50 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
-                <ShieldCheck className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-                <p className="text-sm font-medium text-blue-500 leading-snug">
+              <div className="p-4 bg-primary/10 border border-primary/50 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                <ShieldCheck className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                <p className="text-sm font-medium text-primary leading-snug">
                   {infoMessage}
                 </p>
               </div>
@@ -129,7 +129,7 @@ export default function AdminLoginPage() {
                 placeholder="Admin Email"
                 disabled={showOTP}
                 {...form.register("email")}
-                className="w-full h-12 bg-transparent border border-border rounded-md px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm disabled:opacity-50"
+                className="w-full h-11 bg-muted/30 border border-border rounded-xl px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all text-sm disabled:opacity-50"
               />
               {form.formState.errors.email && (
                 <p className="text-xs text-destructive mt-1">{form.formState.errors.email.message}</p>
@@ -142,7 +142,7 @@ export default function AdminLoginPage() {
                 placeholder="Password"
                 disabled={showOTP}
                 {...form.register("password")}
-                className="w-full h-12 bg-transparent border border-border rounded-md px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm disabled:opacity-50"
+                className="w-full h-11 bg-muted/30 border border-border rounded-xl px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all text-sm disabled:opacity-50"
               />
               {form.formState.errors.password && (
                 <p className="text-xs text-destructive mt-1">{form.formState.errors.password.message}</p>
@@ -155,7 +155,7 @@ export default function AdminLoginPage() {
                   type="text"
                   placeholder="6-Digit Verification Code"
                   {...form.register("otp")}
-                  className="w-full h-12 bg-transparent border border-border rounded-md px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm tracking-widest font-medium text-center"
+                  className="w-full h-11 bg-muted/30 border border-border rounded-xl px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all text-sm tracking-widest font-medium text-center"
                 />
                 {form.formState.errors.otp && (
                   <p className="text-xs text-destructive mt-1">{form.formState.errors.otp.message}</p>
@@ -166,7 +166,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 rounded-md bg-zinc-900 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-black font-semibold text-sm transition-all flex items-center justify-center mt-2 disabled:opacity-70 shadow-md"
+              className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm transition-all flex items-center justify-center mt-3 disabled:opacity-70 shadow-md shadow-primary/20"
             >
               {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (showOTP ? "Verify Login" : "Authenticate as Admin")}
             </button>

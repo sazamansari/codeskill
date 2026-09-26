@@ -1,4 +1,4 @@
-import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Param, Query, NotFoundException } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 
@@ -6,6 +6,12 @@ import { UsersService } from './users.service';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get('leaderboard')
+  @ApiOperation({ summary: 'Get top users ranked by XP' })
+  async getLeaderboard(@Query('limit') limit: string) {
+    return this.usersService.getLeaderboard(parseInt(limit, 10) || 50);
+  }
 
   @Get(':identifier')
   @ApiOperation({ summary: 'Get public user profile' })

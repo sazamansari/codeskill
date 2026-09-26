@@ -44,6 +44,18 @@ import {
   DiscussionReply,
   DiscussionReplySchema,
 } from './schemas/discussion-reply.schema';
+import { AuditLog, AuditLogSchema } from './schemas/audit-log.schema';
+import { EmailJob, EmailJobSchema } from './schemas/email-job.schema';
+import { Question, QuestionSchema } from './schemas/question.schema';
+import {
+  QuestionBank,
+  QuestionBankSchema,
+} from './schemas/question-bank.schema';
+import { Assessment, AssessmentSchema } from './schemas/assessment.schema';
+import {
+  AssessmentAttempt,
+  AssessmentAttemptSchema,
+} from './schemas/assessment-attempt.schema';
 
 @Module({
   imports: [
@@ -73,6 +85,12 @@ import {
       { name: StudentEnrollment.name, schema: StudentEnrollmentSchema },
       { name: Discussion.name, schema: DiscussionSchema },
       { name: DiscussionReply.name, schema: DiscussionReplySchema },
+      { name: AuditLog.name, schema: AuditLogSchema },
+      { name: EmailJob.name, schema: EmailJobSchema },
+      { name: Question.name, schema: QuestionSchema },
+      { name: QuestionBank.name, schema: QuestionBankSchema },
+      { name: Assessment.name, schema: AssessmentSchema },
+      { name: AssessmentAttempt.name, schema: AssessmentAttemptSchema },
     ]),
   ],
   exports: [MongooseModule],

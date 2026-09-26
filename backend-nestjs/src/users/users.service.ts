@@ -15,6 +15,42 @@ export class UsersService {
     private problemMetadataModel: Model<ProblemMetadataDocument>,
   ) {}
 
+  private getTier(xp: number): string {
+    if (xp >= 50000) return 'Grandmaster';
+    if (xp >= 30000) return 'Master';
+    if (xp >= 15000) return 'Expert';
+    if (xp >= 8000) return 'Specialist';
+    if (xp >= 3000) return 'Competent';
+    if (xp >= 1000) return 'Learner';
+    return 'Beginner';
+  }
+
+  async getLeaderboard(limit = 50) {
+    const users = await this.userModel
+      .find({ isActive: true, role: { $ne: 'admin' } })
+      .select('name username uid avatar stats studentProfile')
+      .sort({ 'stats.xp': -1 })
+      .limit(limit)
+      .lean();
+
+    const leaderboard = users.map((u, idx) => ({
+      rank: idx + 1,
+      _id: u._id,
+      name: u.name,
+      username: u.username,
+      uid: u.uid,
+      avatar: u.avatar || '',
+      xp: u.stats?.xp ?? 0,
+      totalSolved: u.stats?.totalSolved ?? 0,
+      currentStreak: u.stats?.currentStreak ?? 0,
+      tier: this.getTier(u.stats?.xp ?? 0),
+      department: u.studentProfile?.department || '',
+      batch: u.studentProfile?.batch || '',
+    }));
+
+    return { success: true, leaderboard, total: leaderboard.length };
+  }
+
   async getPublicProfile(identifier: string) {
     let user;
 

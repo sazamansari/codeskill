@@ -8,8 +8,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "CodeSkill - Premium Coding Platform",
-  description: "A world-class coding assessment platform.",
+  title: "CU CodeSkill — Chandigarh University Assessment Platform",
+  description: "Official coding and assessment platform for Chandigarh University students.",
 };
 
 import { Background } from "@/components/Background";
@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} h-full antialiased`}
+      className={`${inter.variable} h-full antialiased dark`}
       suppressHydrationWarning
     >
       <body className="min-h-screen flex flex-col font-sans bg-background">

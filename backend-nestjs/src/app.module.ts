@@ -33,6 +33,9 @@ import { CampusModule } from './campus/campus.module';
 import { GatewayModule } from './gateway/gateway.module';
 import { HealthModule } from './health/health.module';
 import { DiscussionsModule } from './discussions/discussions.module';
+import { StudentsModule } from './students/students.module';
+import { QuestionsModule } from './questions/questions.module';
+import { AssessmentsModule } from './assessments/assessments.module';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 
@@ -81,6 +84,9 @@ import { ConfigService } from '@nestjs/config';
     HealthModule,
     DiscussionsModule,
     S3Module,
+    StudentsModule,
+    QuestionsModule,
+    AssessmentsModule,
   ],
   providers: [
     {

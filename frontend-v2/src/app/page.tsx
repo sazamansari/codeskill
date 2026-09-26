@@ -162,20 +162,20 @@ export default function Home() {
               </motion.p>
 
               <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
-                <Link href="/problems" className={cn(buttonVariants({ size: "lg" }), "rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-xl shadow-black/20 dark:shadow-white/20 px-8 h-14 text-base font-medium group overflow-hidden relative w-full sm:w-auto transition-all")}>
+                <Link href="/problems" className={cn(buttonVariants({ size: "lg" }), "rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl shadow-primary/25 px-8 h-14 text-base font-medium group overflow-hidden relative w-full sm:w-auto transition-all")}>
                   Start Coding
                   <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                <Link href="/dashboard" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "rounded-full border-border bg-card text-card-foreground hover:bg-muted h-14 px-8 text-base font-medium overflow-hidden relative w-full sm:w-auto shadow-sm")}>
-                  Explore Problems
+                <Link href="/assessments" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "rounded-full border-border bg-card/80 text-foreground hover:bg-muted/80 h-14 px-8 text-base font-medium overflow-hidden relative w-full sm:w-auto shadow-sm")}>
+                  Take Assessment
                 </Link>
               </motion.div>
             </motion.div>
           </div>
         </section>
 
-      {/* 2. Black Features Section */}
-      <section className="w-full bg-[#09090B] text-white py-32 px-6 relative overflow-hidden">
+      {/* 2. Features Section */}
+      <section className="w-full bg-background text-foreground py-24 sm:py-32 px-6 relative overflow-hidden border-t border-border">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent pointer-events-none" />
         
         <div className="max-w-7xl mx-auto relative z-10">
@@ -184,10 +184,10 @@ export default function Home() {
             whileInView="show"
             viewport={{ once: true, margin: "-100px" }}
             variants={staggerContainer}
-            className="flex flex-col items-center mb-20 text-center"
+            className="flex flex-col items-center mb-16 sm:mb-20 text-center"
           >
-            <motion.h2 variants={fadeUp} className="text-4xl md:text-5xl font-bold mb-6">Everything you need to succeed</motion.h2>
-            <motion.p variants={fadeUp} className="text-lg text-muted-foreground max-w-2xl">A professional environment built for focused execution and continuous improvement.</motion.p>
+            <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 sm:mb-6">Everything you need to succeed</motion.h2>
+            <motion.p variants={fadeUp} className="text-base sm:text-lg text-muted-foreground max-w-2xl">A unified, enterprise-grade environment built for focused execution, skill mastery, and proctored technical evaluations.</motion.p>
           </motion.div>
 
           <BentoGrid className="max-w-6xl mx-auto md:auto-rows-[24rem]">
@@ -205,22 +205,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. White Companies Section */}
-      <section className="w-full bg-white text-black py-24 px-6 border-y border-black/5">
+      {/* 3. Standardized Company Trust Section */}
+      <section className="w-full bg-card/30 text-foreground py-20 px-6 border-y border-border">
         <div className="max-w-7xl mx-auto text-center">
-          <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-10">Trusted by developers at top companies</p>
-          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-            {/* Logos represented by stylized text for demo */}
-            <span className="text-2xl font-bold font-heading">Google</span>
-            <span className="text-2xl font-bold font-heading">Meta</span>
-            <span className="text-2xl font-bold font-heading">Amazon</span>
-            <span className="text-2xl font-bold font-heading">Netflix</span>
-            <span className="text-2xl font-bold font-heading">Apple</span>
+          <p className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-8">Trusted by developers and universities worldwide</p>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 hover:opacity-100 transition-opacity duration-300">
+            <span className="text-xl sm:text-2xl font-bold font-heading tracking-tight text-foreground/80 hover:text-primary transition-colors">Google</span>
+            <span className="text-xl sm:text-2xl font-bold font-heading tracking-tight text-foreground/80 hover:text-primary transition-colors">Meta</span>
+            <span className="text-xl sm:text-2xl font-bold font-heading tracking-tight text-foreground/80 hover:text-primary transition-colors">Amazon</span>
+            <span className="text-xl sm:text-2xl font-bold font-heading tracking-tight text-foreground/80 hover:text-primary transition-colors">Netflix</span>
+            <span className="text-xl sm:text-2xl font-bold font-heading tracking-tight text-foreground/80 hover:text-primary transition-colors">Apple</span>
+            <span className="text-xl sm:text-2xl font-bold font-heading tracking-tight text-foreground/80 hover:text-primary transition-colors">Microsoft</span>
           </div>
         </div>
       </section>
 
-      {/* 4. White Premium Testimonials Section */}
+      {/* 4. Unified Dark Testimonials Section */}
       <TestimonialsSection />
 
 

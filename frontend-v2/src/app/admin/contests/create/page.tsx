@@ -87,18 +87,18 @@ export default function CreateContestPage() {
   );
 
   return (
-    <div className="p-8 font-sans max-w-5xl mx-auto">
+    <div className="p-4 sm:p-8 font-sans max-w-5xl mx-auto">
       <div className="mb-6">
-        <Link href="/admin/contests" className="text-gray-500 hover:text-gray-900 inline-flex items-center gap-2 text-sm font-medium mb-4 transition-colors">
+        <Link href="/admin/contests" className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2 text-sm font-medium mb-4 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to Contests
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Create New Contest</h1>
-        <p className="text-gray-500 text-sm mt-1">Schedule a new coding competition and select problems.</p>
+        <h1 className="text-2xl font-bold text-foreground">Create New Contest</h1>
+        <p className="text-muted-foreground text-sm mt-1">Schedule a new coding competition and select problems.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="p-4 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100">
+          <div className="p-4 bg-red-500/10 text-red-400 text-sm rounded-lg border border-red-500/20">
             {error}
           </div>
         )}
@@ -106,12 +106,12 @@ export default function CreateContestPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Details (Left Col) */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-6">
-              <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-100 pb-2">Contest Details</h2>
+            <div className="bg-card border border-border rounded-xl shadow-sm p-6 space-y-6">
+              <h2 className="text-lg font-semibold text-foreground border-b border-border pb-2">Contest Details</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Contest Title <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-medium text-foreground">Contest Title <span className="text-red-500">*</span></label>
                   <input 
                     type="text" 
                     name="title"
@@ -119,12 +119,12 @@ export default function CreateContestPage() {
                     onChange={handleChange}
                     required
                     placeholder="e.g. Weekly Algorithm Challenge #1"
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">URL Slug <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-medium text-foreground">URL Slug <span className="text-red-500">*</span></label>
                   <input 
                     type="text" 
                     name="slug"
@@ -132,13 +132,13 @@ export default function CreateContestPage() {
                     onChange={handleChange}
                     required
                     placeholder="e.g. weekly-algo-1"
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono"
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-mono"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Description <span className="text-red-500">*</span></label>
+                <label className="text-sm font-medium text-foreground">Description <span className="text-red-500">*</span></label>
                 <textarea 
                   name="description"
                   value={formData.description}
@@ -146,60 +146,60 @@ export default function CreateContestPage() {
                   required
                   rows={4}
                   placeholder="Describe the contest rules and objectives..."
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-y"
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-y"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Start Time <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-medium text-foreground">Start Time <span className="text-red-500">*</span></label>
                   <input 
                     type="datetime-local" 
                     name="startTime"
                     value={formData.startTime}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">End Time <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-medium text-foreground">End Time <span className="text-red-500">*</span></label>
                   <input 
                     type="datetime-local" 
                     name="endTime"
                     value={formData.endTime}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 </div>
               </div>
             </div>
 
             {/* Problem Selection Section */}
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-6 flex flex-col h-[500px]">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-2">
-                <h2 className="text-lg font-semibold text-gray-900">Select Problems</h2>
-                <span className="text-sm font-medium text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full">
+            <div className="bg-card border border-border rounded-xl shadow-sm p-6 space-y-6 flex flex-col h-[500px]">
+              <div className="flex items-center justify-between border-b border-border pb-2">
+                <h2 className="text-lg font-semibold text-foreground">Select Problems</h2>
+                <span className="text-sm font-medium text-primary bg-primary/10 px-2.5 py-0.5 rounded-full">
                   {selectedProblems.length} Selected
                 </span>
               </div>
               
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input 
                   type="text" 
                   placeholder="Search problem bank..." 
                   value={problemSearch}
                   onChange={(e) => setProblemSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                 />
               </div>
 
               <div className="flex-1 overflow-y-auto space-y-2 pr-2">
                 {filteredProblems.length === 0 ? (
-                  <div className="text-center text-gray-400 text-sm py-8">No problems found.</div>
+                  <div className="text-center text-muted-foreground text-sm py-8">No problems found.</div>
                 ) : (
                   filteredProblems.map(problem => {
                     const isSelected = selectedProblems.includes(problem._id);
@@ -209,15 +209,15 @@ export default function CreateContestPage() {
                         onClick={() => toggleProblemSelection(problem._id)}
                         className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center justify-between ${
                           isSelected 
-                            ? 'border-blue-500 bg-blue-50/50 shadow-[0_0_0_1px_rgba(59,130,246,0.1)]' 
-                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                            ? 'border-primary bg-primary/10 shadow-[0_0_0_1px_rgba(37,99,235,0.2)]' 
+                            : 'border-border hover:border-muted-foreground/40 hover:bg-muted/40'
                         }`}
                       >
                         <div>
-                          <p className={`text-sm font-medium ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>{problem.title}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">{problem.difficulty} • {problem.slug}</p>
+                          <p className={`text-sm font-medium ${isSelected ? 'text-primary' : 'text-foreground'}`}>{problem.title}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{problem.difficulty} • {problem.slug}</p>
                         </div>
-                        {isSelected && <CheckCircle2 className="w-5 h-5 text-blue-600" />}
+                        {isSelected && <CheckCircle2 className="w-5 h-5 text-primary" />}
                       </div>
                     )
                   })
@@ -228,8 +228,8 @@ export default function CreateContestPage() {
 
           {/* Sidebar Details (Right Col) */}
           <div className="space-y-6">
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-6">
-              <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-100 pb-2">Access & Publishing</h2>
+            <div className="bg-card border border-border rounded-xl shadow-sm p-6 space-y-6">
+              <h2 className="text-lg font-semibold text-foreground border-b border-border pb-2">Access & Publishing</h2>
               
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -240,30 +240,30 @@ export default function CreateContestPage() {
                       name="isPrivate"
                       checked={formData.isPrivate}
                       onChange={handleChange}
-                      className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                      className="w-4 h-4 text-primary rounded border-border focus:ring-primary"
                     />
                   </div>
                   <div className="flex flex-col">
-                    <label htmlFor="isPrivate" className="text-sm font-medium text-gray-700 cursor-pointer">Private Contest</label>
-                    <p className="text-xs text-gray-500 mt-1">Require a password for users to access this contest.</p>
+                    <label htmlFor="isPrivate" className="text-sm font-medium text-foreground cursor-pointer">Private Contest</label>
+                    <p className="text-xs text-muted-foreground mt-1">Require a password for users to access this contest.</p>
                   </div>
                 </div>
 
                 {formData.isPrivate && (
                   <div className="space-y-2 pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <label className="text-sm font-medium text-gray-700">Contest Password</label>
+                    <label className="text-sm font-medium text-foreground">Contest Password</label>
                     <input 
                       type="text" 
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
                       placeholder="Enter access code..."
-                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     />
                   </div>
                 )}
                 
-                <hr className="border-gray-100 my-4" />
+                <hr className="border-border my-4" />
 
                 <div className="flex items-start gap-3">
                   <div className="flex items-center h-5">
@@ -273,12 +273,12 @@ export default function CreateContestPage() {
                       name="isPublished"
                       checked={formData.isPublished}
                       onChange={handleChange}
-                      className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                      className="w-4 h-4 text-primary rounded border-border focus:ring-primary"
                     />
                   </div>
                   <div className="flex flex-col">
-                    <label htmlFor="isPublished" className="text-sm font-medium text-gray-700 cursor-pointer">Publish Contest</label>
-                    <p className="text-xs text-gray-500 mt-1">Make this contest visible on the platform (respects Start Time for actual access).</p>
+                    <label htmlFor="isPublished" className="text-sm font-medium text-foreground cursor-pointer">Publish Contest</label>
+                    <p className="text-xs text-muted-foreground mt-1">Make this contest visible on the platform (respects Start Time for actual access).</p>
                   </div>
                 </div>
               </div>
@@ -289,14 +289,14 @@ export default function CreateContestPage() {
               <button 
                 type="submit"
                 disabled={loading || selectedProblems.length === 0}
-                className="flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                 Create Contest
               </button>
               <Link 
                 href="/admin/contests"
-                className="flex items-center justify-center px-6 py-3 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
+                className="flex items-center justify-center px-6 py-3 text-sm font-medium text-muted-foreground bg-card border border-border rounded-xl hover:bg-muted/40 transition-colors shadow-sm"
               >
                 Cancel
               </Link>

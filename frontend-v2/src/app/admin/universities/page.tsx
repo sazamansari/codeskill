@@ -2,23 +2,53 @@
 
 import { useEffect, useState } from "react";
 import { adminUniversitiesAPI } from "@/config/api";
-import { Search, GraduationCap, BadgeCheck, Trash2 } from "lucide-react";
-import Link from "next/link";
+import {
+  Search,
+  GraduationCap,
+  BadgeCheck,
+  Trash2,
+  Plus,
+  X,
+  Building2,
+  Globe,
+  Mail,
+  MapPin,
+  Loader2,
+  CheckCircle2,
+  AlertTriangle,
+} from "lucide-react";
+
+const inputCls =
+  "w-full px-3 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-all";
+const labelCls = "block text-xs font-semibold text-foreground/80 mb-1.5 uppercase tracking-wide";
 
 export default function AdminUniversitiesPage() {
   const [universities, setUniversities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [createSuccess, setCreateSuccess] = useState(false);
+
+  const [form, setForm] = useState({
+    name: "",
+    domain: "",
+    website: "",
+    location: "",
+    contactEmail: "",
+  });
 
   useEffect(() => {
     fetchUniversities();
-  }, [search]); // Normally debounce this
+  }, [search]);
 
   const fetchUniversities = async () => {
     try {
       setLoading(true);
       const res = await adminUniversitiesAPI.getAll(search);
-      setUniversities(res.data.universities);
+      const data = res.data;
+      setUniversities(data?.universities || data || []);
     } catch (err) {
       console.error("Failed to fetch universities", err);
     } finally {
@@ -27,142 +57,208 @@ export default function AdminUniversitiesPage() {
   };
 
   const handleVerify = async (id: string, name: string) => {
-    if (confirm(`Are you sure you want to toggle verification for ${name}?`)) {
+    if (confirm(`Toggle verification for ${name}?`)) {
       try {
         await adminUniversitiesAPI.toggleVerify(id);
         fetchUniversities();
       } catch (err: any) {
-        alert(err.response?.data?.message || "Failed to verify university");
+        alert(err.response?.data?.message || "Failed");
       }
     }
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (confirm(`CRITICAL WARNING: Are you sure you want to permanently delete ${name}? This action cannot be undone.`)) {
+    if (
+      confirm(`⚠️ Permanently delete ${name}? This cannot be undone.`)
+    ) {
       try {
         await adminUniversitiesAPI.delete(id);
         fetchUniversities();
       } catch (err: any) {
-        alert(err.response?.data?.message || "Failed to delete university");
+        alert(err.response?.data?.message || "Failed to delete");
       }
     }
   };
 
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim()) {
+      setCreateError("University name is required.");
+      return;
+    }
+    setIsCreating(true);
+    setCreateError(null);
+    try {
+      await adminUniversitiesAPI.create(form);
+      setCreateSuccess(true);
+      setTimeout(() => {
+        setShowAddModal(false);
+        setCreateSuccess(false);
+        setForm({ name: "", domain: "", website: "", location: "", contactEmail: "" });
+        fetchUniversities();
+      }, 1200);
+    } catch (err: any) {
+      setCreateError(err.response?.data?.message || "Failed to create university.");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const prefillCU = () => {
+    setForm({
+      name: "Chandigarh University",
+      domain: "cuchd.in",
+      website: "https://www.cuchd.in",
+      location: "Mohali, Punjab, India",
+      contactEmail: "admissions@cuchd.in",
+    });
+  };
+
   return (
-    <div className="p-8 font-sans max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-6 font-sans max-w-7xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Registered Universities</h1>
-          <p className="text-muted-foreground text-sm mt-1">View, verify, and manage all academic institutions using the platform.</p>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-white shrink-0 border border-border">
+              <img src="/cu-logo.jpg" alt="CU" className="w-full h-full object-contain" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground">Universities</h1>
+          </div>
+          <p className="text-muted-foreground text-sm">
+            Manage academic institutions using the Chandigarh University assessment platform.
+          </p>
         </div>
+        <button
+          onClick={() => { setShowAddModal(true); setCreateError(null); setCreateSuccess(false); }}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-zinc-950 text-sm font-semibold rounded-xl transition-colors shadow-md shadow-amber-500/20 shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          Add University
+        </button>
       </div>
 
-      <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden flex flex-col">
-        {/* Toolbar */}
+      {/* CU Banner */}
+      <div className="flex items-center gap-4 p-4 bg-card border border-amber-500/20 rounded-xl">
+        <div className="w-12 h-12 rounded-xl overflow-hidden bg-white shrink-0 border border-border shadow-sm">
+          <img src="/cu-logo.jpg" alt="Chandigarh University" className="w-full h-full object-contain" />
+        </div>
+        <div>
+          <p className="font-bold text-foreground">Chandigarh University</p>
+          <p className="text-xs text-muted-foreground">Mohali, Punjab — Primary Institution</p>
+        </div>
+        <span className="ml-auto px-2.5 py-1 text-[10px] font-bold rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20">
+          PRIMARY
+        </span>
+      </div>
+
+      {/* Table */}
+      <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
         <div className="p-4 border-b border-border flex items-center justify-between gap-4">
-          <div className="relative w-full max-w-md">
+          <div className="relative w-full max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input 
-              type="text" 
-              placeholder="Search universities by name or domain..." 
+            <input
+              type="text"
+              placeholder="Search universities…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-foreground transition-all"
+              className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 text-foreground transition-all"
             />
           </div>
-          <div className="text-sm text-muted-foreground font-medium">
-            {universities.length} {universities.length === 1 ? 'university' : 'universities'}
-          </div>
+          <span className="text-xs text-muted-foreground font-medium shrink-0">
+            {universities.length} institution{universities.length !== 1 ? "s" : ""}
+          </span>
         </div>
 
-        {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-muted-foreground">
-            <thead className="bg-muted/50 text-muted-foreground font-medium border-b border-border">
-              <tr>
-                <th className="px-6 py-3">Institution Details</th>
-                <th className="px-6 py-3">Tier</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Registered On</th>
-                <th className="px-6 py-3 text-right">Actions</th>
+          <table className="w-full text-sm text-left">
+            <thead>
+              <tr className="border-b border-border bg-muted/20">
+                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Institution</th>
+                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Domain</th>
+                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Location</th>
+                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Students</th>
+                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">Loading universities...</td>
+                  <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
+                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
+                    Loading universities…
+                  </td>
                 </tr>
               ) : universities.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center">
-                      <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-3">
-                        <GraduationCap className="w-6 h-6 text-muted-foreground" />
-                      </div>
-                      <p className="text-foreground font-medium">No universities found</p>
-                      <p className="text-xs text-muted-foreground/70">There are no institutions matching your search.</p>
-                    </div>
+                  <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
+                    <GraduationCap className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                    <p className="text-sm">No universities found.</p>
+                    <button
+                      onClick={() => { setShowAddModal(true); prefillCU(); }}
+                      className="mt-3 text-xs text-amber-500 hover:underline"
+                    >
+                      + Add Chandigarh University
+                    </button>
                   </td>
                 </tr>
               ) : (
                 universities.map((uni) => (
-                  <tr key={uni._id} className="hover:bg-muted/30 transition-colors group">
-                    <td className="px-6 py-4">
+                  <tr key={uni._id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg border border-border bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
-                          {uni.logo ? (
-                            <img src={uni.logo} alt={uni.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="font-bold text-lg text-muted-foreground">{uni.name.charAt(0)}</span>
-                          )}
+                        <div className="w-8 h-8 rounded-lg bg-foreground/5 border border-border flex items-center justify-center">
+                          <Building2 className="w-4 h-4 text-muted-foreground" />
                         </div>
                         <div>
-                          <div className="font-medium text-foreground flex items-center gap-1.5">
-                            <Link href={`/${uni.username}`} target="_blank" className="hover:text-blue-500 hover:underline transition-colors">
-                              {uni.name}
-                            </Link>
-                            {uni.isVerified && <BadgeCheck className="w-4 h-4 text-blue-500" />}
-                          </div>
-                          <div className="text-xs text-muted-foreground font-mono mt-0.5">{uni.domain}</div>
-                          <div className="text-[10px] text-muted-foreground/70 mt-1 uppercase tracking-wider">
-                            Owner: {uni.createdBy?.email}
-                          </div>
+                          <p className="font-semibold text-foreground text-sm">{uni.name}</p>
+                          {uni.website && (
+                            <a
+                              href={uni.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11px] text-muted-foreground hover:text-foreground"
+                            >
+                              {uni.website}
+                            </a>
+                          )}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-foreground">
-                      {uni.tier || <span className="text-muted-foreground italic">Not ranked</span>}
+                    <td className="px-4 py-3 text-sm text-muted-foreground font-mono">
+                      {uni.domain || "—"}
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        uni.isVerified ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' : 'bg-muted text-muted-foreground border border-border'
-                      }`}>
-                        {uni.isVerified ? "Verified" : "Unverified"}
-                      </span>
+                    <td className="px-4 py-3 text-sm text-muted-foreground">
+                      {uni.location || "—"}
                     </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {new Date(uni.createdAt).toLocaleDateString('en-GB')}
+                    <td className="px-4 py-3 text-sm text-foreground font-semibold">
+                      {uni.studentCount ?? uni.totalStudents ?? "—"}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
+                    <td className="px-4 py-3">
+                      {uni.isVerified ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400">
+                          <BadgeCheck className="w-3 h-3" /> Verified
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400">
+                          Pending
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <button
                           onClick={() => handleVerify(uni._id, uni.name)}
-                          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1 ${
-                            uni.isVerified 
-                              ? "bg-muted text-muted-foreground hover:bg-amber-500/10 hover:text-amber-500" 
-                              : "bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white"
-                          }`}
-                          title={uni.isVerified ? "Revoke Verification" : "Verify University"}
+                          className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-muted hover:bg-muted/70 text-foreground transition-colors"
                         >
-                          {uni.isVerified ? "Revoke" : "Verify"}
+                          {uni.isVerified ? "Unverify" : "Verify"}
                         </button>
-                        
-                        <button 
+                        <button
                           onClick={() => handleDelete(uni._id, uni.name)}
-                          className="p-1.5 bg-muted text-muted-foreground hover:bg-red-500/10 hover:text-red-500 rounded-md transition-colors"
-                          title="Delete University"
+                          className="p-1.5 text-muted-foreground hover:text-rose-500 transition-colors"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </td>
@@ -173,6 +269,132 @@ export default function AdminUniversitiesPage() {
           </table>
         </div>
       </div>
+
+      {/* Add University Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg">
+            <div className="flex items-center justify-between p-6 border-b border-border">
+              <div>
+                <h2 className="text-base font-bold text-foreground">Add University</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">Register a new institution on the platform</p>
+              </div>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreate} className="p-6 space-y-4">
+              {/* Quick fill for CU */}
+              <button
+                type="button"
+                onClick={prefillCU}
+                className="w-full flex items-center gap-3 p-3 bg-amber-500/10 border border-amber-500/25 rounded-xl hover:bg-amber-500/15 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-lg overflow-hidden bg-white shrink-0">
+                  <img src="/cu-logo.jpg" alt="CU" className="w-full h-full object-contain" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-semibold text-amber-400">Quick fill: Chandigarh University</p>
+                  <p className="text-[10px] text-muted-foreground">Mohali, Punjab, India</p>
+                </div>
+              </button>
+
+              <div>
+                <label className={labelCls}>University Name *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Chandigarh University"
+                  value={form.name}
+                  onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                  className={inputCls}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={labelCls}>Domain</label>
+                  <input
+                    type="text"
+                    placeholder="cuchd.in"
+                    value={form.domain}
+                    onChange={(e) => setForm((p) => ({ ...p, domain: e.target.value }))}
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Location</label>
+                  <input
+                    type="text"
+                    placeholder="Mohali, Punjab"
+                    value={form.location}
+                    onChange={(e) => setForm((p) => ({ ...p, location: e.target.value }))}
+                    className={inputCls}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelCls}>Website</label>
+                <input
+                  type="url"
+                  placeholder="https://www.cuchd.in"
+                  value={form.website}
+                  onChange={(e) => setForm((p) => ({ ...p, website: e.target.value }))}
+                  className={inputCls}
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>Contact Email</label>
+                <input
+                  type="email"
+                  placeholder="admissions@cuchd.in"
+                  value={form.contactEmail}
+                  onChange={(e) => setForm((p) => ({ ...p, contactEmail: e.target.value }))}
+                  className={inputCls}
+                />
+              </div>
+
+              {createError && (
+                <div className="flex items-center gap-2 p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg">
+                  <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                  <p className="text-xs text-rose-400">{createError}</p>
+                </div>
+              )}
+
+              {createSuccess && (
+                <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <p className="text-xs text-emerald-400">University created successfully!</p>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreating}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-zinc-950 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50"
+                >
+                  {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                  Add University
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

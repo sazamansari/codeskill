@@ -198,6 +198,15 @@ export class ExecutionService {
    * Supports both stdin/stdout mode (competitive programming) and
    * function-call mode (LeetCode-style) based on test case format.
    */
+  async runCode(
+    code: string,
+    language: string,
+    testCases: any[],
+    config: any = {},
+  ): Promise<TestCaseResult[]> {
+    return this.executeCode(language, code, testCases, config);
+  }
+
   async executeCode(
     language: string,
     code: string,
