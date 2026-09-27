@@ -29,7 +29,7 @@ export const awsConfig = registerAs('aws', () => ({
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   sessionToken: process.env.AWS_SESSION_TOKEN,
   region: process.env.AWS_REGION || 'ap-south-1',
-  sesSender: process.env.AWS_SES_SENDER || 'noreply@evolvian.in',
+  sesSender: process.env.AWS_SES_SENDER || 'noreply@cuchd.in',
 }));
 
 export const oauthConfig = registerAs('oauth', () => ({

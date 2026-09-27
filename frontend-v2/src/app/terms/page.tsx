@@ -3,8 +3,8 @@ import { Globe, User, Lightbulb, AlertTriangle, ArrowRight, Scale } from "lucide
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Terms of Service | CodeSkill',
-  description: 'Terms of Service for CodeSkill by Evolvian',
+  title: 'Terms of Service | CodeSkill • Chandigarh University',
+  description: 'Terms of Service for CodeSkill for Chandigarh University',
 };
 
 export default function TermsPage() {
@@ -27,7 +27,7 @@ export default function TermsPage() {
             Terms of <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500">Service</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Welcome to CodeSkill, an Evolvian company. By accessing or using our platform, 
+            Welcome to CodeSkill for Chandigarh University. By accessing or using our platform, 
             you agree to be bound by these Terms of Service.
           </p>
         </div>
@@ -83,7 +83,7 @@ export default function TermsPage() {
               <div className="pl-14 text-muted-foreground leading-relaxed">
                 <p>
                   The platform and its original content (excluding user-submitted code), features, and functionality 
-                  are and will remain the exclusive property of Evolvian and its licensors. User-submitted code 
+                  are and will remain the exclusive property of CodeSkill for Chandigarh University and its licensors. User-submitted code 
                   remains the intellectual property of the user, though you grant CodeSkill a license to execute, 
                   analyze, and store it for the purpose of the platform's functionality.
                 </p>

@@ -26,8 +26,15 @@
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
   --color-ring: hsl(var(--ring));
   --color-input: hsl(var(--input));
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
   --radius-2xl: 2rem;
@@ -35,7 +42,9 @@
 
 @layer base {
   :root {
-    /* Professional Institutional Theme: Clean Crisp White & Deep Slate */
+    color-scheme: light;
+
+    /* Light Mode: Clean Crisp White & Deep Slate */
     --background: 0 0% 100%;       /* #ffffff */
     --foreground: 222 47% 11%;     /* #0f172a deep slate */
 
@@ -46,7 +55,7 @@
     --popover-foreground: 222 47% 11%;
 
     /* Official Chandigarh University Brand Accent: Crimson Red */
-    --primary: 350 84% 42%;        /* #c8102e / #b91c1c */
+    --primary: 350 84% 42%;        /* #c8102e */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;    /* #f1f5f9 subtle slate */
@@ -71,11 +80,65 @@
     --input: 214 32% 91%;
     --ring: 350 84% 42%;
     --radius: 0.5rem;              /* 8px standard professional radius */
+
+    /* Sidebar tokens */
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-accent: 210 40% 96.1%;
+    --sidebar-accent-foreground: 222 47% 11%;
+  }
+
+  .dark {
+    color-scheme: dark;
+
+    /* Dark Mode: Layered Near-Black & Deep Space Surfaces */
+    --background: 222 47% 7%;       /* #090d16 / #0b0f19 deep base */
+    --foreground: 210 40% 98%;      /* #f8fafc */
+
+    --card: 222 47% 10%;            /* #0f172a elevated card layer */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;         /* #111827 */
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 350 84% 52%;         /* #e11d48 / #c8102e vibrant CU crimson */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 33% 16%;       /* #1e293b dark slate surface */
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 15%;           /* #1a2234 */
+    --muted-foreground: 215 20% 65%; /* #94a3b8 soft readable silver */
+
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 217 33% 19%;          /* #1e293b / #2d3748 */
+    --input: 217 33% 19%;
+    --ring: 350 84% 52%;
+
+    /* Sidebar tokens */
+    --sidebar: 222 47% 9%;          /* #0d121f */
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-accent: 217 33% 15%;
+    --sidebar-accent-foreground: 210 40% 98%;
   }
 
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }

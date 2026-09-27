@@ -43,7 +43,7 @@ async function bootstrap() {
   // Swagger
   const config = new DocumentBuilder()
     .setTitle('CodeSkill API')
-    .setDescription('CodeSkill Online Judge — Evolvian EdTech Platform')
+    .setDescription('CodeSkill Online Judge — Chandigarh University Assessment Platform')
     .setVersion('2.0.0')
     .addBearerAuth()
     .build();

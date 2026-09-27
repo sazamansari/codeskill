@@ -73,10 +73,10 @@ export function AdminSidebar() {
   };
 
   return (
-    <div className="w-64 bg-white text-slate-600 flex flex-col h-full border-r border-slate-200 relative z-20">
+    <div className="w-64 bg-sidebar text-sidebar-foreground flex flex-col h-full border-r border-sidebar-border relative z-20">
       {/* Header with CU Branding */}
-      <div className="h-16 flex items-center px-4 border-b border-slate-200 gap-3 bg-white">
-        <div className="w-9 h-9 rounded-md overflow-hidden shrink-0 bg-white border border-slate-200 p-0.5 flex items-center justify-center">
+      <div className="h-16 flex items-center px-4 border-b border-sidebar-border gap-3 bg-sidebar">
+        <div className="w-9 h-9 rounded-md overflow-hidden shrink-0 bg-card border border-border p-0.5 flex items-center justify-center">
           <img
             src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
             alt="Chandigarh University"
@@ -87,8 +87,8 @@ export function AdminSidebar() {
           />
         </div>
         <div className="min-w-0">
-          <p className="text-xs font-bold text-slate-900 truncate leading-tight">Chandigarh University</p>
-          <p className="text-[10px] text-[#c8102e] font-semibold tracking-wide uppercase">Admin Assessment Portal</p>
+          <p className="text-xs font-bold text-sidebar-foreground truncate leading-tight">Chandigarh University</p>
+          <p className="text-[10px] text-primary font-semibold tracking-wide uppercase">Admin Assessment Portal</p>
         </div>
       </div>
 

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeSkill • Chandigarh University - Logo Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(22, 27, 46, 0.7);
+      --border: rgba(255, 255, 255, 0.08);
+      --cu-red: #C8102E;
+      --cu-red-glow: rgba(200, 16, 46, 0.35);
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: radial-gradient(circle at top right, rgba(200, 16, 46, 0.15), transparent 45%),
+                  radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.1), transparent 40%),
+                  var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 40px 24px;
+      line-height: 1.5;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 50px; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(200, 16, 46, 0.15);
+      color: #fb7185;
+      border: 1px solid rgba(200, 16, 46, 0.35);
+      padding: 6px 16px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 32px;
+      margin-bottom: 60px;
+    }
+
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .logo-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo-card:hover {
+      border-color: rgba(200, 16, 46, 0.4);
+      box-shadow: 0 20px 40px -15px var(--cu-red-glow);
+      transform: translateY(-4px);
+    }
+
+    .preview-box {
+      padding: 40px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 240px;
+    }
+
+    .preview-box.light-preview { background: #F8FAFC; }
+    .preview-box.dark-preview { background: #0B0F19; }
+
+    .preview-box img {
+      width: 100%;
+      max-height: 140px;
+      object-fit: contain;
+    }
+
+    .card-details {
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.4);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .card-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #38bdf8;
+    }
+
+    .card-desc {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .actions { display: flex; gap: 12px; }
+
+    .btn {
+      flex: 1;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #c8102e, #e11d48);
+      color: white;
+      border: none;
+    }
+
+    .btn-primary:hover { filter: brightness(1.15); transform: scale(1.02); }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.07);
+      color: #f1f5f9;
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.12); }
+
+    .mockup-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 36px;
+      margin-top: 40px;
+    }
+
+    .mockup-navbar {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 14px;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">Chandigarh University Identity Suite</div>
+      <h1>CodeSkill Brand Mark Concepts</h1>
+      <p class="subtitle">4 Distinct vector concepts created for CodeSkill at Chandigarh University.</p>
+    </header>
+
+    <div class="grid">
+      <!-- 1 -->
+      <div class="logo-card">
+        <div class="preview-box light-preview">
+          <img src="/codeskill-option1.svg" alt="Concept 1">
+        </div>
+        <div class="card-details">
+          <div class="card-header">
+            <h3 class="card-title">Concept 1: Hex Shield Monogram</h3>
+            <span class="card-tag">Recommended for Portal</span>
+          </div>
+          <p class="card-desc">Modern hexagonal code brackets emblem infused with CU Crimson badge.</p>
+          <div class="actions">
+            <a href="/codeskill-option1.svg" target="_blank" class="btn btn-primary">Open SVG</a>
+            <a href="/codeskill-option1.svg" download class="btn btn-secondary">Download</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2 -->
+      <div class="logo-card">
+        <div class="preview-box light-preview">
+          <img src="/codeskill-option2.svg" alt="Concept 2">
+        </div>
+        <div class="card-details">
+          <div class="card-header">
+            <h3 class="card-title">Concept 2: Academic Crest</h3>
+            <span class="card-tag">Institutional</span>
+          </div>
+          <p class="card-desc">Chandigarh University shield crest with embedded logic circuits and star of excellence.</p>
+          <div class="actions">
+            <a href="/codeskill-option2.svg" target="_blank" class="btn btn-primary">Open SVG</a>
+            <a href="/codeskill-option2.svg" download class="btn btn-secondary">Download</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 -->
+      <div class="logo-card">
+        <div class="preview-box light-preview">
+          <img src="/codeskill-option3.svg" alt="Concept 3">
+        </div>
+        <div class="card-details">
+          <div class="card-header">
+            <h3 class="card-title">Concept 3: Terminal Prompt</h3>
+            <span class="card-tag">Developer / Tech</span>
+          </div>
+          <p class="card-desc">Clean CLI terminal cursor prompt `>_` with high-contrast red accent.</p>
+          <div class="actions">
+            <a href="/codeskill-option3.svg" target="_blank" class="btn btn-primary">Open SVG</a>
+            <a href="/codeskill-option3.svg" download class="btn btn-secondary">Download</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 -->
+      <div class="logo-card">
+        <div class="preview-box dark-preview">
+          <img src="/codeskill-option4.svg" alt="Concept 4">
+        </div>
+        <div class="card-details">
+          <div class="card-header">
+            <h3 class="card-title">Concept 4: Cyber Dark Edition</h3>
+            <span class="card-tag">IDE Pro</span>
+          </div>
+          <p class="card-desc">Glowing neon crimson with electric blue accents designed specifically for dark theme screens.</p>
+          <div class="actions">
+            <a href="/codeskill-option4.svg" target="_blank" class="btn btn-primary">Open SVG</a>
+            <a href="/codeskill-option4.svg" download class="btn btn-secondary">Download</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -118,12 +118,12 @@ export default function LoginPage() {
     <div className="flex min-h-screen bg-background text-foreground font-sans">
       {/* Left Column - University Branding (Hidden on mobile) */}
       {/* Left Column - Institutional Overview */}
-      <div className="hidden lg:flex flex-1 relative bg-slate-50 border-r border-slate-200 items-center justify-center overflow-hidden flex-col p-12 text-slate-800 text-center">
+      <div className="hidden lg:flex flex-1 relative bg-muted/30 border-r border-border items-center justify-center overflow-hidden flex-col p-12 text-foreground text-center">
         {/* Clean subtle architectural grid */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:32px_32px] opacity-40" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:32px_32px] opacity-[0.03] dark:opacity-[0.05]" />
 
         <div className="relative z-10 max-w-md flex flex-col items-center">
-          <div className="w-24 h-24 bg-white border border-slate-200 rounded-xl p-2 flex items-center justify-center mb-6 shadow-xs">
+          <div className="w-24 h-24 bg-card border border-border rounded-xl p-2 flex items-center justify-center mb-6 shadow-xs">
             <img
               src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
               alt="Chandigarh University"
@@ -134,20 +134,20 @@ export default function LoginPage() {
             />
           </div>
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-red-50 border border-red-200 text-[#c8102e] text-xs font-semibold tracking-wide uppercase mb-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/50 text-[#c8102e] dark:text-rose-400 text-xs font-semibold tracking-wide uppercase mb-3">
             <ShieldCheck className="w-3.5 h-3.5" /> Official Assessment Portal
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3 text-slate-900">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3 text-foreground">
             Chandigarh University
           </h1>
-          <p className="text-sm text-slate-600 leading-relaxed mb-6">
+          <p className="text-sm text-muted-foreground leading-relaxed mb-6">
             Official Examination & Academic Assessment System. Sign in using your registered University Identification Number (UID) to access scheduled evaluations.
           </p>
 
-          <div className="w-full bg-white rounded-lg p-5 border border-slate-200 text-left text-xs space-y-2 text-slate-600 shadow-xs">
-            <div className="font-semibold text-slate-900 flex items-center gap-1.5 text-xs">
-              <Info className="w-4 h-4 text-[#c8102e]" /> Candidate Instructions:
+          <div className="w-full bg-card rounded-lg p-5 border border-border text-left text-xs space-y-2 text-muted-foreground shadow-xs">
+            <div className="font-semibold text-foreground flex items-center gap-1.5 text-xs">
+              <Info className="w-4 h-4 text-primary" /> Candidate Instructions:
             </div>
             <p>• Assessment sessions are monitored with anti-cheating audit telemetry.</p>
             <p>• Ensure a stable internet connection before launching your exam attempt.</p>
@@ -157,11 +157,11 @@ export default function LoginPage() {
       </div>
 
       {/* Right Column - UID Login Form */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 relative bg-white">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 relative bg-background">
         <div className="w-full max-w-sm flex flex-col gap-6">
           {/* Header */}
           <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-white border border-slate-200 rounded-xl p-1.5 flex items-center justify-center mb-3 shadow-xs">
+            <div className="w-16 h-16 bg-card border border-border rounded-xl p-1.5 flex items-center justify-center mb-3 shadow-xs">
               <img
                 src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
                 alt="Chandigarh University"
@@ -171,18 +171,18 @@ export default function LoginPage() {
                 }}
               />
             </div>
-            <h2 className="text-xl font-bold tracking-tight text-slate-900">
+            <h2 className="text-xl font-bold tracking-tight text-foreground">
               Student Sign In
             </h2>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Chandigarh University Examination Portal
             </p>
           </div>
 
           {/* Form Error Banner */}
           {form.formState.errors.root && (
-            <div className="p-3 bg-rose-50 border border-rose-200 rounded-md flex items-start gap-2.5 text-rose-700 text-xs">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+            <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-md flex items-start gap-2.5 text-rose-600 dark:text-rose-400 text-xs">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
               <span>{form.formState.errors.root.message}</span>
             </div>
           )}
@@ -192,7 +192,7 @@ export default function LoginPage() {
             <div className="space-y-1.5">
               <label
                 htmlFor="uid-input"
-                className="text-xs font-semibold text-slate-700"
+                className="text-xs font-semibold text-foreground"
               >
                 University UID / Roll Number
               </label>
@@ -201,13 +201,13 @@ export default function LoginPage() {
                   id="uid-input"
                   type="text"
                   placeholder="e.g. CU202600101"
-                  className="w-full h-10 px-3.5 pl-10 rounded-md border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#c8102e] focus:border-[#c8102e] font-mono text-sm tracking-wide uppercase transition-all shadow-xs"
+                  className="w-full h-10 px-3.5 pl-10 rounded-md border border-input bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary font-mono text-sm tracking-wide uppercase transition-all shadow-xs"
                   {...form.register("uid")}
                 />
-                <Building className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <Building className="w-4 h-4 text-muted-foreground absolute left-3 top-3" />
               </div>
               {form.formState.errors.uid && (
-                <p className="text-xs text-rose-600 mt-1">
+                <p className="text-xs text-rose-600 dark:text-rose-400 mt-1">
                   {form.formState.errors.uid.message}
                 </p>
               )}
@@ -218,14 +218,14 @@ export default function LoginPage() {
               <div className="flex items-center justify-between">
                 <label
                   htmlFor="password-input"
-                  className="text-xs font-semibold text-slate-700"
+                  className="text-xs font-semibold text-foreground"
                 >
                   Password
                 </label>
                 <button
                   type="button"
                   onClick={() => setShowSupportModal(true)}
-                  className="text-xs text-[#c8102e] hover:underline font-medium inline-flex items-center gap-1"
+                  className="text-xs text-primary hover:underline font-medium inline-flex items-center gap-1"
                 >
                   <HelpCircle className="w-3 h-3" /> Help
                 </button>
@@ -235,13 +235,13 @@ export default function LoginPage() {
                   id="password-input"
                   type="password"
                   placeholder="••••••••••••"
-                  className="w-full h-10 px-3.5 pl-10 rounded-md border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#c8102e] focus:border-[#c8102e] text-sm transition-all shadow-xs"
+                  className="w-full h-10 px-3.5 pl-10 rounded-md border border-input bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm transition-all shadow-xs"
                   {...form.register("password")}
                 />
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <Lock className="w-4 h-4 text-muted-foreground absolute left-3 top-3" />
               </div>
               {form.formState.errors.password && (
-                <p className="text-xs text-rose-600 mt-1">
+                <p className="text-xs text-rose-600 dark:text-rose-400 mt-1">
                   {form.formState.errors.password.message}
                 </p>
               )}
@@ -252,7 +252,7 @@ export default function LoginPage() {
               id="student-login-submit"
               type="submit"
               disabled={isLoading}
-              className="w-full h-10 bg-[#c8102e] hover:bg-[#a90c25] active:bg-[#910b20] text-white font-semibold rounded-md transition-all shadow-xs flex items-center justify-center gap-2 text-xs uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+              className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-md transition-all shadow-xs flex items-center justify-center gap-2 text-xs uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed mt-2"
             >
               {isLoading ? (
                 <>
@@ -267,8 +267,8 @@ export default function LoginPage() {
           </form>
 
           {/* Institutional Compliance Notice */}
-          <div className="pt-4 border-t border-slate-200 text-center">
-            <p className="text-xs text-slate-500">
+          <div className="pt-4 border-t border-border text-center">
+            <p className="text-xs text-muted-foreground">
               Student accounts are managed by Chandigarh University. Public self-registration is restricted.
             </p>
           </div>

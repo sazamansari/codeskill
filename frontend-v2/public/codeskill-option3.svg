@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 220" width="100%" height="100%">
+  <defs>
+    <linearGradient id="opt3Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#C8102E"/>
+      <stop offset="60%" stop-color="#E11D48"/>
+      <stop offset="100%" stop-color="#FB7185"/>
+    </linearGradient>
+    <linearGradient id="badgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Modern Dynamic Terminal Icon -->
+  <g transform="translate(45, 30)">
+    <rect x="0" y="0" width="160" height="160" rx="36" fill="url(#badgeGrad)" stroke="#334155" stroke-width="2"/>
+    
+    <!-- Code prompt symbol >_ -->
+    <path d="M42 55 L78 80 L42 105" fill="none" stroke="url(#opt3Grad)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="88" y1="105" x2="120" y2="105" stroke="#38BDF8" stroke-width="12" stroke-linecap="round"/>
+  </g>
+
+  <!-- Main Wordmark -->
+  <g transform="translate(235, 105)">
+    <text font-family="'Outfit', 'Inter', -apple-system, sans-serif" font-weight="900" font-size="68" letter-spacing="-1.5">
+      <tspan x="0" y="0" fill="#0F172A">Code</tspan>
+      <tspan fill="url(#opt3Grad)">Skill</tspan>
+    </text>
+
+    <!-- Tagline & CU affiliation -->
+    <g transform="translate(4, 25)">
+      <rect x="0" y="0" width="180" height="26" rx="6" fill="#C8102E"/>
+      <text x="90" y="17" font-family="'Inter', sans-serif" font-size="11" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">CHANDIGARH UNIV</text>
+
+      <text x="195" y="18" font-family="'Inter', sans-serif" font-size="13" font-weight="600" fill="#64748B" letter-spacing="0.5">NEXT-GEN ASSESSMENT PLATFORM</text>
+    </g>
+  </g>
+</svg>

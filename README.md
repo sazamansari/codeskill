@@ -1,5 +1,5 @@
-# CodeSkill — Full-Stack Coding Platform
-### Part of the Evolvian EdTech Ecosystem
+# CodeSkill — Technical Assessment & Coding Platform
+### Official Platform for Chandigarh University
 
 A LeetCode-style coding practice platform built with the MERN stack featuring 300 curated problems, AI-powered hints, syntax highlighting, and comprehensive user progress tracking.
 
@@ -228,4 +228,4 @@ The `codeskill-platform.jsx` file in the root outputs folder contains the comple
 | AI | Claude API (Anthropic) |
 | Styling | CSS-in-JS (inline styles) |
 
-Built as part of the **Evolvian** EdTech ecosystem.
+Built for **Chandigarh University** Official Technical Assessment & Algorithmic Learning System.

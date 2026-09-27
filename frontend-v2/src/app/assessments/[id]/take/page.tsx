@@ -715,12 +715,12 @@ export default function TakeAssessmentPage({
   const isTimeCritical = timeLeftSeconds < 300; // < 5 mins
 
   return (
-    <div className="flex-1 bg-white text-slate-900 font-sans min-h-screen flex flex-col select-none relative">
+    <div className="flex-1 bg-background text-foreground font-sans min-h-screen flex flex-col select-none relative">
       {/* Top Test Header Bar */}
-      <header className="h-16 border-b border-slate-200 bg-white px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+      <header className="h-16 border-b border-border bg-card px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
         <div className="flex items-center gap-3">
           {/* CU Official Logo */}
-          <div className="w-9 h-9 rounded-md overflow-hidden bg-white shrink-0 border border-slate-200 p-0.5 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl overflow-hidden bg-muted/40 shrink-0 border border-border p-1 flex items-center justify-center">
             <img
               src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
               alt="Chandigarh University"
@@ -730,24 +730,24 @@ export default function TakeAssessmentPage({
               }}
             />
           </div>
-          <div className="w-8 h-8 rounded-md bg-red-50 text-[#c8102e] border border-red-200 flex items-center justify-center font-bold text-xs font-mono shadow-xs">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-xs font-mono shadow-xs">
             Q{currentIndex + 1}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xs sm:text-sm font-bold text-slate-900">
-                Question {currentIndex + 1} <span className="text-slate-500 font-normal">of {questions.length}</span>
+              <h1 className="text-xs sm:text-sm font-bold text-foreground">
+                Question {currentIndex + 1} <span className="text-muted-foreground font-normal">of {questions.length}</span>
               </h1>
-              <span className="hidden sm:inline-block text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+              <span className="hidden sm:inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-foreground border border-border">
                 Chandigarh University
               </span>
               {assessmentCode && (
-                <span className="hidden md:inline px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                <span className="hidden md:inline px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-muted text-foreground border border-border">
                   {assessmentCode}
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-slate-500 font-medium truncate max-w-[140px] sm:max-w-none">
+            <p className="text-[11px] text-muted-foreground font-medium truncate max-w-[140px] sm:max-w-none">
               {currentQ.topic} {currentQ.subtopic ? `• ${currentQ.subtopic}` : ""}
             </p>
           </div>

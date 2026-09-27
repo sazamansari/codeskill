@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function CompanyLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -92,6 +93,10 @@ export default function CompanyLayout({ children }: { children: React.ReactNode 
               <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
             </div>
           </div>
+          <div className="flex items-center justify-between pt-2 border-t border-border">
+            <span className="text-xs font-semibold text-muted-foreground">Theme</span>
+            <ThemeToggle />
+          </div>
           <button 
             onClick={logout}
             className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
@@ -112,9 +117,12 @@ export default function CompanyLayout({ children }: { children: React.ReactNode 
             </div>
             <span className="font-bold text-lg text-foreground">CodeSkill<span className="text-blue-500">Work</span></span>
           </div>
-          <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-muted-foreground hover:text-foreground">
-            <Menu className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-muted-foreground hover:text-foreground">
+              <Menu className="w-6 h-6" />
+            </button>
+          </div>
         </header>
 
         {/* Page Content */}

@@ -8,12 +8,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Chandigarh University — Official Technical Assessment Platform",
+  title: "CodeSkill — Chandigarh University Technical Assessment Platform",
   description: "Official examination and technical assessment platform for Chandigarh University students.",
   icons: {
-    icon: "/cu-logo.png",
-    shortcut: "/cu-logo.png",
-    apple: "/cu-logo.png",
+    icon: "/codeskill-option1.svg",
+    shortcut: "/codeskill-option1.svg",
+    apple: "/codeskill-option1.svg",
   },
 };
 
@@ -21,6 +21,19 @@ import { Background } from "@/components/Background";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Providers } from "@/components/Providers";
+
+const antiFlashScript = `
+  (function() {
+    try {
+      var stored = localStorage.getItem('codeskill_theme');
+      var isDark = stored === 'dark' || ((!stored || stored === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      var root = document.documentElement;
+      root.classList.remove('light', 'dark');
+      root.classList.add(isDark ? 'dark' : 'light');
+      root.style.colorScheme = isDark ? 'dark' : 'light';
+    } catch (e) {}
+  })();
+`;
 
 export default function RootLayout({
   children,
@@ -33,7 +46,13 @@ export default function RootLayout({
       className={`${inter.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen flex flex-col font-sans bg-background text-foreground">
+      <head>
+        <script
+          id="codeskill-theme-init"
+          dangerouslySetInnerHTML={{ __html: antiFlashScript }}
+        />
+      </head>
+      <body className="min-h-screen flex flex-col font-sans bg-background text-foreground transition-colors duration-200">
         <Providers>
           <Background />
           <Navbar />

@@ -55,7 +55,7 @@ export function InteractiveCard({ className, children, tilt = true, ...props }: 
       whileHover={{ scale: 1.02, y: -5 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
       className={cn(
-        "relative rounded-3xl p-6 bg-card border border-white/5 shadow-2xl overflow-hidden group cursor-pointer transition-colors hover:border-primary/50",
+        "relative rounded-3xl p-6 bg-card border border-border shadow-xl overflow-hidden group cursor-pointer transition-colors hover:border-primary/50",
         className
       )}
       {...props}

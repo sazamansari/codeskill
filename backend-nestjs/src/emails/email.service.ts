@@ -15,7 +15,7 @@ export class EmailService {
     const sessionToken = this.configService.get<string>('aws.sessionToken');
     const region = this.configService.get<string>('aws.region') || 'ap-south-1';
     this.senderEmail =
-      this.configService.get<string>('aws.sesSender') || 'noreply@evolvian.in';
+      this.configService.get<string>('aws.sesSender') || 'noreply@cuchd.in';
 
     const sesConfig: any = { region };
 

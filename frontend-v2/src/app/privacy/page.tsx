@@ -3,8 +3,8 @@ import { Shield, Lock, FileText, Mail, ArrowRight } from "lucide-react";
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Privacy Policy | CodeSkill',
-  description: 'Privacy Policy for CodeSkill by Evolvian',
+  title: 'Privacy Policy | CodeSkill • Chandigarh University',
+  description: 'Privacy Policy for CodeSkill for Chandigarh University',
 };
 
 export default function PrivacyPage() {
@@ -27,7 +27,7 @@ export default function PrivacyPage() {
             Privacy <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500">Policy</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            At CodeSkill (an Evolvian company), we believe that your data is yours. 
+            At CodeSkill for Chandigarh University, we believe that your data is yours. 
             We are committed to safeguarding your privacy while providing a world-class coding experience.
           </p>
         </div>
@@ -112,11 +112,11 @@ export default function PrivacyPage() {
                   please don't hesitate to reach out to our privacy team.
                 </p>
                 <a 
-                  href="mailto:support@evolvian.in" 
+                  href="mailto:support@cuchd.in" 
                   className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground font-medium transition-colors"
                 >
                   <Mail className="w-4 h-4" />
-                  support@evolvian.in
+                  support@cuchd.in
                 </a>
               </div>
             </section>

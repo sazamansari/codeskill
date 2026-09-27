@@ -60,15 +60,15 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-white text-slate-800 font-sans">
+    <div className="flex min-h-screen bg-background text-foreground font-sans">
       
       {/* Left Column - Brand / Graphic */}
-      <div className="hidden lg:flex flex-1 relative bg-slate-50 border-r border-slate-200 items-center justify-center overflow-hidden flex-col p-12 text-slate-800 text-center">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:32px_32px] opacity-40" />
+      <div className="hidden lg:flex flex-1 relative bg-muted/20 border-r border-border items-center justify-center overflow-hidden flex-col p-12 text-center">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:32px_32px] opacity-30" />
         
         {/* Brand Content */}
         <div className="relative z-10 max-w-md flex flex-col items-center">
-          <Link href="/" className="w-24 h-24 bg-white border border-slate-200 rounded-xl p-2 flex items-center justify-center mb-6 shadow-xs">
+          <Link href="/" className="w-24 h-24 bg-card border border-border rounded-xl p-2 flex items-center justify-center mb-6 shadow-xs">
             <img
               src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
               alt="Chandigarh University"
@@ -78,25 +78,25 @@ export default function AdminLoginPage() {
               }}
             />
           </Link>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-red-50 border border-red-200 text-[#c8102e] text-xs font-semibold tracking-wide uppercase mb-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-semibold tracking-wide uppercase mb-3">
             <ShieldCheck className="w-3.5 h-3.5" /> Institutional Administration
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3 text-slate-900">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3 text-foreground">
             Chandigarh University
           </h1>
-          <p className="text-sm text-slate-600 leading-relaxed max-w-sm">
+          <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
             Assessment & Examination Administration Console. Manage question banks, monitor live sessions, schedule exams, and audit candidate submissions.
           </p>
         </div>
       </div>
 
       {/* Right Column - Admin Login Form */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 relative bg-white">
-        <div className="w-full max-w-sm flex flex-col gap-6 bg-white border border-slate-200 p-8 rounded-lg shadow-xs">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 relative bg-background">
+        <div className="w-full max-w-sm flex flex-col gap-6 bg-card border border-border p-8 rounded-2xl shadow-sm">
           
           {/* Header */}
           <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-white border border-slate-200 rounded-xl p-1.5 flex items-center justify-center mb-3 shadow-xs">
+            <div className="w-16 h-16 bg-muted/40 border border-border rounded-xl p-1.5 flex items-center justify-center mb-3 shadow-xs">
               <img
                 src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
                 alt="Chandigarh University"
@@ -106,15 +106,15 @@ export default function AdminLoginPage() {
                 }}
               />
             </div>
-            <h2 className="text-xl font-bold tracking-tight text-slate-900">Admin Sign In</h2>
-            <p className="text-xs text-slate-500 mt-1">Authorized faculty and examination controllers only</p>
+            <h2 className="text-xl font-bold tracking-tight text-foreground">Admin Sign In</h2>
+            <p className="text-xs text-muted-foreground mt-1">Authorized faculty and examination controllers only</p>
           </div>
 
           {/* Form */}
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             
             {form.formState.errors.root && (
-              <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
                 <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                 <p className="text-sm font-medium text-red-500 leading-snug">
                   {form.formState.errors.root.message}
@@ -123,7 +123,7 @@ export default function AdminLoginPage() {
             )}
 
             {infoMessage && (
-              <div className="p-4 bg-primary/10 border border-primary/50 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+              <div className="p-4 bg-primary/10 border border-primary/30 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
                 <ShieldCheck className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                 <p className="text-sm font-medium text-primary leading-snug">
                   {infoMessage}
@@ -137,10 +137,10 @@ export default function AdminLoginPage() {
                 placeholder="Admin Email"
                 disabled={showOTP}
                 {...form.register("email")}
-                className="w-full h-11 bg-muted/30 border border-border rounded-xl px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all text-sm disabled:opacity-50"
+                className="w-full h-11 bg-background border border-input rounded-xl px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all text-sm disabled:opacity-50"
               />
               {form.formState.errors.email && (
-                <p className="text-xs text-destructive mt-1">{form.formState.errors.email.message}</p>
+                <p className="text-xs text-red-500 mt-1">{form.formState.errors.email.message}</p>
               )}
             </div>
 
@@ -150,10 +150,10 @@ export default function AdminLoginPage() {
                 placeholder="Password"
                 disabled={showOTP}
                 {...form.register("password")}
-                className="w-full h-10 bg-white border border-slate-300 rounded-md px-3.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#c8102e] focus:border-[#c8102e] transition-all text-sm disabled:opacity-50 shadow-xs"
+                className="w-full h-11 bg-background border border-input rounded-xl px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all text-sm disabled:opacity-50"
               />
               {form.formState.errors.password && (
-                <p className="text-xs text-rose-600 mt-1">{form.formState.errors.password.message}</p>
+                <p className="text-xs text-red-500 mt-1">{form.formState.errors.password.message}</p>
               )}
             </div>
 
@@ -163,10 +163,10 @@ export default function AdminLoginPage() {
                   type="text"
                   placeholder="6-Digit Verification Code"
                   {...form.register("otp")}
-                  className="w-full h-10 bg-white border border-slate-300 rounded-md px-3.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#c8102e] focus:border-[#c8102e] transition-all text-sm tracking-widest font-mono text-center shadow-xs"
+                  className="w-full h-11 bg-background border border-input rounded-xl px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all text-sm tracking-widest font-mono text-center"
                 />
                 {form.formState.errors.otp && (
-                  <p className="text-xs text-rose-600 mt-1">{form.formState.errors.otp.message}</p>
+                  <p className="text-xs text-red-500 mt-1">{form.formState.errors.otp.message}</p>
                 )}
               </div>
             )}
@@ -174,14 +174,14 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-10 rounded-md bg-[#c8102e] hover:bg-[#a90c25] active:bg-[#910b20] text-white font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center mt-3 disabled:opacity-70 shadow-xs"
+              className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 active:bg-primary/80 text-primary-foreground font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center mt-3 disabled:opacity-70 shadow-xs"
             >
               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (showOTP ? "Verify Login" : "Authenticate as Admin")}
             </button>
           </form>
           
-          <div className="mt-4 pt-4 border-t border-slate-200 text-center">
-            <Link href="/" className="text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors">
+          <div className="mt-4 pt-4 border-t border-border text-center">
+            <Link href="/" className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors">
               Return to Portal Home
             </Link>
           </div>
