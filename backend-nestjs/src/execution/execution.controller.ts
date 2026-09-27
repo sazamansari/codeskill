@@ -169,19 +169,45 @@ export class ExecutionController {
 
     // If Azure is not configured, fall back to local executor
     if (!this.azureExecutionService.isAvailable) {
-      const testCases = body.testCases || [
-        { id: 'run', input: body.stdin || '', expected: '' },
-      ];
-      const results = await this.executionService.runCode(
+      const isSingleRun = !body.testCases || body.testCases.length === 0;
+      const testCases = isSingleRun
+        ? [{ id: 'run', input: body.stdin || '', expected: '' }]
+        : body.testCases!;
+
+      const rawResults = await this.executionService.runCode(
         body.code,
         body.language,
         testCases.map((tc) => ({ id: tc.id, input: tc.input, expected: tc.expected })),
         { timeout: body.timeoutMs || 10000 },
       );
+
+      const normalizedResults = rawResults.map((r, idx) => {
+        const hasErr = r.status === 'compilation_error' || r.status === 'runtime_error' || r.status === 'time_limit_exceeded' || r.status === 'system_error';
+        const isRunWithoutExpected = isSingleRun && !testCases[idx]?.expected;
+        const finalStatus = isRunWithoutExpected ? (hasErr ? r.status : 'success') : r.status;
+        const passed = isRunWithoutExpected ? !hasErr : r.passed;
+
+        return {
+          id: r.id,
+          passed,
+          status: finalStatus,
+          stdout: r.output || '',
+          stderr: r.error || '',
+          output: r.output || '',
+          expected: r.expected || '',
+          executionTimeMs: r.executionTime,
+        };
+      });
+
+      const passedCount = normalizedResults.filter((r) => r.passed).length;
+
       return {
         success: true,
         engine: 'local',
-        results,
+        passedCount,
+        totalCount: normalizedResults.length,
+        results: normalizedResults,
+        result: isSingleRun ? normalizedResults[0] : undefined,
       };
     }
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Trophy,
   Award,
@@ -16,7 +17,8 @@ import {
   X,
   Layers,
   ShieldCheck,
-  Share2
+  Share2,
+  RotateCcw
 } from "lucide-react";
 import { studentAssessmentsAPI } from "@/config/api";
 
@@ -25,11 +27,26 @@ export default function AssessmentResultPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const router = useRouter();
   const resolvedParams = use(params);
   const id = resolvedParams.id;
 
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRetaking, setIsRetaking] = useState(false);
+
+  const handleRetake = async () => {
+    setIsRetaking(true);
+    try {
+      await studentAssessmentsAPI.retakeAttempt(id);
+      router.push(`/assessments/${id}/take`);
+    } catch (err) {
+      console.error("Failed to retake assessment:", err);
+      router.push(`/assessments/${id}/take`);
+    } finally {
+      setIsRetaking(false);
+    }
+  };
 
   useEffect(() => {
     const fetchResult = async () => {
@@ -343,13 +360,27 @@ export default function AssessmentResultPage({
         )}
 
         {/* Footer */}
-        <div className="text-center pt-4 pb-8">
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-4 pb-8">
           <Link
             href="/assessments"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold rounded-xl transition-all shadow-md shadow-primary/20"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-muted hover:bg-muted/80 text-foreground text-xs font-bold rounded-xl transition-all border border-border"
           >
             <ArrowLeft className="w-4 h-4" /> Return to Assessments
           </Link>
+          {data?.canRetake !== false ? (
+            <button
+              onClick={handleRetake}
+              disabled={isRetaking}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold rounded-xl transition-all shadow-md shadow-primary/20 disabled:opacity-50"
+            >
+              <RotateCcw className={`w-4 h-4 ${isRetaking ? "animate-spin" : ""}`} />
+              {isRetaking ? "Preparing Re-attempt..." : "Redo / Re-attempt Assessment"}
+            </button>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-5 py-3 rounded-xl bg-muted/60 text-muted-foreground text-xs font-semibold border border-border">
+              1 Attempt Allowed (Completed)
+            </span>
+          )}
         </div>
       </div>
     </div>

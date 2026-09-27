@@ -308,6 +308,7 @@ export const studentAssessmentsAPI = {
   saveProgress: (id: string, data: any) => api.post(`/assessments/${id}/save-progress`, data),
   submitAttempt: (id: string, data: any) => api.post(`/assessments/${id}/submit`, data),
   getResult: (id: string) => api.get(`/assessments/${id}/result`),
+  retakeAttempt: (id: string) => api.post(`/assessments/${id}/retake`),
 };
 
 export default api;

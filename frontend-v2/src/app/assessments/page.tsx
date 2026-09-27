@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { 
   Trophy, 
   Clock, 
@@ -14,16 +15,19 @@ import {
   RefreshCw,
   Search,
   Sparkles,
-  BarChart3
+  BarChart3,
+  RotateCcw
 } from "lucide-react";
 import { studentAssessmentsAPI } from "@/config/api";
 import { useAuth } from "@/context/AuthContext";
 
 export default function StudentAssessmentsPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const [assessments, setAssessments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterTab, setFilterTab] = useState<"available" | "completed">("available");
+  const [retakingId, setRetakingId] = useState<string | null>(null);
 
   const fetchAssessments = async () => {
     setIsLoading(true);
@@ -34,6 +38,19 @@ export default function StudentAssessmentsPage() {
       console.error("Failed to load student assessments:", err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleRetake = async (assessmentId: string) => {
+    setRetakingId(assessmentId);
+    try {
+      await studentAssessmentsAPI.retakeAttempt(assessmentId);
+      router.push(`/assessments/${assessmentId}/take`);
+    } catch (err) {
+      console.error("Failed to initiate reattempt:", err);
+      router.push(`/assessments/${assessmentId}/take`);
+    } finally {
+      setRetakingId(null);
     }
   };
 
@@ -198,30 +215,60 @@ export default function StudentAssessmentsPage() {
 
                 <div className="pt-2 flex items-center justify-between border-t border-border/40">
                   {test.attemptStatus === "submitted" ? (
-                    <div className="flex items-center justify-between w-full">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
                       <div className="text-xs">
-                        <span className="text-muted-foreground">Score: </span>
-                        <strong className="text-foreground text-sm">{test.attemptScore} pts</strong>
+                        <span className="text-muted-foreground">Best Score: </span>
+                        <strong className="text-foreground text-sm font-mono">{test.attemptScore} / {test.totalMarks} pts</strong>
                         <span
                           className={`ml-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                             test.attemptPassed
-                              ? "bg-emerald-500/10 text-emerald-400"
-                              : "bg-rose-500/10 text-rose-400"
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
                           }`}
                         >
-                          {test.attemptPassed ? "PASSED" : "FAILED"}
+                          {test.attemptPassed ? "PASSED" : "COMPLETED"}
                         </span>
+                        {test.totalAttempts && test.totalAttempts > 1 && (
+                          <span className="ml-2 text-[10px] text-muted-foreground font-mono">
+                            ({test.totalAttempts} attempts)
+                          </span>
+                        )}
                       </div>
-                      <Link
-                        href={`/assessments/${test._id}/result`}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-muted hover:bg-muted/80 text-foreground text-xs font-semibold rounded-xl transition-colors border border-border"
-                      >
-                        <BarChart3 className="w-3.5 h-3.5 text-primary" /> View Scorecard
-                      </Link>
+
+                      <div className="flex items-center gap-2">
+                        {test.canRetake ? (
+                          <button
+                            type="button"
+                            onClick={() => handleRetake(test._id)}
+                            disabled={retakingId === test._id}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold rounded-xl border border-primary/20 transition-colors disabled:opacity-50"
+                          >
+                            <RotateCcw className={`w-3.5 h-3.5 ${retakingId === test._id ? "animate-spin" : ""}`} />
+                            <span>{retakingId === test._id ? "Launching..." : "Re-attempt"}</span>
+                          </button>
+                        ) : (
+                          <span className="text-[11px] font-medium text-muted-foreground px-2.5 py-1 rounded-lg bg-muted/40 border border-border">
+                            1 Attempt Allowed
+                          </span>
+                        )}
+
+                        <Link
+                          href={`/assessments/${test._id}/result`}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-muted hover:bg-muted/80 text-foreground text-xs font-semibold rounded-xl transition-colors border border-border"
+                        >
+                          <BarChart3 className="w-3.5 h-3.5 text-primary" /> View Scorecard
+                        </Link>
+                      </div>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between w-full">
-                      <span className="text-xs text-muted-foreground">1 Attempt Allowed</span>
+                      <span className="text-xs text-muted-foreground font-medium">
+                        {test.allowedAttempts === 1
+                          ? "1 Attempt Allowed"
+                          : test.allowedAttempts === 0
+                          ? "Multiple Attempts Allowed"
+                          : `${test.allowedAttempts} Attempts Allowed`}
+                      </span>
                       <Link
                         href={`/assessments/${test._id}`}
                         className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold rounded-xl transition-all shadow-md shadow-primary/20"

@@ -1,0 +1,152 @@
+title,question,question_type,topic,subtopic,difficulty,marks,negative_marks,**constraints,**time_limit,memory_limit,starter_code,test_input_1,test_output_1,test_input_2,test_output_2,explanation,language,**tags**
+"Customer Purchase Analyzer","A retail company stores the number of items purchased by each customer during a promotional event. Find the customer who purchased the maximum number of items. If multiple customers have the same maximum, return the first occurrence.","coding",DSA I,Arrays,medium,5,0,**"1 <= N <= 10^5",**2000,256,"def max_purchase(purchases):
+
+    pass","5
+
+12 25 18 30 22","30","4
+
+15 40 40 20","40","Traverse the array once and keep track of the maximum purchase count.","python",**"arrays,scenario-based,max-element"**
+"Employee Attendance Tracker","An organization records the number of days employees were present during a month. Return the number of employees whose attendance is greater than or equal to a given required attendance value.","coding",DSA I,Arrays,medium,5,0,**"1 <= N <= 10^5",**2000,256,"def eligible_employees(attendance, required):
+
+    pass","5
+
+18 22 15 25 20
+
+20","3","4
+
+10 30 25 18
+
+20","2","Traverse the attendance array and count employees meeting the required threshold.","python",**"arrays,counting,scenario-based"**
+"Delivery Route Adjustment","A delivery company has recorded package counts for different delivery zones. Due to a system update, the package count of every zone must be shifted one position to the right. The last zone's count moves to the first position.","coding",DSA I,Arrays,medium,5,0,**"1 <= N <= 10^5",**2000,256,"def rotate_right(packages):
+
+    pass","5
+
+10 20 30 40 50","50 10 20 30 40","3
+
+5 15 25","25 5 15","Move the last element to the first position and shift all other elements one position right.","python",**"arrays,rotation,scenario-based"**
+"Inventory Duplicate Check","An inventory system receives product IDs for a shipment. Determine whether any product ID appears more than once in the shipment.","coding",DSA I,Hashing,medium,5,0,**"1 <= N <= 10^5",**2000,256,"def has_duplicate(products):
+
+    pass","6
+
+101 205 310 205 450 500","true","5
+
+10 20 30 40 50","false","Use a hash set to track product IDs already encountered.","python",**"hashing,arrays,duplicates"**
+"Support Ticket Analyzer","A support center stores the category of every incoming ticket as a string. Find the first category character that appears only once in the category code.","coding",DSA I,Strings,medium,5,0,**"1 <= len(s) <= 10^5",**2000,256,"def first_unique(s):
+
+    pass","support","u","aabbcc","-1","Count every character first, then scan the string to find the first character with frequency one.","python",**"strings,hashing,frequency"**
+"Employee ID Verification","An organization receives an employee ID string. Determine whether the ID reads the same from left to right and right to left. Return true if it is a valid palindrome ID.","coding",DSA I,Strings,easy,5,0,**"1 <= len(s) <= 10^5",**2000,256,"def is_valid_id(s):
+
+    pass","1221","true","EMP102","false","Compare characters from both ends using two pointers.","python",**"strings,palindrome,two-pointers"**
+"Sales Frequency Report","A company wants to know how many times each product was sold during a day. Given product IDs, return the frequency of a specified product ID.","coding",DSA I,Hashing,easy,5,0,**"1 <= N <= 10^5",**2000,256,"def product_frequency(products, product_id):
+
+    pass","7
+
+101 205 101 301 205 101 400
+
+101","3","5
+
+10 20 10 30 20
+
+30","1","Store product frequencies in a hash map and retrieve the count for the requested product.","python",**"hashing,frequency,arrays"**
+"Customer Feedback Cleaner","A customer feedback system receives a text string. Remove all repeated spaces so that words are separated by exactly one space.","coding",DSA I,Strings,medium,5,0,**"1 <= len(s) <= 10^5",**2000,256,"def clean_feedback(s):
+
+    pass","hello   customer   service","hello customer service","great    support","great support","Process the string and add a space only when the previous character is not already a space.","python",**"strings,text-processing,scenario-based"**
+"Transaction Pair Finder","A banking application needs to identify two transactions whose amounts add up to a specified target amount. Return their indices.","coding",DSA I,Hashing,medium,10,0,**"2 <= N <= 10^5",**2000,256,"def find_transactions(amounts, target):
+
+    pass","5
+
+120 250 180 320 100
+
+430","1 3","4
+
+50 75 125 200
+
+275","1 2","Use a hash map to store previously processed transaction amounts and search for the required complement.","python",**"hashing,two-sum,arrays"**
+"Employee Salary Search","An HR system stores employee salaries in sorted order. Given a salary, determine whether an employee with exactly that salary exists and return its index.","coding",DSA II,Searching,easy,5,0,**"1 <= N <= 10^5",**2000,256,"def salary_search(salaries, target):
+
+    pass","6
+
+25000 30000 35000 40000 45000 50000
+
+40000","3","5
+
+20000 25000 30000 35000 40000
+
+28000","-1","Because salaries are sorted, use binary search to repeatedly reduce the search range by half.","python",**"searching,binary-search,scenario-based"**
+"Product Code Lookup","A warehouse maintains sorted product codes. Given a product code, find its position using an efficient searching technique.","coding",DSA II,Searching,medium,5,0,**"1 <= N <= 10^5",**2000,256,"def find_product(codes, target):
+
+    pass","7
+
+101 205 310 415 520 625 730
+
+520","4","5
+
+100 200 300 400 500
+
+350","-1","Use binary search because the product codes are sorted.","python",**"binary-search,searching,arrays"**
+"Monthly Sales Sorting","A company wants to arrange monthly sales figures from lowest to highest before generating a report. Sort the given sales values.","coding",DSA II,Sorting,medium,10,0,**"1 <= N <= 10^4",**2000,256,"def sort_sales(sales):
+
+    pass","6
+
+450 120 300 200 500 100","100 120 200 300 450 500","5
+
+90 40 70 20 60","20 40 60 70 90","Sort the sales values in ascending order using an appropriate sorting algorithm.","python",**"sorting,arrays,sales"**
+"Priority Task Ordering","A project management system stores task priorities where a smaller number represents a higher priority. Arrange all tasks from highest priority to lowest priority.","coding",DSA II,Sorting,medium,10,0,**"1 <= N <= 10^4",**2000,256,"def arrange_tasks(priority):
+
+    pass","5
+
+4 1 3 2 5","1 2 3 4 5","4
+
+3 5 1 2","1 2 3 5","Compare and rearrange task priorities so that the smallest priority values appear first.","python",**"sorting,arrays,priority"**
+"Search Optimization","A company searches for a customer ID in an unsorted list using a sequential search. Given N customer IDs, determine the worst-case time complexity of this search operation.","coding",DSA II,Time/Space Complexity,easy,5,0,**"1 <= N <= 10^6",**1000,128,"def search_complexity():
+
+    pass","","O(n)","","O(n)","In the worst case, sequential search may inspect every element, so its time complexity is O(n).","python",**"complexity,big-o,searching"**
+"Report Generation Complexity","A reporting program processes every employee once and performs a constant amount of work for each employee. Determine its time complexity for N employees.","coding",DSA II,Time/Space Complexity,easy,5,0,**"1 <= N <= 10^6",**1000,128,"def report_complexity():
+
+    pass","","O(n)","","O(n)","The program performs constant work for each of N employees, resulting in linear time complexity O(n).","python",**"time-complexity,big-o,analysis"**
+"Duplicate Transaction Detector","A payment company receives transaction IDs. Determine whether any transaction ID appears more than once. The solution should be efficient for large input sizes.","coding",DSA II,Pattern Recognition,medium,10,0,**"1 <= N <= 10^5",**2000,256,"def detect_duplicate_transactions(ids):
+
+    pass","6
+
+501 702 803 501 904 1005","true","5
+
+100 200 300 400 500","false","Recognize the duplicate-detection pattern and use a hash set to achieve average O(n) time.","python",**"pattern-recognition,hashing,duplicates"**
+"Peak Sales Period","A company records daily profit and loss values. Find the maximum total profit that can be obtained from any continuous period of days.","coding",DSA II,Pattern Recognition,hard,10,0,**"1 <= N <= 10^5",**2000,256,"def maximum_profit_period(values):
+
+    pass","8
+
+-2 3 -1 5 -6 4 2 -1","7","5
+
+4 -1 2 1 -5","6","Recognize the maximum subarray pattern and use Kadane's algorithm to track the best continuous sum.","python",**"pattern-recognition,kadane,arrays"**
+"Customer Name Sorting","A customer service application stores customer names and needs them in alphabetical order for a report. Sort the names lexicographically.","coding",DSA II,Sorting,medium,10,0,**"1 <= N <= 10^4",**2000,256,"def sort_names(names):
+
+    pass","4
+
+Zara Amit Rahul Neha","Amit Neha Rahul Zara","3
+
+John Adam Bob","Adam Bob John","Use a sorting algorithm to arrange strings in lexicographical order.","python",**"sorting,strings,scenario-based"**
+"Efficient Product Search","A warehouse has N sorted product codes and needs to process many searches for requested codes. Identify the most suitable searching approach and implement it.","coding",DSA II,Searching,medium,10,0,**"1 <= N <= 10^5",**2000,256,"def product_search(codes, target):
+
+    pass","6
+
+100 200 300 400 500 600
+
+500","4","5
+
+110 220 330 440 550
+
+250","-1","Since the product codes are sorted, binary search reduces the search space by half at every step.","python",**"searching,binary-search,optimization"**
+"Pattern Based Stock Analysis","A company records daily stock prices. Find the first day where the price is greater than the price on the previous day. Return its index, or -1 if no such day exists.","coding",DSA II,Pattern Recognition,medium,5,0,**"2 <= N <= 10^5",**2000,256,"def first_increase(prices):
+
+    pass","5
+
+100 95 90 110 120","3","4
+
+100 90 80 70","-1","Compare adjacent values and identify the first position where the current price is greater than the previous price.","python",**"pattern-recognition,arrays,stock-prices"**
+"Memory Efficient Processing","A data processing application receives a very large array and must find the maximum value without creating another array of size N. Return the maximum value and use constant extra space.","coding",DSA II,Time/Space Complexity,medium,10,0,**"1 <= N <= 10^6",**2000,256,"def memory_efficient_max(nums):
+
+    pass","5
+
+12 45 23 67 34","67","4
+
+90 20 75 10","90","Maintain only the current maximum value instead of creating an additional data structure. The extra space is O(1).","python",**"space-complexity,arrays,optimization"**

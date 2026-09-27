@@ -33,6 +33,7 @@ export default function CreateAssessmentPage() {
   const [passingMarks, setPassingMarks] = useState<number | "">("");
   const [negativeMarking, setNegativeMarking] = useState(true);
   const [category, setCategory] = useState("exam");
+  const [allowedAttempts, setAllowedAttempts] = useState(0);
 
   // Proctoring Settings
   const [enforceFullscreen, setEnforceFullscreen] = useState(true);
@@ -130,6 +131,7 @@ export default function CreateAssessmentPage() {
         code: code.trim().toUpperCase(),
         description: description.trim(),
         category,
+        allowedAttempts: Number(allowedAttempts),
         durationMinutes: Number(durationMinutes),
         passingMarks: passingMarks !== "" ? Number(passingMarks) : Math.ceil(totalCalculatedMarks * 0.4),
         negativeMarking,
@@ -242,7 +244,7 @@ export default function CreateAssessmentPage() {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground">
                 Duration (Minutes) <span className="text-rose-400">*</span>
@@ -285,6 +287,23 @@ export default function CreateAssessmentPage() {
                 <option value="quiz">Weekly Quiz / Test</option>
                 <option value="practice">Practice Drill</option>
                 <option value="recruitment">Campus Placement Test</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-foreground">
+                Attempt Policy <span className="text-primary">*</span>
+              </label>
+              <select
+                value={allowedAttempts}
+                onChange={(e) => setAllowedAttempts(Number(e.target.value))}
+                className="w-full px-3.5 py-2.5 bg-muted/40 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary font-medium"
+              >
+                <option value={0}>Multiple / Unlimited Attempts (Keep Best Score)</option>
+                <option value={1}>1 Attempt Allowed</option>
+                <option value={2}>2 Attempts (Keep Best Score)</option>
+                <option value={3}>3 Attempts (Keep Best Score)</option>
+                <option value={5}>5 Attempts (Keep Best Score)</option>
               </select>
             </div>
           </div>

@@ -43,6 +43,15 @@ export class AssessmentsStudentController {
     return this.assessmentsService.startStudentAttempt(id, studentUser);
   }
 
+  @Post(':id/retake')
+  @ApiOperation({ summary: 'Redo / Retake assessment session for practice' })
+  async retakeAttempt(
+    @Param('id') id: string,
+    @CurrentUser() studentUser: any,
+  ) {
+    return this.assessmentsService.retakeStudentAttempt(id, studentUser);
+  }
+
   @Post(':id/save-progress')
   @ApiOperation({ summary: 'Autosave candidate responses during test' })
   async saveProgress(

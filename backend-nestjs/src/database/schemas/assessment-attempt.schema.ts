@@ -31,6 +31,18 @@ export class QuestionResponse {
   @Prop({ default: 0 })
   timeSpentSeconds: number;
 
+  @Prop({ default: '' })
+  code?: string;
+
+  @Prop({ default: 'python' })
+  language?: string;
+
+  @Prop({ default: 0 })
+  testCasesPassed?: number;
+
+  @Prop({ default: 0 })
+  totalTestCases?: number;
+
   @Prop({
     type: String,
     enum: ['answered', 'marked_for_review', 'skipped', 'unvisited'],
@@ -95,6 +107,12 @@ export class AssessmentAttempt {
   // Computed Evaluation Scores
   @Prop({ default: 0 })
   score: number;
+
+  @Prop({ default: 0 })
+  highestScore?: number;
+
+  @Prop({ default: 1 })
+  attemptNumber?: number;
 
   @Prop({ default: 0 })
   maxScore: number;

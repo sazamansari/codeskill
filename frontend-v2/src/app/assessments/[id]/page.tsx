@@ -15,7 +15,8 @@ import {
   ArrowLeft,
   Maximize2,
   Check,
-  RefreshCw
+  RefreshCw,
+  BarChart3
 } from "lucide-react";
 import { studentAssessmentsAPI } from "@/config/api";
 import { useAuth } from "@/context/AuthContext";
@@ -41,7 +42,11 @@ export default function AssessmentBriefingPage({
       try {
         const res = await studentAssessmentsAPI.getOverview(id);
         setData(res.data);
-        if (res.data.attempt?.status === "submitted" || res.data.attempt?.status === "auto_submitted") {
+        // Only redirect to result if student finished and cannot retake
+        if (
+          (res.data.attempt?.status === "submitted" || res.data.attempt?.status === "auto_submitted") &&
+          res.data.canRetake === false
+        ) {
           router.replace(`/assessments/${id}/result`);
         }
       } catch (err) {
@@ -65,6 +70,15 @@ export default function AssessmentBriefingPage({
       }
     } catch (e) {
       // Fullscreen prompt optional fallback
+    }
+
+    // If re-attempting after completing, ensure fresh attempt is initialized
+    if (data?.completedAttemptsCount > 0 && data?.attempt?.status !== "in_progress") {
+      try {
+        await studentAssessmentsAPI.retakeAttempt(id);
+      } catch (e) {
+        console.error("Retake attempt error:", e);
+      }
     }
 
     router.push(`/assessments/${id}/take`);
@@ -131,6 +145,13 @@ export default function AssessmentBriefingPage({
                     {assessment.unavailabilityReason || "Currently Closed"}
                   </span>
                 )}
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border">
+                  {assessment.allowedAttempts === 1
+                    ? "1 Attempt Allowed"
+                    : assessment.allowedAttempts === 0
+                    ? "Multiple Attempts Allowed"
+                    : `${assessment.allowedAttempts} Attempts Allowed`}
+                </span>
               </div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">
                 {assessment.title}
@@ -216,8 +237,10 @@ export default function AssessmentBriefingPage({
               Examination Rules & Integrity Notice
             </h3>
             <ul className="space-y-2.5 text-xs text-muted-foreground">
-              {(assessment.instructions && assessment.instructions.length > 0
+              {(Array.isArray(assessment.instructions) && assessment.instructions.length > 0
                 ? assessment.instructions
+                : typeof assessment.instructions === "string" && assessment.instructions.trim().length > 0
+                ? assessment.instructions.split("\n").map((s: string) => s.trim()).filter(Boolean)
                 : [
                     "Camera & Microphone proctoring is enabled to monitor your test environment.",
                     "Fullscreen mode is strictly enforced. Tab switching or exiting fullscreen will trigger security warnings.",
@@ -250,27 +273,68 @@ export default function AssessmentBriefingPage({
             </label>
           </div>
 
-          {/* Start Action */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-            <span className="text-xs text-muted-foreground">
-              {assessment.isAvailable === false
-                ? "This assessment is currently not accepting new attempts."
-                : "Once you click Begin, the timer and proctoring session will start immediately."}
-            </span>
+          {/* Previous Attempt Summary for Re-attempts */}
+          {data?.completedAttemptsCount > 0 && (
+            <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="space-y-0.5">
+                <span className="font-bold text-foreground flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  Previous Attempt Completed ({data.completedAttemptsCount} {data.completedAttemptsCount === 1 ? "attempt" : "attempts"} taken)
+                </span>
+                <p className="text-muted-foreground">
+                  Highest Score Recorded: <strong className="text-emerald-400 font-bold">{data.highestScore ?? data.attempt?.score ?? 0}</strong> / {assessment.totalMarks} pts.
+                  {assessment.allowedAttempts === 0 ? " (Unlimited Re-attempts Allowed)" : ` (${assessment.allowedAttempts - data.completedAttemptsCount} attempts remaining)`}
+                </p>
+              </div>
+              <Link
+                href={`/assessments/${id}/result`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground font-semibold rounded-lg border border-border text-xs transition-colors"
+              >
+                <BarChart3 className="w-3.5 h-3.5 text-primary" /> View Last Scorecard
+              </Link>
+            </div>
+          )}
 
-            <button
-              onClick={handleStartExam}
-              disabled={!agreedToRules || isStarting || assessment.isAvailable === false}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl text-xs sm:text-sm transition-all shadow-md shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <Maximize2 className="w-4 h-4" />
-              {isStarting
-                ? "Launching Exam..."
-                : assessment.isAvailable === false
-                ? "Assessment Closed"
-                : "Begin Assessment Now"}
-            </button>
-          </div>
+          {/* Start Action / Scorecard Redirect */}
+          {data?.attempt?.status === "submitted" && data?.canRetake === false ? (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+              <span className="text-xs text-muted-foreground font-medium">
+                You have already completed your permitted attempt(s) for this examination.
+              </span>
+
+              <Link
+                href={`/assessments/${id}/result`}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl text-xs sm:text-sm transition-all shadow-md shadow-primary/20"
+              >
+                <BarChart3 className="w-4 h-4" /> View Your Scorecard & Result
+              </Link>
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+              <span className="text-xs text-muted-foreground">
+                {assessment.isAvailable === false
+                  ? "This assessment is currently not accepting new attempts."
+                  : data?.completedAttemptsCount > 0
+                  ? "Starting a new attempt will allow you to improve your score. The highest score is permanently saved."
+                  : "Once you click Begin, the timer and proctoring session will start immediately."}
+              </span>
+
+              <button
+                onClick={handleStartExam}
+                disabled={!agreedToRules || isStarting || assessment.isAvailable === false}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl text-xs sm:text-sm transition-all shadow-md shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Maximize2 className="w-4 h-4" />
+                {isStarting
+                  ? "Launching Exam..."
+                  : assessment.isAvailable === false
+                  ? "Assessment Closed"
+                  : data?.completedAttemptsCount > 0
+                  ? "Start New Attempt / Re-attempt"
+                  : "Begin Assessment Now"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

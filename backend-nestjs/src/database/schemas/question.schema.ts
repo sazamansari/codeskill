@@ -6,7 +6,7 @@ export type QuestionDocument = HydratedDocument<Question>;
 
 export type QuestionDifficulty = 'easy' | 'medium' | 'hard';
 export type QuestionStatus = 'pending' | 'approved' | 'rejected' | 'archived';
-export type QuestionType = 'single_choice' | 'multiple_choice';
+export type QuestionType = 'single_choice' | 'multiple_choice' | 'coding' | 'algorithmic';
 
 @Schema({ timestamps: true })
 export class Question {
@@ -51,7 +51,7 @@ export class Question {
 
   @Prop({
     type: String,
-    enum: ['single_choice', 'multiple_choice'],
+    enum: ['single_choice', 'multiple_choice', 'coding', 'algorithmic'],
     default: 'single_choice',
   })
   questionType: QuestionType;

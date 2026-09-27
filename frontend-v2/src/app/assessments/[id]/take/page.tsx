@@ -28,6 +28,16 @@ import {
   X
 } from "lucide-react";
 import { studentAssessmentsAPI } from "@/config/api";
+import DSAAssessmentEditor from "@/components/assessment/DSAAssessmentEditor";
+
+interface TestCase {
+  id?: string;
+  input: string;
+  output?: string;
+  expected?: string;
+  explanation?: string;
+  isHidden?: boolean;
+}
 
 interface Question {
   _id: string;
@@ -41,7 +51,12 @@ interface Question {
   negativeMarks: number;
   options: string[];
   codeSnippet?: string;
+  starterCode?: string;
   language?: string;
+  constraints?: string;
+  timeLimit?: number;
+  memoryLimit?: number;
+  testCases?: TestCase[];
 }
 
 interface ViolationEvent {
@@ -63,7 +78,17 @@ export default function TakeAssessmentPage({
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [responses, setResponses] = useState<
-    Record<string, { selectedAnswer: number; status: string }>
+    Record<
+      string,
+      {
+        selectedAnswer: number;
+        code?: string;
+        language?: string;
+        testCasesPassed?: number;
+        totalTestCases?: number;
+        status: string;
+      }
+    >
   >({});
   const [durationMinutes, setDurationMinutes] = useState(45);
   const [startedAt, setStartedAt] = useState<Date>(new Date());
@@ -130,6 +155,10 @@ export default function TakeAssessmentPage({
         return {
           questionId: q._id,
           selectedAnswer: r ? r.selectedAnswer : -1,
+          code: r?.code || "",
+          language: r?.language || "python",
+          testCasesPassed: r?.testCasesPassed || 0,
+          totalTestCases: r?.totalTestCases || 0,
           status: r ? r.status : "unvisited",
         };
       });
@@ -172,12 +201,30 @@ export default function TakeAssessmentPage({
         }
 
         // Restore saved responses if session resumed
-        const initialResponses: Record<string, { selectedAnswer: number; status: string }> = {};
+        const initialResponses: Record<
+          string,
+          {
+            selectedAnswer: number;
+            code?: string;
+            language?: string;
+            testCasesPassed?: number;
+            totalTestCases?: number;
+            status: string;
+          }
+        > = {};
         (data.savedResponses || []).forEach((r: any) => {
           if (r.questionId) {
             initialResponses[r.questionId.toString()] = {
               selectedAnswer: r.selectedAnswer ?? -1,
-              status: r.status || (r.selectedAnswer >= 0 ? "answered" : "unvisited"),
+              code: r.code || "",
+              language: r.language || "python",
+              testCasesPassed: r.testCasesPassed || 0,
+              totalTestCases: r.totalTestCases || 0,
+              status:
+                r.status ||
+                (r.selectedAnswer >= 0 || (r.code && r.code.trim().length > 0)
+                  ? "answered"
+                  : "unvisited"),
             };
           }
         });
@@ -307,6 +354,10 @@ export default function TakeAssessmentPage({
         return {
           questionId: q._id,
           selectedAnswer: r ? r.selectedAnswer : -1,
+          code: r?.code || "",
+          language: r?.language || "python",
+          testCasesPassed: r?.testCasesPassed || 0,
+          totalTestCases: r?.totalTestCases || 0,
           status: r ? r.status : "skipped",
           timeSpentSeconds: 0,
         };
@@ -355,6 +406,10 @@ export default function TakeAssessmentPage({
         return {
           questionId: q._id,
           selectedAnswer: r ? r.selectedAnswer : -1,
+          code: r?.code || "",
+          language: r?.language || "python",
+          testCasesPassed: r?.testCasesPassed || 0,
+          totalTestCases: r?.totalTestCases || 0,
           status: r ? r.status : "unvisited",
         };
       });
@@ -413,6 +468,15 @@ export default function TakeAssessmentPage({
     if (isLoading) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable
+      ) {
+        return;
+      }
+
       const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
       const mod = isMac ? e.metaKey : e.ctrlKey;
 
@@ -448,21 +512,39 @@ export default function TakeAssessmentPage({
     };
 
     const handleFullscreenChange = () => {
-      const isFull = !!document.fullscreenElement;
+      const isFull = !!(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement
+      );
       setIsFullscreen(isFull);
-      if (!isFull) {
-        recordViolation("fullscreen_exit", "Candidate exited fullscreen exam environment");
+      if (!isFull && !isLoading) {
+        recordViolation(
+          "fullscreen_exit",
+          "Candidate exited fullscreen exam environment"
+        );
+        setViolationMessage(
+          "Proctoring Alert: Fullscreen Exit Detected! University examination integrity policy strictly requires you to remain in fullscreen mode throughout the entire test. Click below to re-enter fullscreen immediately."
+        );
+        setShowViolationModal(true);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown, true);
     window.addEventListener("contextmenu", handleContextMenu);
     document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown, true);
       window.removeEventListener("contextmenu", handleContextMenu);
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
     };
   }, [isLoading, recordViolation]);
 
@@ -525,6 +607,49 @@ export default function TakeAssessmentPage({
     }
   };
 
+  const handleSaveCodingQuestion = (
+    code: string,
+    language: string,
+    testCasesPassed: number,
+    totalTestCases: number
+  ) => {
+    if (!currentQ) return;
+    const nextResponses = {
+      ...responsesRef.current,
+      [currentQ._id]: {
+        selectedAnswer: -1,
+        code,
+        language,
+        testCasesPassed,
+        totalTestCases,
+        status: "answered",
+      },
+    };
+    setResponses(nextResponses);
+    responsesRef.current = nextResponses;
+
+    // Send formatted progress to server immediately
+    const formatted = questions.map((q) => {
+      const r = nextResponses[q._id];
+      return {
+        questionId: q._id,
+        selectedAnswer: r ? r.selectedAnswer : -1,
+        code: r?.code || "",
+        language: r?.language || "python",
+        testCasesPassed: r?.testCasesPassed || 0,
+        totalTestCases: r?.totalTestCases || 0,
+        status: r ? r.status : "unvisited",
+        timeSpentSeconds: 0,
+      };
+    });
+
+    studentAssessmentsAPI.saveProgress(id, {
+      responses: formatted,
+      timeSpentSeconds: Math.floor((Date.now() - startedAt.getTime()) / 1000),
+      violations: violationsRef.current,
+    }).catch(() => {});
+  };
+
   const handleSaveAndNext = () => {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex((prev) => prev + 1);
@@ -558,7 +683,9 @@ export default function TakeAssessmentPage({
 
   // Metrics for Question Palette
   const answeredCount = Object.values(responses).filter(
-    (r) => r.status === "answered" && r.selectedAnswer >= 0
+    (r) =>
+      r.status === "answered" &&
+      (r.selectedAnswer >= 0 || (r.code && r.code.trim().length > 0))
   ).length;
   const reviewCount = Object.values(responses).filter(
     (r) => r.status === "marked_for_review"
@@ -675,154 +802,218 @@ export default function TakeAssessmentPage({
       )}
 
       {/* Main Workspace Layout */}
-      <div className="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full p-3 sm:p-6 gap-4 sm:gap-6">
-        
-        {/* Left Column: Question Area */}
-        <main className="flex-1 flex flex-col justify-between space-y-4">
-          <div className="bg-card border border-border rounded-2xl sm:rounded-3xl p-5 sm:p-8 space-y-6 shadow-sm">
-            
-            {/* Question Metadata Ribbon */}
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-4">
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase bg-primary/10 text-primary border border-primary/20">
-                  {currentQ.questionType === "multiple_choice" ? "Multiple Choice" : "Single Choice"}
-                </span>
-                <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-muted text-muted-foreground border border-border capitalize">
-                  {currentQ.difficulty}
-                </span>
-              </div>
+      {(() => {
+        const isCodingQuestion =
+          currentQ.questionType === "coding" ||
+          currentQ.questionType === "algorithmic" ||
+          (!currentQ.options?.length && (!!currentQ.starterCode || !!currentQ.codeSnippet));
 
-              <div className="flex items-center gap-3 text-xs">
-                <div className="flex items-center gap-1 text-emerald-400 font-mono font-bold">
-                  <span>+{currentQ.marks || 1} mark</span>
-                </div>
-                {currentQ.negativeMarks > 0 && (
-                  <div className="flex items-center gap-1 text-rose-400 font-mono font-bold">
-                    <span>-{currentQ.negativeMarks} negative</span>
-                  </div>
-                )}
-              </div>
-            </div>
+        return (
+          <div
+            className={`flex-1 flex flex-col lg:flex-row mx-auto w-full p-3 sm:p-6 gap-4 sm:gap-6 ${
+              isCodingQuestion ? "max-w-[1700px]" : "max-w-7xl"
+            }`}
+          >
+            {/* Left Column: Question Area / DSA Code Editor */}
+            {isCodingQuestion ? (
+              <main className="flex-1 flex flex-col justify-between space-y-4 min-w-0">
+                <DSAAssessmentEditor
+                  question={currentQ}
+                  savedResponse={responses[currentQ._id]}
+                  onSave={handleSaveCodingQuestion}
+                  onNext={handleSaveAndNext}
+                  isLastQuestion={isLastQuestion}
+                />
 
-            {/* Question Text */}
-            <div className="space-y-4">
-              <h2 className="text-base sm:text-lg font-semibold text-foreground leading-relaxed whitespace-pre-wrap">
-                {currentQ.question}
-              </h2>
-
-              {/* Code Snippet Box (If present in question) */}
-              {currentQ.codeSnippet && (
-                <div className="rounded-xl overflow-hidden border border-border bg-[#0d0d10] p-4 text-xs font-mono text-emerald-300">
-                  <div className="text-[10px] text-muted-foreground uppercase font-sans mb-2 font-bold tracking-wider">
-                    {currentQ.language || "Code"}
-                  </div>
-                  <pre className="overflow-x-auto whitespace-pre leading-5">
-                    {currentQ.codeSnippet}
-                  </pre>
-                </div>
-              )}
-            </div>
-
-            {/* Options Selection (4 Cards) */}
-            <div className="space-y-3 pt-2">
-              {(currentQ.options ?? []).map((optionText, optIndex) => {
-                const isSelected = selectedAnswer === optIndex;
-                const letter = String.fromCharCode(65 + optIndex); // A, B, C, D
-
-                return (
-                  <button
-                    key={optIndex}
-                    type="button"
-                    onClick={() => handleSelectOption(optIndex)}
-                    className={`w-full text-left p-4 sm:p-4 rounded-2xl border transition-all flex items-start gap-3.5 group relative ${
-                      isSelected
-                        ? "border-primary bg-primary/10 shadow-[0_0_0_1px_rgba(37,99,235,0.25)]"
-                        : "border-border bg-card hover:bg-muted/40 hover:border-muted-foreground/30"
-                    }`}
-                  >
-                    {/* Option Radio Letter Pill */}
-                    <div
-                      className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 transition-colors ${
-                        isSelected
-                          ? "bg-primary text-primary-foreground shadow-sm"
-                          : "bg-muted text-muted-foreground border border-border group-hover:border-primary/50 group-hover:text-foreground"
-                      }`}
+                {/* Bottom Action Ribbon */}
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-card border border-border p-3 sm:p-4 rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleMarkForReview}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 text-xs font-semibold text-amber-400 transition-colors"
+                      title="Mark for later review"
                     >
-                      {letter}
-                    </div>
+                      <Bookmark className="w-3.5 h-3.5" /> Review Later
+                    </button>
+                  </div>
 
-                    <div className="flex-1 text-xs sm:text-sm font-medium text-foreground pt-0.5 leading-relaxed">
-                      {optionText}
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
+                      disabled={currentIndex === 0}
+                      className="inline-flex items-center gap-1 px-3 sm:px-4 py-2 rounded-xl border border-border hover:bg-muted text-xs font-semibold text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft className="w-4 h-4" /> Previous
+                    </button>
 
-                    {/* Checkmark when chosen */}
-                    {isSelected && (
-                      <CheckCircle2 className="w-5 h-5 text-primary shrink-0 self-center" />
+                    {isLastQuestion ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowSubmitModal(true)}
+                        className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all shadow-md shadow-primary/20"
+                      >
+                        <Send className="w-3.5 h-3.5" /> Submit Assessment
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleSaveAndNext}
+                        className="inline-flex items-center gap-1 px-4 sm:px-5 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all shadow-sm shadow-primary/20"
+                      >
+                        Save & Next <ChevronRight className="w-4 h-4" />
+                      </button>
                     )}
-                  </button>
-                );
-              })}
-            </div>
+                  </div>
+                </div>
+              </main>
+            ) : (
+              <main className="flex-1 flex flex-col justify-between space-y-4">
+                <div className="bg-card border border-border rounded-2xl sm:rounded-3xl p-5 sm:p-8 space-y-6 shadow-sm">
+                  {/* Question Metadata Ribbon */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase bg-primary/10 text-primary border border-primary/20">
+                        {currentQ.questionType === "multiple_choice" ? "Multiple Choice" : "Single Choice"}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-muted text-muted-foreground border border-border capitalize">
+                        {currentQ.difficulty}
+                      </span>
+                    </div>
 
-            {/* Keyboard shortcut hint */}
-            <div className="text-[11px] text-muted-foreground text-right hidden sm:block">
-              Tip: Press <kbd className="px-1.5 py-0.5 bg-muted rounded border border-border text-foreground font-mono">A</kbd> <kbd className="px-1.5 py-0.5 bg-muted rounded border border-border text-foreground font-mono">B</kbd> <kbd className="px-1.5 py-0.5 bg-muted rounded border border-border text-foreground font-mono">C</kbd> <kbd className="px-1.5 py-0.5 bg-muted rounded border border-border text-foreground font-mono">D</kbd> to select
-            </div>
-          </div>
+                    <div className="flex items-center gap-3 text-xs">
+                      <div className="flex items-center gap-1 text-emerald-400 font-mono font-bold">
+                        <span>+{currentQ.marks || 1} mark</span>
+                      </div>
+                      {currentQ.negativeMarks > 0 && (
+                        <div className="flex items-center gap-1 text-rose-400 font-mono font-bold">
+                          <span>-{currentQ.negativeMarks} negative</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
-          {/* Bottom Action Ribbon */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-card border border-border p-3 sm:p-4 rounded-2xl shadow-sm">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleClearSelection}
-                disabled={selectedAnswer < 0}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border hover:bg-muted text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                title="Clear current answer choice"
-              >
-                <RotateCcw className="w-3.5 h-3.5" /> Clear
-              </button>
+                  {/* Question Text */}
+                  <div className="space-y-4">
+                    <h2 className="text-base sm:text-lg font-semibold text-foreground leading-relaxed whitespace-pre-wrap">
+                      {currentQ.question}
+                    </h2>
 
-              <button
-                type="button"
-                onClick={handleMarkForReview}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 text-xs font-semibold text-amber-400 transition-colors"
-                title="Mark for later review"
-              >
-                <Bookmark className="w-3.5 h-3.5" /> Review
-              </button>
-            </div>
+                    {/* Code Snippet Box (If present in question) */}
+                    {currentQ.codeSnippet && (
+                      <div className="rounded-xl overflow-hidden border border-border bg-[#0d0d10] p-4 text-xs font-mono text-emerald-300">
+                        <div className="text-[10px] text-muted-foreground uppercase font-sans mb-2 font-bold tracking-wider">
+                          {currentQ.language || "Code"}
+                        </div>
+                        <pre className="overflow-x-auto whitespace-pre leading-5">
+                          {currentQ.codeSnippet}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
-                disabled={currentIndex === 0}
-                className="inline-flex items-center gap-1 px-3 sm:px-4 py-2 rounded-xl border border-border hover:bg-muted text-xs font-semibold text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="w-4 h-4" /> Previous
-              </button>
+                  {/* Options Selection (4 Cards) */}
+                  <div className="space-y-3 pt-2">
+                    {(currentQ.options ?? []).map((optionText, optIndex) => {
+                      const isSelected = selectedAnswer === optIndex;
+                      const letter = String.fromCharCode(65 + optIndex); // A, B, C, D
 
-              {isLastQuestion ? (
-                <button
-                  type="button"
-                  onClick={() => setShowSubmitModal(true)}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all shadow-md shadow-primary/20"
-                >
-                  <Send className="w-3.5 h-3.5" /> Submit Assessment
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleSaveAndNext}
-                  className="inline-flex items-center gap-1 px-4 sm:px-5 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all shadow-sm shadow-primary/20"
-                >
-                  Save & Next <ChevronRight className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          </div>
-        </main>
+                      return (
+                        <button
+                          key={optIndex}
+                          type="button"
+                          onClick={() => handleSelectOption(optIndex)}
+                          className={`w-full text-left p-4 sm:p-4 rounded-2xl border transition-all flex items-start gap-3.5 group relative ${
+                            isSelected
+                              ? "border-primary bg-primary/10 shadow-[0_0_0_1px_rgba(37,99,235,0.25)]"
+                              : "border-border bg-card hover:bg-muted/40 hover:border-muted-foreground/30"
+                          }`}
+                        >
+                          {/* Option Radio Letter Pill */}
+                          <div
+                            className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 transition-colors ${
+                              isSelected
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "bg-muted text-muted-foreground border border-border group-hover:border-primary/50 group-hover:text-foreground"
+                            }`}
+                          >
+                            {letter}
+                          </div>
+
+                          <div className="flex-1 text-xs sm:text-sm font-medium text-foreground pt-0.5 leading-relaxed">
+                            {optionText}
+                          </div>
+
+                          {/* Checkmark when chosen */}
+                          {isSelected && (
+                            <CheckCircle2 className="w-5 h-5 text-primary shrink-0 self-center" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Keyboard shortcut hint */}
+                  <div className="text-[11px] text-muted-foreground text-right hidden sm:block">
+                    Tip: Press <kbd className="px-1.5 py-0.5 bg-muted rounded border border-border text-foreground font-mono">A</kbd> <kbd className="px-1.5 py-0.5 bg-muted rounded border border-border text-foreground font-mono">B</kbd> <kbd className="px-1.5 py-0.5 bg-muted rounded border border-border text-foreground font-mono">C</kbd> <kbd className="px-1.5 py-0.5 bg-muted rounded border border-border text-foreground font-mono">D</kbd> to select
+                  </div>
+                </div>
+
+                {/* Bottom Action Ribbon */}
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-card border border-border p-3 sm:p-4 rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleClearSelection}
+                      disabled={selectedAnswer < 0}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border hover:bg-muted text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Clear current answer choice"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" /> Clear
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleMarkForReview}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 text-xs font-semibold text-amber-400 transition-colors"
+                      title="Mark for later review"
+                    >
+                      <Bookmark className="w-3.5 h-3.5" /> Review
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
+                      disabled={currentIndex === 0}
+                      className="inline-flex items-center gap-1 px-3 sm:px-4 py-2 rounded-xl border border-border hover:bg-muted text-xs font-semibold text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft className="w-4 h-4" /> Previous
+                    </button>
+
+                    {isLastQuestion ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowSubmitModal(true)}
+                        className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all shadow-md shadow-primary/20"
+                      >
+                        <Send className="w-3.5 h-3.5" /> Submit Assessment
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleSaveAndNext}
+                        className="inline-flex items-center gap-1 px-4 sm:px-5 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all shadow-sm shadow-primary/20"
+                      >
+                        Save & Next <ChevronRight className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </main>
+            )}
 
         {/* Right Column: Proctoring Feed & Question Palette Sidebar */}
         <aside className="w-full lg:w-80 flex flex-col gap-4">
@@ -932,7 +1123,9 @@ export default function TakeAssessmentPage({
                 {questions.map((q, idx) => {
                   const resp = responses[q._id];
                   const isCurrent = idx === currentIndex;
-                  const isAnswered = resp?.status === "answered" && resp?.selectedAnswer >= 0;
+                  const isAnswered =
+                    resp?.status === "answered" &&
+                    (resp?.selectedAnswer >= 0 || (resp?.code && resp?.code.trim().length > 0));
                   const isReview = resp?.status === "marked_for_review";
 
                   let btnStyle = "bg-muted/40 text-muted-foreground border-border hover:bg-muted";
@@ -988,6 +1181,8 @@ export default function TakeAssessmentPage({
           </div>
         </aside>
       </div>
+    );
+  })()}
 
       {/* Confirmation Modal */}
       {showSubmitModal && (
@@ -1064,13 +1259,27 @@ export default function TakeAssessmentPage({
             <p className="text-xs text-muted-foreground leading-relaxed">
               {violationMessage}
             </p>
-            <div className="pt-2 text-right">
+            <div className="pt-2 flex items-center justify-end gap-2.5">
+              {!isFullscreen && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowViolationModal(false);
+                    if (!document.fullscreenElement) {
+                      document.documentElement.requestFullscreen().catch(() => {});
+                    }
+                  }}
+                  className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all shadow-md shadow-primary/20 flex items-center gap-1.5"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" /> Re-enter Fullscreen
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setShowViolationModal(false)}
-                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all shadow-md shadow-rose-600/20"
+                className="px-4 py-2.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground text-xs font-bold transition-all border border-border"
               >
-                I Understand & Acknowledge
+                Dismiss Warning
               </button>
             </div>
           </div>

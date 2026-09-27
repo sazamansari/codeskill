@@ -19,7 +19,7 @@ export function Providers({ children }: { children: ReactNode }) {
   );
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark" enableSystem={false}>
+    <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark" enableSystem={false} enableColorScheme={false} disableTransitionOnChange>
       {clientId ? (
         <GoogleOAuthProvider clientId={clientId}>
           {content}

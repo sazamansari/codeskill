@@ -30,4 +30,3 @@ export class QuestionBank {
 export const QuestionBankSchema = SchemaFactory.createForClass(QuestionBank);
 
 QuestionBankSchema.index({ topic: 1, name: 1 });
-QuestionBankSchema.index({ createdBy: 1 });

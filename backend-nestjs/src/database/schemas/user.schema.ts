@@ -258,7 +258,6 @@ UserSchema.methods.updateStreak = function () {
   this.activityMap.set(today, (this.activityMap.get(today) || 0) + 1);
 };
 
-UserSchema.index({ uid: 1 }, { unique: true, sparse: true });
 UserSchema.index({ isAssessmentStudent: 1 });
 UserSchema.index({ role: 1 });
 UserSchema.index({ 'studentProfile.department': 1 });

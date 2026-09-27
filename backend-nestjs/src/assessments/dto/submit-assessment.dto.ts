@@ -22,6 +22,22 @@ export class QuestionAnswerDto {
   @IsString()
   @IsOptional()
   status?: string; // 'answered' | 'marked_for_review' | 'skipped'
+
+  @IsString()
+  @IsOptional()
+  code?: string;
+
+  @IsString()
+  @IsOptional()
+  language?: string;
+
+  @IsNumber()
+  @IsOptional()
+  testCasesPassed?: number;
+
+  @IsNumber()
+  @IsOptional()
+  totalTestCases?: number;
 }
 
 export class ProctoringViolationDto {

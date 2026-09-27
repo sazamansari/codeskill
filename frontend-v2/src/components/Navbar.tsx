@@ -29,7 +29,7 @@ export function Navbar() {
   const isWorkspacePage = pathname.match(/^\/(problems|contest)\/[^/]+$/);
   const isExamTakingPage = pathname.includes("/take");
 
-  if (isAuthPage || isAdminPage || isWorkspacePage || isExamTakingPage) {
+  if (!mounted || isAuthPage || isAdminPage || isWorkspacePage || isExamTakingPage) {
     return null;
   }
 

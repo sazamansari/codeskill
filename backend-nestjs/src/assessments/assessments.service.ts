@@ -82,6 +82,7 @@ export class AssessmentsService {
       shuffleOptions: dto.shuffleOptions ?? true,
       showResultImmediately: dto.showResultImmediately ?? true,
       allowReview: dto.allowReview ?? true,
+      allowedAttempts: dto.allowedAttempts !== undefined ? Number(dto.allowedAttempts) : 1,
       proctoring: dto.proctoring || {
         enforceFullscreen: true,
         blockCopyPaste: true,
@@ -197,6 +198,10 @@ export class AssessmentsService {
     if (dto.shuffleOptions !== undefined) assessment.shuffleOptions = dto.shuffleOptions;
     if (dto.showResultImmediately !== undefined) assessment.showResultImmediately = dto.showResultImmediately;
     if (dto.allowReview !== undefined) assessment.allowReview = dto.allowReview;
+    if (dto.allowedAttempts !== undefined) assessment.allowedAttempts = Number(dto.allowedAttempts);
+    if (!assessment.createdBy && adminUser?._id) {
+      assessment.createdBy = adminUser._id;
+    }
 
     if (dto.proctoring) {
       assessment.proctoring = {
@@ -277,12 +282,64 @@ export class AssessmentsService {
       .sort({ score: -1, timeSpentSeconds: 1 })
       .lean();
 
-    // Summary Analytics
-    const totalCandidates = attempts.length;
-    const submittedCount = attempts.filter((a) => a.status === 'submitted' || a.status === 'auto_submitted').length;
-    const passedCount = attempts.filter((a) => a.passed).length;
-    const avgScore = totalCandidates > 0
-      ? (attempts.reduce((sum, a) => sum + (a.score || 0), 0) / totalCandidates).toFixed(1)
+    // Deduplicate / Aggregate by student: group attempts per unique student
+    const studentAttemptsMap = new Map<string, any[]>();
+    for (const att of attempts) {
+      const studentKey = att.studentId ? att.studentId.toString() : att.studentUid;
+      const list = studentAttemptsMap.get(studentKey) || [];
+      list.push(att);
+      studentAttemptsMap.set(studentKey, list);
+    }
+
+    const uniqueCandidates = Array.from(studentAttemptsMap.entries()).map(([key, studentAttempts]) => {
+      // Pick best submitted attempt, or latest attempt
+      const submitted = studentAttempts.filter((a) => a.status === 'submitted' || a.status === 'auto_submitted');
+      const best = submitted.length > 0
+        ? [...submitted].sort((a, b) => (b.score || 0) - (a.score || 0))[0]
+        : [...studentAttempts].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())[0];
+
+      const maxScore = submitted.length > 0
+        ? Math.max(...submitted.map((s) => s.score || 0))
+        : (best?.score || 0);
+
+      const hasPassed = submitted.length > 0
+        ? submitted.some((s) => s.passed)
+        : (best?.passed || false);
+
+      return {
+        ...best,
+        attemptNumber: studentAttempts.length,
+        totalAttempts: studentAttempts.length,
+        score: maxScore,
+        highestScore: maxScore,
+        passed: hasPassed,
+        allAttempts: studentAttempts
+          .sort((a, b) => (a.attemptNumber || 0) - (b.attemptNumber || 0))
+          .map((a, idx) => ({
+            _id: a._id,
+            attemptNumber: a.attemptNumber || idx + 1,
+            score: a.score ?? 0,
+            maxScore: a.maxScore || assessment.totalMarks || 100,
+            status: a.status,
+            percentage: a.percentage ?? 0,
+            submittedAt: a.submittedAt || (a as any).createdAt || a.startedAt,
+            passed: a.passed,
+            timeSpentSeconds: a.timeSpentSeconds || 0,
+            tabSwitchCount: a.tabSwitchCount || 0,
+            violationsCount: a.violations?.length || 0,
+            responses: a.responses || [],
+            violations: a.violations || [],
+          })),
+      };
+    });
+
+    // Summary Analytics on Unique Candidates
+    const totalCandidates = uniqueCandidates.length;
+    const submittedCandidates = uniqueCandidates.filter((c) => c.status === 'submitted' || c.status === 'auto_submitted');
+    const submittedCount = submittedCandidates.length;
+    const passedCount = uniqueCandidates.filter((c) => c.passed).length;
+    const avgScore = submittedCount > 0
+      ? Number((submittedCandidates.reduce((sum, c) => sum + (c.score || 0), 0) / submittedCount).toFixed(1))
       : 0;
 
     return {
@@ -291,17 +348,37 @@ export class AssessmentsService {
         id: assessment._id,
         title: assessment.title,
         code: assessment.code,
-        totalMarks: assessment.totalMarks,
-        passingMarks: assessment.passingMarks,
+        totalMarks: assessment.totalMarks || 100,
+        passingMarks: assessment.passingMarks || 40,
+        allowedAttempts: assessment.allowedAttempts !== undefined ? assessment.allowedAttempts : 0,
       },
       stats: {
         totalCandidates,
         submittedCount,
         passedCount,
-        passPercentage: totalCandidates > 0 ? ((passedCount / totalCandidates) * 100).toFixed(1) : 0,
-        avgScore: Number(avgScore),
+        passPercentage: submittedCount > 0 ? Number(((passedCount / submittedCount) * 100).toFixed(1)) : 0,
+        avgScore,
+        totalSubmissionsCount: attempts.filter((a) => a.status === 'submitted' || a.status === 'auto_submitted').length,
       },
-      attempts,
+      attempts: uniqueCandidates,
+      rawAttempts: attempts.map((a, idx) => ({
+        _id: a._id,
+        studentId: a.studentId,
+        studentUid: a.studentUid,
+        studentName: a.studentName,
+        studentEmail: a.studentEmail,
+        attemptNumber: a.attemptNumber || idx + 1,
+        score: a.score ?? 0,
+        maxScore: a.maxScore || assessment.totalMarks || 100,
+        percentage: a.percentage ?? 0,
+        passed: a.passed,
+        status: a.status,
+        submittedAt: a.submittedAt || (a as any).createdAt || a.startedAt,
+        timeSpentSeconds: a.timeSpentSeconds || 0,
+        tabSwitchCount: a.tabSwitchCount || 0,
+        violations: a.violations || [],
+        responses: a.responses || [],
+      })),
     };
   }
 
@@ -346,18 +423,46 @@ export class AssessmentsService {
         assessmentId: { $in: assessmentIds },
         studentId: studentUser._id,
       })
+      .sort({ score: -1, createdAt: -1 })
       .lean();
 
-    const attemptsMap = new Map(existingAttempts.map((att) => [att.assessmentId.toString(), att]));
-
     const items = assessments.map((a) => {
-      const attempt = attemptsMap.get(a._id.toString());
+      const allForAssessment = existingAttempts.filter(
+        (att) => att.assessmentId.toString() === a._id.toString()
+      );
+      const submittedAttempts = allForAssessment.filter(
+        (att) => att.status === 'submitted' || att.status === 'auto_submitted'
+      );
+      const isCompleted = submittedAttempts.length > 0;
+      const inProgressAttempt = allForAssessment.find((att) => att.status === 'in_progress');
+
+      // Highest score across all submitted attempts
+      const maxScore = isCompleted
+        ? Math.max(...submittedAttempts.map((s) => s.score || 0))
+        : inProgressAttempt?.score ?? null;
+
+      const hasPassed = isCompleted
+        ? submittedAttempts.some((s) => s.passed)
+        : false;
+
+      const allowedAttempts = (a as any).allowedAttempts !== undefined ? (a as any).allowedAttempts : 1;
+      const completedCount = submittedAttempts.length;
+      // 0 = unlimited, 1 = 1 attempt allowed (cannot retake if completed), >1 = multiple attempts up to limit
+      const canRetake = allowedAttempts === 0
+        ? true
+        : completedCount < allowedAttempts;
+
       return {
         ...a,
+        allowedAttempts,
+        completedAttemptsCount: completedCount,
         questionCount: a.questions?.length || 0,
-        attemptStatus: attempt ? attempt.status : 'not_started',
-        attemptScore: attempt ? attempt.score : null,
-        attemptPassed: attempt ? attempt.passed : null,
+        attemptStatus: isCompleted ? 'submitted' : (inProgressAttempt ? 'in_progress' : 'not_started'),
+        attemptScore: maxScore,
+        attemptPassed: hasPassed,
+        highestScore: maxScore,
+        totalAttempts: allForAssessment.length,
+        canRetake,
       };
     });
 
@@ -373,12 +478,28 @@ export class AssessmentsService {
       throw new NotFoundException('Assessment not found');
     }
 
-    const existingAttempt = await this.attemptModel
-      .findOne({
+    const allAttempts = await this.attemptModel
+      .find({
         assessmentId: new Types.ObjectId(id),
         studentId: studentUser._id,
       })
+      .sort({ score: -1, startedAt: -1 })
       .lean();
+
+    const submittedAttempts = allAttempts.filter(
+      (a) => a.status === 'submitted' || a.status === 'auto_submitted',
+    );
+    const inProgressAttempt = allAttempts.find((a) => a.status === 'in_progress');
+
+    const allowedAttempts = assessment.allowedAttempts !== undefined ? assessment.allowedAttempts : 1;
+    const completedCount = submittedAttempts.length;
+    // 0 = unlimited attempts, otherwise check completedCount < allowedAttempts
+    const canRetake = allowedAttempts === 0 ? true : completedCount < allowedAttempts;
+    const highestScore = submittedAttempts.length > 0
+      ? Math.max(...submittedAttempts.map((s) => s.score || 0))
+      : null;
+
+    const latestAttempt = inProgressAttempt || (allAttempts.length > 0 ? allAttempts[0] : null);
 
     const now = new Date();
     let isAvailable = assessment.status === 'published' || assessment.status === 'ongoing';
@@ -416,19 +537,24 @@ export class AssessmentsService {
         passingMarks: assessment.passingMarks,
         negativeMarking: assessment.negativeMarking,
         questionCount: assessment.questions.length,
+        allowedAttempts,
         proctoring: assessment.proctoring,
         instructions: assessment.instructions,
       },
-      attempt: existingAttempt
+      attempt: latestAttempt
         ? {
-            status: existingAttempt.status,
-            score: existingAttempt.score,
-            percentage: existingAttempt.percentage,
-            passed: existingAttempt.passed,
-            startedAt: existingAttempt.startedAt,
-            submittedAt: existingAttempt.submittedAt,
+            status: latestAttempt.status,
+            score: latestAttempt.score,
+            percentage: latestAttempt.percentage,
+            passed: latestAttempt.passed,
+            startedAt: latestAttempt.startedAt,
+            submittedAt: latestAttempt.submittedAt,
+            attemptNumber: latestAttempt.attemptNumber,
           }
         : null,
+      canRetake,
+      completedAttemptsCount: completedCount,
+      highestScore,
     };
   }
 
@@ -460,13 +586,32 @@ export class AssessmentsService {
     let attempt = await this.attemptModel.findOne({
       assessmentId: new Types.ObjectId(id),
       studentId: studentUser._id,
+      status: 'in_progress',
     });
 
-    if (attempt && (attempt.status === 'submitted' || attempt.status === 'auto_submitted')) {
-      throw new BadRequestException('You have already submitted this assessment.');
-    }
-
     if (!attempt) {
+      // Check previous submissions to track attempt number and highest score
+      const previousSubmitted = await this.attemptModel
+        .find({
+          assessmentId: new Types.ObjectId(id),
+          studentId: studentUser._id,
+          status: { $in: ['submitted', 'auto_submitted'] },
+        })
+        .sort({ score: -1 })
+        .lean();
+
+      const allowedAttempts = assessment.allowedAttempts !== undefined ? assessment.allowedAttempts : 1;
+      if (allowedAttempts > 0 && previousSubmitted.length >= allowedAttempts) {
+        throw new BadRequestException(
+          allowedAttempts === 1
+            ? 'Only 1 attempt is allowed for this examination and you have already completed it.'
+            : `You have reached the maximum limit of ${allowedAttempts} attempts for this examination.`
+        );
+      }
+
+      const highestPreviousScore = previousSubmitted.length > 0 ? (previousSubmitted[0].score || 0) : 0;
+      const attemptNum = previousSubmitted.length + 1;
+
       // Shuffle question order if enabled
       let orderedIds = questionsList.map((q) => q._id);
       if (assessment.shuffleQuestions) {
@@ -481,6 +626,8 @@ export class AssessmentsService {
         studentEmail: studentUser.email || '',
         status: 'in_progress',
         startedAt: new Date(),
+        attemptNumber: attemptNum,
+        highestScore: highestPreviousScore,
         questionOrder: orderedIds,
         maxScore: assessment.totalMarks,
         responses: orderedIds.map((qId) => ({
@@ -517,7 +664,20 @@ export class AssessmentsService {
             )
           : [],
         codeSnippet: q.codeSnippet,
-        language: q.language,
+        starterCode: (q.metadata as any)?.starterCode || (q.questionType === 'coding' ? (q.codeSnippet || '') : ''),
+        language: q.language || 'python',
+        constraints: (q.metadata as any)?.constraints || '',
+        timeLimit: (q.metadata as any)?.timeLimit || 2000,
+        memoryLimit: (q.metadata as any)?.memoryLimit || 256,
+        testCases: (((q.metadata as any)?.testCases || []) as any[])
+          .filter((tc: any) => !tc.isHidden)
+          .map((tc: any, tcIdx: number) => ({
+            id: tc.id || String(tcIdx + 1),
+            input: tc.input || '',
+            expected: tc.output || tc.expected || '',
+            output: tc.output || tc.expected || '',
+            explanation: tc.explanation || '',
+          })),
       };
     }).filter(Boolean);
 
@@ -530,6 +690,19 @@ export class AssessmentsService {
       questions: sanitizedQuestions,
       savedResponses: attempt.responses,
     };
+  }
+
+  async retakeStudentAttempt(id: string, studentUser: any) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid assessment ID');
+    }
+    // Delete any unfinished in_progress attempts only, preserving submitted attempts
+    await this.attemptModel.deleteMany({
+      assessmentId: new Types.ObjectId(id),
+      studentId: studentUser._id,
+      status: 'in_progress',
+    });
+    return this.startStudentAttempt(id, studentUser);
   }
 
   async saveProgress(id: string, dto: SubmitAssessmentDto, studentUser: any) {
@@ -547,10 +720,14 @@ export class AssessmentsService {
       attempt.responses = dto.responses.map((r) => ({
         questionId: new Types.ObjectId(r.questionId),
         selectedAnswer: r.selectedAnswer,
+        code: r.code || '',
+        language: r.language || 'python',
+        testCasesPassed: r.testCasesPassed || 0,
+        totalTestCases: r.totalTestCases || 0,
         isCorrect: false,
         marksAwarded: 0,
         timeSpentSeconds: r.timeSpentSeconds || 0,
-        status: r.status || (r.selectedAnswer >= 0 ? 'answered' : 'unvisited'),
+        status: r.status || ((r.selectedAnswer >= 0 || (r.code && r.code.trim().length > 0)) ? 'answered' : 'unvisited'),
       }));
     }
 
@@ -580,13 +757,10 @@ export class AssessmentsService {
     const attempt = await this.attemptModel.findOne({
       assessmentId: new Types.ObjectId(id),
       studentId: studentUser._id,
-    });
+      status: 'in_progress',
+    }).sort({ startedAt: -1 });
 
     if (!attempt) {
-      throw new BadRequestException('Attempt not found.');
-    }
-
-    if (attempt.status === 'submitted' || attempt.status === 'auto_submitted') {
       return this.getStudentResult(id, studentUser);
     }
 
@@ -615,24 +789,44 @@ export class AssessmentsService {
         };
       }
 
-      const isAttempted = r.selectedAnswer !== undefined && r.selectedAnswer >= 0;
+      const isCoding = q.questionType === 'coding' || q.questionType === 'algorithmic';
+      let isAttempted = false;
       let isCorrect = false;
       let marksAwarded = 0;
 
-      if (isAttempted) {
-        totalAttempted++;
-        if (r.selectedAnswer === q.correctAnswer) {
-          isCorrect = true;
-          marksAwarded = q.marks || 1;
-          totalCorrect++;
+      if (isCoding) {
+        const hasCode = r.code && r.code.trim().length > 0;
+        if (hasCode) {
+          isAttempted = true;
+          totalAttempted++;
+          const passed = Number(r.testCasesPassed) || 0;
+          const totalTc = Number(r.totalTestCases) || 1;
+          const ratio = Math.min(1, Math.max(0, passed / totalTc));
+          marksAwarded = Math.round(ratio * (q.marks || 5) * 10) / 10;
+          isCorrect = ratio >= 0.99;
+          if (isCorrect) totalCorrect++;
+          else if (ratio > 0) totalCorrect++;
+          else totalWrong++;
         } else {
-          isCorrect = false;
-          const negMarks = assessment.negativeMarking ? (q.negativeMarks || 0) : 0;
-          marksAwarded = -negMarks;
-          totalWrong++;
+          totalSkipped++;
         }
       } else {
-        totalSkipped++;
+        isAttempted = r.selectedAnswer !== undefined && r.selectedAnswer >= 0;
+        if (isAttempted) {
+          totalAttempted++;
+          if (r.selectedAnswer === q.correctAnswer) {
+            isCorrect = true;
+            marksAwarded = q.marks || 1;
+            totalCorrect++;
+          } else {
+            isCorrect = false;
+            const negMarks = assessment.negativeMarking ? (q.negativeMarks || 0) : 0;
+            marksAwarded = -negMarks;
+            totalWrong++;
+          }
+        } else {
+          totalSkipped++;
+        }
       }
 
       totalScore += marksAwarded;
@@ -640,10 +834,14 @@ export class AssessmentsService {
       return {
         questionId: q._id,
         selectedAnswer: r.selectedAnswer ?? -1,
+        code: r.code || '',
+        language: r.language || 'python',
+        testCasesPassed: r.testCasesPassed || 0,
+        totalTestCases: r.totalTestCases || 0,
         isCorrect,
         marksAwarded,
         timeSpentSeconds: r.timeSpentSeconds || 0,
-        status: isAttempted ? (isCorrect ? 'answered' : 'answered') : 'skipped',
+        status: isAttempted ? 'answered' : 'skipped',
       };
     });
 
@@ -662,14 +860,26 @@ export class AssessmentsService {
     }));
     const tabSwitches = violations.filter((v) => v.type === 'tab_switch').length;
 
+    // Calculate highest score across all attempts
+    const prevAttempts = await this.attemptModel.find({
+      assessmentId: new Types.ObjectId(id),
+      studentId: studentUser._id,
+      status: { $in: ['submitted', 'auto_submitted'] },
+      _id: { $ne: attempt._id },
+    }).lean();
+
+    const prevMax = prevAttempts.length > 0 ? Math.max(...prevAttempts.map((a) => a.score || 0)) : 0;
+    const finalHighestScore = Math.max(finalScore, prevMax);
+
     attempt.status = 'submitted';
     attempt.submittedAt = new Date();
     attempt.timeSpentSeconds = dto.timeSpentSeconds || 0;
     attempt.responses = evaluatedResponses;
     attempt.score = finalScore;
+    attempt.highestScore = finalHighestScore;
     attempt.maxScore = maxScore;
     attempt.percentage = percentage;
-    attempt.passed = passed;
+    attempt.passed = passed || (prevMax >= (assessment.passingMarks || 0));
     attempt.totalAttempted = totalAttempted;
     attempt.totalCorrect = totalCorrect;
     attempt.totalWrong = totalWrong;
@@ -685,20 +895,25 @@ export class AssessmentsService {
       message: 'Assessment submitted successfully.',
       result: {
         score: finalScore,
+        highestScore: finalHighestScore,
         maxScore,
         percentage,
-        passed,
+        passed: attempt.passed,
         accuracy,
         totalAttempted,
         totalCorrect,
         totalWrong,
         totalSkipped,
         timeSpentSeconds: attempt.timeSpentSeconds,
+        tabSwitchCount: tabSwitches,
       },
     };
   }
 
   async getStudentResult(id: string, studentUser: any) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid assessment ID');
+    }
     const assessment = await this.assessmentModel.findById(id).lean();
     if (!assessment) {
       throw new NotFoundException('Assessment not found');
@@ -707,9 +922,10 @@ export class AssessmentsService {
     const attempt = await this.attemptModel.findOne({
       assessmentId: new Types.ObjectId(id),
       studentId: studentUser._id,
-    }).lean();
+      status: { $in: ['submitted', 'auto_submitted'] },
+    }).sort({ score: -1, submittedAt: -1 }).lean();
 
-    if (!attempt || attempt.status === 'in_progress') {
+    if (!attempt) {
       throw new BadRequestException('No completed assessment attempt found.');
     }
 
@@ -759,12 +975,21 @@ export class AssessmentsService {
 
     return {
       success: true,
+      canRetake:
+        assessment.allowedAttempts === 0
+          ? true
+          : (await this.attemptModel.countDocuments({
+              assessmentId: new Types.ObjectId(id),
+              studentId: studentUser._id,
+              status: { $in: ['submitted', 'auto_submitted'] },
+            })) < (assessment.allowedAttempts !== undefined ? assessment.allowedAttempts : 1),
       assessment: {
         title: assessment.title,
         code: assessment.code,
         totalMarks: assessment.totalMarks,
         passingMarks: assessment.passingMarks,
         allowReview: assessment.allowReview,
+        allowedAttempts: assessment.allowedAttempts !== undefined ? assessment.allowedAttempts : 1,
       },
       attempt: {
         score: attempt.score,

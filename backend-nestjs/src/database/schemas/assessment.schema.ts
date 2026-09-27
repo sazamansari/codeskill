@@ -39,7 +39,7 @@ export class Assessment {
 
   @Prop({
     type: String,
-    enum: ['mcq', 'coding', 'hybrid'],
+    enum: ['mcq', 'coding', 'hybrid', 'technical'],
     default: 'mcq',
   })
   type: AssessmentType;
@@ -112,7 +112,7 @@ export class Assessment {
   })
   status: AssessmentStatus;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
   createdBy: Types.ObjectId;
 
   @Prop({ type: [String], default: [] })
@@ -124,4 +124,3 @@ export const AssessmentSchema = SchemaFactory.createForClass(Assessment);
 AssessmentSchema.index({ status: 1, startTime: 1, endTime: 1 });
 AssessmentSchema.index({ targetBatches: 1 });
 AssessmentSchema.index({ targetDepartments: 1 });
-AssessmentSchema.index({ code: 1 }, { unique: true });

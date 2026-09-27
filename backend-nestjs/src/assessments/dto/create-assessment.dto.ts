@@ -89,6 +89,11 @@ export class CreateAssessmentDto {
   @IsOptional()
   allowReview?: boolean;
 
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  allowedAttempts?: number;
+
   @IsOptional()
   proctoring?: {
     enforceFullscreen?: boolean;

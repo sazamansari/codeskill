@@ -87,6 +87,11 @@ export class UpdateAssessmentDto {
   @IsString({ each: true })
   @IsOptional()
   instructions?: string[];
+
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  allowedAttempts?: number;
 }
 
 export class UpdateAssessmentStatusDto {
