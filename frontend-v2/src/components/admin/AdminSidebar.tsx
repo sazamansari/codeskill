@@ -74,21 +74,19 @@ export function AdminSidebar() {
 
   return (
     <div className="w-64 bg-sidebar text-sidebar-foreground flex flex-col h-full border-r border-sidebar-border relative z-20">
-      {/* Header with CU Branding */}
+      {/* Header with CodeSkill Branding */}
       <div className="h-16 flex items-center px-4 border-b border-sidebar-border gap-3 bg-sidebar">
-        <div className="w-9 h-9 rounded-md overflow-hidden shrink-0 bg-card border border-border p-0.5 flex items-center justify-center">
-          <img
-            src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
-            alt="Chandigarh University"
-            className="w-full h-full object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = "/cu-logo.png";
-            }}
-          />
+        <div className="w-9 h-9 rounded-xl overflow-hidden bg-slate-950 border border-primary/40 shadow-xs flex items-center justify-center p-1">
+          <svg viewBox="0 0 160 160" className="w-full h-full" fill="none">
+            <polygon points="80,10 145,45 145,115 80,150 15,115 15,45" fill="#0F172A" stroke="#C8102E" strokeWidth="8" strokeLinejoin="round" />
+            <path d="M60 62 L40 80 L60 98" stroke="#FFFFFF" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M85 55 L75 105" stroke="#C8102E" strokeWidth="10" strokeLinecap="round" />
+            <path d="M100 62 L120 80 L100 98" stroke="#38BDF8" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </div>
         <div className="min-w-0">
-          <p className="text-xs font-bold text-sidebar-foreground truncate leading-tight">Chandigarh University</p>
-          <p className="text-[10px] text-primary font-semibold tracking-wide uppercase">Admin Assessment Portal</p>
+          <p className="text-sm font-bold text-sidebar-foreground truncate leading-tight">CodeSkill</p>
+          <p className="text-[10px] text-primary font-semibold tracking-wide uppercase">Admin Console</p>
         </div>
       </div>
 

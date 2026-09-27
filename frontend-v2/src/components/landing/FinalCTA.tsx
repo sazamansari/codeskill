@@ -14,7 +14,7 @@ export function FinalCTA() {
         {/* Brand pill */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-semibold">
           <GraduationCap className="w-4 h-4" />
-          <span>Chandigarh University Official Assessment Platform</span>
+          <span>CodeSkill Standardized Assessment &amp; Examination Platform</span>
         </div>
 
         {/* Heading */}

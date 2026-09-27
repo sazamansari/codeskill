@@ -54,10 +54,10 @@ export function Hero() {
               </Link>
             </div>
 
-            {/* Trust / Institutional Note */}
+            {/* Trust / Platform Note */}
             <div className="flex items-center gap-2 pt-2 text-xs text-muted-foreground">
               <ShieldCheck className="w-4 h-4 text-emerald-500" />
-              <span>Built for Chandigarh University students &amp; faculty</span>
+              <span>Built for modern developers, engineering students &amp; technical evaluations</span>
             </div>
 
           </div>

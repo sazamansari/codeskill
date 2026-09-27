@@ -81,7 +81,7 @@ export default function LoginPage() {
         if (res?.requireOTP) {
           router.push(`/admin/login?email=${encodeURIComponent(data.uid)}`);
         } else {
-          router.push("/admin/dashboard");
+          window.location.href = "/admin/dashboard";
         }
         return;
       }
@@ -89,8 +89,10 @@ export default function LoginPage() {
       if (res?.user?.forcePasswordChange) {
         forceForm.setValue("currentPassword", data.password);
         setShowForcePasswordModal(true);
+      } else if (res?.user?.isAdmin) {
+        window.location.href = "/admin/dashboard";
       } else {
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       }
     } catch (err: any) {
       form.setError("root", {

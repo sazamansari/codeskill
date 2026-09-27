@@ -42,7 +42,7 @@ export default function AdminLoginPage() {
           setShowOTP(true);
           if (res.message) setInfoMessage(res.message);
         } else {
-          router.push("/admin/dashboard");
+          window.location.href = "/admin/dashboard";
         }
       } else {
         if (!data.otp) {
@@ -50,7 +50,7 @@ export default function AdminLoginPage() {
           return;
         }
         await adminLoginVerify({ email: data.email, otp: data.otp });
-        router.push("/admin/dashboard");
+        window.location.href = "/admin/dashboard";
       }
     } catch (err: any) {
       form.setError("root", { type: "manual", message: err.message || "Failed to authenticate admin" });

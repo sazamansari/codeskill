@@ -23,39 +23,54 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     async function checkAuth() {
       if (loading) return;
 
+      const token = typeof window !== "undefined" ? localStorage.getItem("codeskill_token") : null;
+
       if (isLoginPage) {
         if (user && user.isAdmin) {
-          router.push("/admin/dashboard");
+          router.replace("/admin/dashboard");
+        } else if (token) {
+          try {
+            const res = await authAPI.getMe();
+            const freshUser = res.data?.user;
+            if (freshUser && freshUser.isAdmin) {
+              updateUserLocal(freshUser);
+              router.replace("/admin/dashboard");
+              return;
+            }
+          } catch (_) {
+            // invalid token
+          }
+          setIsVerifying(false);
         } else {
           setIsVerifying(false);
         }
         return;
       }
 
-      if (!user) {
-        router.push("/admin/login");
-        return;
-      }
-
-      if (user.isAdmin) {
+      if (user && user.isAdmin) {
         if (isMounted) setIsVerifying(false);
         return;
       }
 
-      // User exists but local state has isAdmin = false.
-      // Re-verify with backend in case user was recently promoted.
-      try {
-        const res = await authAPI.getMe();
-        const freshUser = res.data?.user;
-        if (freshUser && freshUser.isAdmin) {
-          updateUserLocal(freshUser);
-          if (isMounted) setIsVerifying(false);
-        } else {
-          router.push("/dashboard");
+      if (token) {
+        try {
+          const res = await authAPI.getMe();
+          const freshUser = res.data?.user;
+          if (freshUser && freshUser.isAdmin) {
+            updateUserLocal(freshUser);
+            if (isMounted) setIsVerifying(false);
+            return;
+          } else {
+            router.replace("/dashboard");
+            return;
+          }
+        } catch (err) {
+          router.replace("/admin/login");
+          return;
         }
-      } catch (err) {
-        router.push("/dashboard");
       }
+
+      router.replace("/admin/login");
     }
 
     checkAuth();
@@ -81,26 +96,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="flex h-screen bg-background overflow-hidden font-sans">
       <AdminSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Standardized Admin Header with CU Branding & Theme Toggle */}
+        {/* Standardized Admin Header with CodeSkill Branding & Theme Toggle */}
         <header className="bg-card border-b border-border h-16 flex items-center justify-between px-6 sticky top-0 z-10 shrink-0 shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-md overflow-hidden bg-card shrink-0 border border-border p-0.5 flex items-center justify-center">
-              <img
-                src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
-                alt="Chandigarh University"
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/cu-logo.png";
-                }}
-              />
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-950 border border-primary/40 shadow-xs flex items-center justify-center p-1">
+              <svg viewBox="0 0 160 160" className="w-full h-full" fill="none">
+                <polygon points="80,10 145,45 145,115 80,150 15,115 15,45" fill="#0F172A" stroke="#C8102E" strokeWidth="8" strokeLinejoin="round" />
+                <path d="M60 62 L40 80 L60 98" stroke="#FFFFFF" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M85 55 L75 105" stroke="#C8102E" strokeWidth="10" strokeLinecap="round" />
+                <path d="M100 62 L120 80 L100 98" stroke="#38BDF8" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </div>
             <div>
-              <p className="text-xs font-bold text-foreground leading-tight">Chandigarh University</p>
-              <p className="text-[10px] text-muted-foreground font-medium">Assessment Administration System</p>
+              <p className="text-sm font-bold text-foreground leading-tight">CodeSkill</p>
+              <p className="text-[10px] text-muted-foreground font-medium">Administration System</p>
             </div>
             <div className="hidden md:flex items-center gap-1.5 ml-3 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Campus Live</span>
+              <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">System Live</span>
             </div>
           </div>
           <div className="flex items-center gap-4">

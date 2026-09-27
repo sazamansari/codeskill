@@ -8,8 +8,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "CodeSkill — Chandigarh University Technical Assessment Platform",
-  description: "Official examination and technical assessment platform for Chandigarh University students.",
+  title: "CodeSkill — Technical Assessment & Algorithmic Learning Platform",
+  description: "Official examination, algorithmic learning, and technical assessment platform.",
   icons: {
     icon: "/codeskill-option1.svg",
     shortcut: "/codeskill-option1.svg",

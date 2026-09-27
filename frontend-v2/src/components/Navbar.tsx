@@ -55,46 +55,29 @@ export function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex items-center justify-between h-11">
           
-          {/* Brand Logo & University Identifier */}
-          <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <div className="flex items-center -space-x-1.5 shrink-0">
-              {/* CodeSkill Primary Logo */}
-              <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-950 border border-primary/40 shadow-xs flex items-center justify-center p-1 group-hover:scale-105 transition-transform z-10">
-                <svg viewBox="0 0 160 160" className="w-full h-full" fill="none">
-                  <polygon points="80,10 145,45 145,115 80,150 15,115 15,45" fill="#0F172A" stroke="#C8102E" strokeWidth="8" strokeLinejoin="round" />
-                  <path d="M60 62 L40 80 L60 98" stroke="#FFFFFF" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M85 55 L75 105" stroke="#C8102E" strokeWidth="10" strokeLinecap="round" />
-                  <path d="M100 62 L120 80 L100 98" stroke="#38BDF8" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              {/* Chandigarh University Seal */}
-              <div className="w-7 h-7 rounded-md overflow-hidden bg-card shrink-0 border border-border p-0.5 shadow-xs flex items-center justify-center">
-                <img
-                  src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
-                  alt="Chandigarh University"
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/cu-logo.png";
-                  }}
-                />
-              </div>
+          {/* Brand Logo */}
+          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+            {/* CodeSkill Primary Logo */}
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-950 border border-primary/40 shadow-xs flex items-center justify-center p-1 group-hover:scale-105 transition-transform z-10">
+              <svg viewBox="0 0 160 160" className="w-full h-full" fill="none">
+                <polygon points="80,10 145,45 145,115 80,150 15,115 15,45" fill="#0F172A" stroke="#C8102E" strokeWidth="8" strokeLinejoin="round" />
+                <path d="M60 62 L40 80 L60 98" stroke="#FFFFFF" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M85 55 L75 105" stroke="#C8102E" strokeWidth="10" strokeLinecap="round" />
+                <path d="M100 62 L120 80 L100 98" stroke="#38BDF8" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </div>
 
             <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-sm sm:text-base text-foreground tracking-tight leading-none">
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-base sm:text-lg text-foreground tracking-tight leading-none">
                   CodeSkill
                 </span>
-                <span className="text-[10px] text-muted-foreground font-medium">for</span>
-                <span className="font-semibold text-xs text-foreground/90 tracking-tight leading-none">
-                  Chandigarh University
-                </span>
-                <span className="hidden lg:inline-block text-[9px] font-semibold px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">
-                  Portal
+                <span className="hidden sm:inline-block text-[9px] font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
+                  Assessment
                 </span>
               </div>
-              <span className="hidden sm:block text-[9px] text-muted-foreground font-normal leading-none mt-0.5">
-                Official Examination &amp; Algorithmic Learning System
+              <span className="hidden sm:block text-[10px] text-muted-foreground font-normal leading-none mt-0.5">
+                Examination &amp; Algorithmic Learning System
               </span>
             </div>
           </Link>

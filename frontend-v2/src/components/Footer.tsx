@@ -36,30 +36,19 @@ export function Footer() {
                 </svg>
               </div>
 
-              {/* CU Seal */}
-              <div className="w-8 h-8 rounded-lg overflow-hidden bg-card shrink-0 border border-border p-0.5 shadow-xs flex items-center justify-center">
-                <img
-                  src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
-                  alt="Chandigarh University"
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/cu-logo.png";
-                  }}
-                />
-              </div>
-
               <div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <span className="font-extrabold text-base text-foreground tracking-tight">CodeSkill</span>
-                  <span className="text-[10px] text-muted-foreground font-semibold">for</span>
-                  <span className="font-semibold text-xs text-foreground/90">Chandigarh University</span>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
+                    Platform
+                  </span>
                 </div>
-                <p className="text-[11px] text-muted-foreground">Assessment &amp; Algorithmic Learning System</p>
+                <p className="text-[11px] text-muted-foreground">Examination &amp; Algorithmic Learning System</p>
               </div>
             </div>
 
             <p className="text-xs text-muted-foreground leading-relaxed max-w-sm">
-              Official institutional examination portal and algorithmic skill-building platform engineered for Chandigarh University students and faculty.
+              Standardized examination portal and algorithmic skill-building platform engineered for developers, students, and technical evaluations.
             </p>
 
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/60 text-muted-foreground border border-border text-[11px]">

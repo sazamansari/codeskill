@@ -6,8 +6,8 @@ export function TrustBar() {
   const trustPillars = [
     {
       icon: GraduationCap,
-      title: "Chandigarh University",
-      subtitle: "Official Academic Platform",
+      title: "Academic & Enterprise",
+      subtitle: "Verified Evaluation Standards",
     },
     {
       icon: Cpu,
