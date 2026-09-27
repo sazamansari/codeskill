@@ -120,34 +120,48 @@ export default function AdminUniversitiesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-white shrink-0 border border-border">
-              <img src="/cu-logo.jpg" alt="CU" className="w-full h-full object-contain" />
+            <div className="w-8 h-8 rounded-md overflow-hidden bg-white shrink-0 border border-slate-200 p-0.5 flex items-center justify-center">
+              <img
+                src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
+                alt="CU"
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/cu-logo.png";
+                }}
+              />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Universities</h1>
+            <h1 className="text-xl font-bold text-slate-900">Universities & Campuses</h1>
           </div>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-slate-500 text-xs">
             Manage academic institutions using the Chandigarh University assessment platform.
           </p>
         </div>
         <button
           onClick={() => { setShowAddModal(true); setCreateError(null); setCreateSuccess(false); }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-zinc-950 text-sm font-semibold rounded-xl transition-colors shadow-md shadow-amber-500/20 shrink-0"
+          className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#c8102e] hover:bg-[#a90c25] active:bg-[#910b20] text-white text-xs font-semibold rounded-md transition-colors shadow-xs shrink-0"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           Add University
         </button>
       </div>
 
       {/* CU Banner */}
-      <div className="flex items-center gap-4 p-4 bg-card border border-amber-500/20 rounded-xl">
-        <div className="w-12 h-12 rounded-xl overflow-hidden bg-white shrink-0 border border-border shadow-sm">
-          <img src="/cu-logo.jpg" alt="Chandigarh University" className="w-full h-full object-contain" />
+      <div className="flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-lg shadow-xs">
+        <div className="w-12 h-12 rounded-md overflow-hidden bg-white shrink-0 border border-slate-200 p-0.5 flex items-center justify-center">
+          <img
+            src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
+            alt="Chandigarh University"
+            className="w-full h-full object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "/cu-logo.png";
+            }}
+          />
         </div>
         <div>
-          <p className="font-bold text-foreground">Chandigarh University</p>
-          <p className="text-xs text-muted-foreground">Mohali, Punjab — Primary Institution</p>
+          <p className="font-bold text-slate-900 text-sm">Chandigarh University</p>
+          <p className="text-xs text-slate-500">Mohali, Punjab — Primary Academic Institution</p>
         </div>
-        <span className="ml-auto px-2.5 py-1 text-[10px] font-bold rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20">
+        <span className="ml-auto px-2.5 py-0.5 text-[10px] font-bold rounded bg-red-50 text-[#c8102e] border border-red-200">
           PRIMARY
         </span>
       </div>
@@ -294,8 +308,15 @@ export default function AdminUniversitiesPage() {
                 onClick={prefillCU}
                 className="w-full flex items-center gap-3 p-3 bg-amber-500/10 border border-amber-500/25 rounded-xl hover:bg-amber-500/15 transition-colors"
               >
-                <div className="w-8 h-8 rounded-lg overflow-hidden bg-white shrink-0">
-                  <img src="/cu-logo.jpg" alt="CU" className="w-full h-full object-contain" />
+                <div className="w-8 h-8 rounded-md overflow-hidden bg-white shrink-0 border border-slate-200 p-0.5 flex items-center justify-center">
+                  <img
+                    src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
+                    alt="CU"
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/cu-logo.png";
+                    }}
+                  />
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-semibold text-amber-400">Quick fill: Chandigarh University</p>

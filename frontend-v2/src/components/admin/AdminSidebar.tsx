@@ -73,22 +73,22 @@ export function AdminSidebar() {
   };
 
   return (
-    <div className="w-64 bg-card text-muted-foreground flex flex-col h-full border-r border-border relative z-20">
+    <div className="w-64 bg-white text-slate-600 flex flex-col h-full border-r border-slate-200 relative z-20">
       {/* Header with CU Branding */}
-      <div className="h-16 flex items-center px-4 border-b border-border gap-3">
-        <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-white">
+      <div className="h-16 flex items-center px-4 border-b border-slate-200 gap-3 bg-white">
+        <div className="w-9 h-9 rounded-md overflow-hidden shrink-0 bg-white border border-slate-200 p-0.5 flex items-center justify-center">
           <img
-            src="/cu-seal.png"
+            src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
             alt="Chandigarh University"
-            className="w-full h-full object-contain p-0.5"
+            className="w-full h-full object-contain"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = "/cu-logo.jpg";
+              (e.target as HTMLImageElement).src = "/cu-logo.png";
             }}
           />
         </div>
         <div className="min-w-0">
-          <p className="text-[11px] font-bold text-foreground truncate leading-tight">Chandigarh University</p>
-          <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Admin Portal</p>
+          <p className="text-xs font-bold text-slate-900 truncate leading-tight">Chandigarh University</p>
+          <p className="text-[10px] text-[#c8102e] font-semibold tracking-wide uppercase">Admin Assessment Portal</p>
         </div>
       </div>
 

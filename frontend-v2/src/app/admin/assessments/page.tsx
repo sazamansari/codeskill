@@ -144,15 +144,27 @@ export default function AdminAssessmentsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
-              <Trophy className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-md overflow-hidden bg-white shrink-0 border border-slate-200 p-0.5 flex items-center justify-center">
+              <img
+                src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
+                alt="Chandigarh University"
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/cu-logo.png";
+                }}
+              />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                MCQ Assessments
-              </h1>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Manage university examinations, availability triggers, scheduled timings, and proctoring logs.
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight text-slate-900">
+                  Assessments & Examinations
+                </h1>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-red-50 text-[#c8102e] border border-red-200">
+                  Chandigarh University
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Manage university examinations, availability triggers, scheduled timings, and proctoring policies.
               </p>
             </div>
           </div>
@@ -161,7 +173,7 @@ export default function AdminAssessmentsPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/admin/assessments/create"
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold rounded-xl transition-all shadow-md shadow-primary/20"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#c8102e] hover:bg-[#a90c25] active:bg-[#910b20] text-white text-xs font-semibold uppercase tracking-wider rounded-md transition-all shadow-xs"
           >
             <Plus className="w-4 h-4" /> Create Assessment
           </Link>

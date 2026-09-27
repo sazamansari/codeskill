@@ -34,44 +34,43 @@
 }
 
 @layer base {
-  :root,
-  .dark {
-    /* Single Standardized Theme: Cohesive Dark Slate / Charcoal */
-    --background: 240 10% 4%; /* #09090b */
-    --foreground: 0 0% 98%;   /* #fafafa */
+  :root {
+    /* Professional Institutional Theme: Clean Crisp White & Deep Slate */
+    --background: 0 0% 100%;       /* #ffffff */
+    --foreground: 222 47% 11%;     /* #0f172a deep slate */
 
-    --card: 240 8% 7.5%;     /* #131316 */
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;             /* #ffffff clean white card */
+    --card-foreground: 222 47% 11%;
 
-    --popover: 240 8% 7.5%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Standard Curated Brand Color: Electric Blue / Indigo */
-    --primary: 221 83% 53%;   /* #2563eb */
+    /* Official Chandigarh University Brand Accent: Crimson Red */
+    --primary: 350 84% 42%;        /* #c8102e / #b91c1c */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 5% 15%;  /* #26262b */
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 210 40% 96.1%;    /* #f1f5f9 subtle slate */
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 240 6% 12%;      /* #1c1c21 */
-    --muted-foreground: 240 5% 65%; /* #9e9ea7 */
+    --muted: 210 40% 96.1%;        /* #f8fafc / #f1f5f9 */
+    --muted-foreground: 215 16% 47%; /* #64748b readable slate */
 
-    --accent: 240 5% 15%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222 47% 11%;
 
-    --destructive: 0 72% 51%; /* #dc2626 */
+    --destructive: 0 84% 60%;      /* #ef4444 */
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 71% 45%;   /* #16a34a */
+    --success: 142 71% 40%;        /* #15803d */
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;    /* #f59e0b */
+    --warning: 38 92% 50%;         /* #f59e0b */
     --warning-foreground: 0 0% 100%;
 
-    --border: 240 5% 18%;     /* #2a2a30 */
-    --input: 240 5% 18%;
-    --ring: 221 83% 53%;
-    --radius: 0.75rem;
+    --border: 214 32% 91%;         /* #e2e8f0 crisp 1px border */
+    --input: 214 32% 91%;
+    --ring: 350 84% 42%;
+    --radius: 0.5rem;              /* 8px standard professional radius */
   }
 
   * {

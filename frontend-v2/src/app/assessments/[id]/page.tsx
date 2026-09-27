@@ -129,23 +129,41 @@ export default function AssessmentBriefingPage({
         </Link>
 
         {/* Exam Header Card */}
-        <div className="bg-card border border-border rounded-2xl sm:rounded-3xl p-6 sm:p-8 space-y-6">
+        <div className="bg-white border border-slate-200 rounded-lg p-6 sm:p-8 space-y-6 shadow-xs">
+          {/* Institutional Branding Header */}
+          <div className="flex items-center gap-3 pb-4 border-b border-slate-200">
+            <div className="w-10 h-10 rounded-md overflow-hidden bg-white shrink-0 border border-slate-200 p-0.5 flex items-center justify-center">
+              <img
+                src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
+                alt="Chandigarh University"
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/cu-logo.png";
+                }}
+              />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-900 leading-tight">Chandigarh University</p>
+              <p className="text-[10px] text-[#c8102e] font-semibold uppercase tracking-wider">Official Assessment & Examination Portal</p>
+            </div>
+          </div>
+
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-primary/10 text-primary border border-primary/20">
+                <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
                   {assessment.code}
                 </span>
                 {assessment.isAvailable !== false ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Available Now
+                  <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" /> Available Now
                   </span>
                 ) : (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                  <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
                     {assessment.unavailabilityReason || "Currently Closed"}
                   </span>
                 )}
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border">
+                <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                   {assessment.allowedAttempts === 1
                     ? "1 Attempt Allowed"
                     : assessment.allowedAttempts === 0
@@ -153,31 +171,31 @@ export default function AssessmentBriefingPage({
                     : `${assessment.allowedAttempts} Attempts Allowed`}
                 </span>
               </div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
                 {assessment.title}
               </h1>
               {assessment.description && (
-                <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
                   {assessment.description}
                 </p>
               )}
             </div>
 
             {user?.uid && (
-              <div className="bg-muted/40 border border-border px-4 py-2.5 rounded-2xl text-left sm:text-right shrink-0">
-                <span className="text-[10px] uppercase font-bold text-muted-foreground">Candidate</span>
-                <div className="text-xs font-bold text-foreground mt-0.5">{user.name}</div>
-                <div className="text-[11px] font-mono text-primary font-medium">{user.uid}</div>
+              <div className="bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-md text-left sm:text-right shrink-0">
+                <span className="text-[10px] uppercase font-bold text-slate-500">Candidate</span>
+                <div className="text-xs font-bold text-slate-900 mt-0.5">{user.name}</div>
+                <div className="text-[11px] font-mono text-[#c8102e] font-semibold">{user.uid}</div>
               </div>
             )}
           </div>
 
           {/* Timing Window Banner (If configured by Admin) */}
           {(assessment.startTime || assessment.endTime) && (
-            <div className="p-3.5 bg-muted/40 border border-border rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Clock className="w-4 h-4 text-primary" />
-                <span className="font-semibold text-foreground">Scheduled Window:</span>
+            <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-md flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-slate-600">
+                <Clock className="w-4 h-4 text-[#c8102e]" />
+                <span className="font-semibold text-slate-900">Scheduled Window:</span>
                 <span>
                   {assessment.startTime ? new Date(assessment.startTime).toLocaleString([], { dateStyle: "short", timeStyle: "short" }) : "Immediate"}
                   {" — "}
@@ -322,7 +340,7 @@ export default function AssessmentBriefingPage({
               <button
                 onClick={handleStartExam}
                 disabled={!agreedToRules || isStarting || assessment.isAvailable === false}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl text-xs sm:text-sm transition-all shadow-md shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#c8102e] hover:bg-[#a90c25] active:bg-[#910b20] text-white font-semibold rounded-md text-xs sm:text-sm uppercase tracking-wider transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Maximize2 className="w-4 h-4" />
                 {isStarting

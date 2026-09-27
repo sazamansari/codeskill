@@ -8,8 +8,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "CU CodeSkill — Chandigarh University Assessment Platform",
-  description: "Official coding and assessment platform for Chandigarh University students.",
+  title: "Chandigarh University — Official Technical Assessment Platform",
+  description: "Official examination and technical assessment platform for Chandigarh University students.",
+  icons: {
+    icon: "/cu-logo.png",
+    shortcut: "/cu-logo.png",
+    apple: "/cu-logo.png",
+  },
 };
 
 import { Background } from "@/components/Background";
@@ -25,10 +30,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} h-full antialiased dark`}
+      className={`${inter.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen flex flex-col font-sans bg-background">
+      <body className="min-h-screen flex flex-col font-sans bg-background text-foreground">
         <Providers>
           <Background />
           <Navbar />

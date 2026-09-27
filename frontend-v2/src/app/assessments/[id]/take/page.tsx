@@ -715,25 +715,39 @@ export default function TakeAssessmentPage({
   const isTimeCritical = timeLeftSeconds < 300; // < 5 mins
 
   return (
-    <div className="flex-1 bg-background text-foreground font-sans min-h-screen flex flex-col select-none relative">
+    <div className="flex-1 bg-white text-slate-900 font-sans min-h-screen flex flex-col select-none relative">
       {/* Top Test Header Bar */}
-      <header className="h-16 border-b border-border bg-card/95 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+      <header className="h-16 border-b border-slate-200 bg-white px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-xs font-mono shadow-sm">
+          {/* CU Official Logo */}
+          <div className="w-9 h-9 rounded-md overflow-hidden bg-white shrink-0 border border-slate-200 p-0.5 flex items-center justify-center">
+            <img
+              src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
+              alt="Chandigarh University"
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/cu-logo.png";
+              }}
+            />
+          </div>
+          <div className="w-8 h-8 rounded-md bg-red-50 text-[#c8102e] border border-red-200 flex items-center justify-center font-bold text-xs font-mono shadow-xs">
             Q{currentIndex + 1}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xs sm:text-sm font-bold text-foreground">
-                Question {currentIndex + 1} <span className="text-muted-foreground font-normal">of {questions.length}</span>
+              <h1 className="text-xs sm:text-sm font-bold text-slate-900">
+                Question {currentIndex + 1} <span className="text-slate-500 font-normal">of {questions.length}</span>
               </h1>
+              <span className="hidden sm:inline-block text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                Chandigarh University
+              </span>
               {assessmentCode && (
-                <span className="hidden md:inline px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-muted text-muted-foreground border border-border">
+                <span className="hidden md:inline px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
                   {assessmentCode}
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-muted-foreground truncate max-w-[140px] sm:max-w-none">
+            <p className="text-[11px] text-slate-500 font-medium truncate max-w-[140px] sm:max-w-none">
               {currentQ.topic} {currentQ.subtopic ? `• ${currentQ.subtopic}` : ""}
             </p>
           </div>
@@ -742,20 +756,20 @@ export default function TakeAssessmentPage({
         {/* Center: Live Countdown Clock */}
         <div className="flex items-center gap-2 sm:gap-3">
           <div
-            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-xl border text-xs sm:text-sm font-mono font-bold transition-all ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-md border text-xs sm:text-sm font-mono font-bold transition-all ${
               isTimeCritical
-                ? "bg-rose-500/10 text-rose-400 border-rose-500/30 animate-pulse shadow-sm shadow-rose-500/20"
-                : "bg-muted/40 text-foreground border-border"
+                ? "bg-rose-50 text-rose-700 border-rose-300 animate-pulse shadow-xs"
+                : "bg-slate-50 text-slate-800 border-slate-200"
             }`}
           >
-            <Clock className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isTimeCritical ? "text-rose-400" : "text-primary"}`} />
+            <Clock className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isTimeCritical ? "text-rose-600" : "text-[#c8102e]"}`} />
             <span>{formatTime(timeLeftSeconds)}</span>
           </div>
 
           {/* Fullscreen Button */}
           <button
             onClick={toggleFullscreen}
-            className="hidden sm:flex items-center justify-center p-2 rounded-xl border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            className="hidden sm:flex items-center justify-center p-2 rounded-md border border-slate-200 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors"
             title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -763,7 +777,7 @@ export default function TakeAssessmentPage({
 
           {/* Tab Switch Strike Counter */}
           {tabSwitches > 0 && (
-            <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs font-bold">
+            <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold">
               <ShieldAlert className="w-3.5 h-3.5" />
               <span>{tabSwitches}/{maxTabSwitches}</span>
             </div>
@@ -772,7 +786,7 @@ export default function TakeAssessmentPage({
           {/* Permanent Top Submit Test Button */}
           <button
             onClick={() => setShowSubmitModal(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all shadow-sm shadow-primary/20"
+            className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-md bg-[#c8102e] hover:bg-[#a90c25] active:bg-[#910b20] text-white text-xs font-semibold uppercase tracking-wider transition-all shadow-xs"
           >
             <Send className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Submit Test</span>

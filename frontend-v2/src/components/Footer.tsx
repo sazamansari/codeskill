@@ -16,30 +16,30 @@ export function Footer() {
   if (isHidden) return null;
 
   return (
-    <footer className="w-full bg-card/50 border-t border-border mt-auto py-10 px-6">
+    <footer className="w-full bg-white border-t border-slate-200 mt-auto py-8 px-4 sm:px-6 md:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Top Row: Branding + Links */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
-          <div className="flex items-center gap-4">
-            {/* CU Logo */}
-            <div className="w-10 h-10 rounded-xl overflow-hidden bg-white shrink-0 shadow-sm border border-border p-0.5 flex items-center justify-center">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-6">
+          <div className="flex items-center gap-3.5">
+            {/* CU Official Logo */}
+            <div className="w-10 h-10 rounded-md overflow-hidden bg-white shrink-0 border border-slate-200 p-0.5 flex items-center justify-center">
               <img
-                src="/cu-seal.png"
+                src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
                 alt="Chandigarh University"
                 className="w-full h-full object-contain"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/cu-logo.jpg";
+                  (e.target as HTMLImageElement).src = "/cu-logo.png";
                 }}
               />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-base text-foreground">CU CodeSkill</span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-red-500/20 bg-red-500/10 text-red-500">
-                  This is a product of Chandigarh University
+                <span className="font-bold text-sm sm:text-base text-slate-900 tracking-tight">Chandigarh University</span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-red-50 text-[#c8102e] border border-red-200">
+                  Official Technical Platform
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground mt-0.5">Chandigarh University — Official Technical Assessment & Algorithmic Learning Platform</p>
+              <p className="text-xs text-slate-500 mt-0.5">Chandigarh University — Official Academic Examination & Algorithmic Learning Portal</p>
             </div>
           </div>
 

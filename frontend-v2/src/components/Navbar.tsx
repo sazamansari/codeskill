@@ -50,43 +50,43 @@ export function Navbar() {
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? "bg-background/90 backdrop-blur-md border-b border-border shadow-sm py-3"
-            : "bg-transparent py-5"
-        }`}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border shadow-xs py-2.5"
       >
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-xl overflow-hidden bg-white shrink-0 shadow-sm border border-border/50 group-hover:scale-105 transition-transform p-0.5 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-md overflow-hidden bg-white shrink-0 border border-slate-200 p-0.5 flex items-center justify-center">
               <img
-                src="/cu-seal.png"
+                src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
                 alt="Chandigarh University"
                 className="w-full h-full object-contain"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/cu-logo.jpg";
+                  (e.target as HTMLImageElement).src = "/cu-logo.png";
                 }}
               />
             </div>
-            <div className="hidden sm:block">
+            <div>
               <div className="flex items-center gap-2">
-                <p className="font-bold text-sm text-foreground leading-tight tracking-tight">CU CodeSkill</p>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 border border-red-500/20">
-                  A Product of Chandigarh University
+                <span className="font-bold text-sm sm:text-base text-slate-900 tracking-tight leading-none">
+                  Chandigarh University
+                </span>
+                <span className="hidden sm:inline-block text-[10px] font-semibold px-2 py-0.5 rounded bg-red-50 text-[#c8102e] border border-red-200">
+                  Assessment Portal
                 </span>
               </div>
-              <p className="text-[9px] text-muted-foreground leading-tight mt-0.5">Chandigarh University Official Technical Platform</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium leading-tight mt-0.5">
+                Official Examination & Algorithmic Learning System
+              </p>
             </div>
           </Link>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-7">
             {navLinks.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group py-2"
+                className="text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors py-1.5"
               >
                 {item.name}
               </Link>
@@ -94,39 +94,40 @@ export function Navbar() {
           </div>
 
           {/* Desktop Auth */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
                 {user.isAdmin && (
-                  <Link href="/admin/dashboard" className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-primary-foreground transition-colors">
-                    <ShieldCheck className="w-4 h-4" />
+                  <Link href="/admin/dashboard" className="flex items-center gap-1.5 h-8.5 px-3 rounded-md text-xs font-semibold bg-red-50 text-[#c8102e] border border-red-200 hover:bg-[#c8102e] hover:text-white transition-colors">
+                    <ShieldCheck className="w-3.5 h-3.5" />
                     <span>Admin Portal</span>
                   </Link>
                 )}
-                <Link href="/profile" className="flex items-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-                  <User className="w-4 h-4" />
+                <Link href="/profile" className="flex items-center gap-1.5 h-8.5 px-3 rounded-md text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors">
+                  <User className="w-3.5 h-3.5" />
                   <span>Profile</span>
                 </Link>
                 <button 
                   onClick={handleLogout}
-                  className="flex items-center justify-center gap-2 h-9 px-4 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  className="flex items-center justify-center h-8.5 px-3 rounded-md text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-slate-200 transition-colors"
+                  title="Sign Out"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5" />
                 </button>
               </>
             ) : (
-              <Link href="/login" className="flex items-center justify-center h-9 px-4 rounded-xl text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-colors shadow-sm shadow-primary/20">
-                Student Login
+              <Link href="/login" className="flex items-center justify-center h-8.5 px-4 rounded-md text-xs font-semibold bg-[#c8102e] hover:bg-[#a90c25] text-white transition-colors shadow-xs">
+                Student Sign In
               </Link>
             )}
           </div>
 
           {/* Mobile Menu Toggle */}
           <button 
-            className="md:hidden flex items-center justify-center text-foreground"
+            className="md:hidden flex items-center justify-center text-slate-700 p-1.5 rounded-md border border-slate-200"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </motion.nav>
@@ -170,8 +171,8 @@ export function Navbar() {
                   </button>
                 </>
               ) : (
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center w-full h-12 rounded-md bg-amber-500 text-zinc-950 font-semibold shadow-sm">
-                  Student Login
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center w-full h-11 rounded-md bg-[#c8102e] text-white font-semibold shadow-xs">
+                  Student Sign In
                 </Link>
               )}
             </div>

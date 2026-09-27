@@ -60,46 +60,54 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground font-sans">
+    <div className="flex min-h-screen bg-white text-slate-800 font-sans">
       
-      {/* Left Column - Brand/Graphic (Hidden on smaller screens) */}
-      <div className="hidden lg:flex flex-1 relative bg-black items-center justify-center overflow-hidden flex-col p-12 text-white text-center">
-        {/* Abstract Grid / Red Admin Background */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:32px_32px] opacity-20" />
-        <div className="absolute left-1/2 top-1/2 -z-10 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-red-500/20 blur-[120px]" />
+      {/* Left Column - Brand / Graphic */}
+      <div className="hidden lg:flex flex-1 relative bg-slate-50 border-r border-slate-200 items-center justify-center overflow-hidden flex-col p-12 text-slate-800 text-center">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:32px_32px] opacity-40" />
         
         {/* Brand Content */}
         <div className="relative z-10 max-w-md flex flex-col items-center">
-          <Link href="/" className="w-16 h-16 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center mb-8 shadow-2xl hover:bg-white/20 transition-colors">
-            <ShieldCheck className="w-8 h-8 text-red-400" />
+          <Link href="/" className="w-24 h-24 bg-white border border-slate-200 rounded-xl p-2 flex items-center justify-center mb-6 shadow-xs">
+            <img
+              src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
+              alt="Chandigarh University"
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/cu-logo.png";
+              }}
+            />
           </Link>
-          <h1 className="text-4xl font-bold tracking-tight mb-4">
-            CodeSkill<br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-rose-500">Admin Portal</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-red-50 border border-red-200 text-[#c8102e] text-xs font-semibold tracking-wide uppercase mb-3">
+            <ShieldCheck className="w-3.5 h-3.5" /> Institutional Administration
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3 text-slate-900">
+            Chandigarh University
           </h1>
-          <p className="text-lg text-gray-400">
-            Secure access for platform administrators. Manage content, monitor activity, and configure system settings.
+          <p className="text-sm text-slate-600 leading-relaxed max-w-sm">
+            Assessment & Examination Administration Console. Manage question banks, monitor live sessions, schedule exams, and audit candidate submissions.
           </p>
         </div>
       </div>
 
       {/* Right Column - Admin Login Form */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 relative bg-background text-foreground">
-        {/* Subtle Background Pattern for Right Side */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] -z-10" />
-
-        <div className="w-full max-w-[420px] flex flex-col gap-6 bg-card border border-border p-8 rounded-2xl shadow-xl">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 relative bg-white">
+        <div className="w-full max-w-sm flex flex-col gap-6 bg-white border border-slate-200 p-8 rounded-lg shadow-xs">
           
-          {/* Mobile Logo Header */}
-          <div className="flex lg:hidden flex-col items-center text-center mb-2">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-black/5 bg-muted border border-border">
-              <ShieldCheck className="w-7 h-7 text-primary" />
+          {/* Header */}
+          <div className="flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-white border border-slate-200 rounded-xl p-1.5 flex items-center justify-center mb-3 shadow-xs">
+              <img
+                src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
+                alt="Chandigarh University"
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/cu-logo.png";
+                }}
+              />
             </div>
-          </div>
-
-          <div className="mb-2 text-center">
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Admin Access</h2>
-            <p className="text-xs text-muted-foreground mt-1">Authorized personnel and faculty only.</p>
+            <h2 className="text-xl font-bold tracking-tight text-slate-900">Admin Sign In</h2>
+            <p className="text-xs text-slate-500 mt-1">Authorized faculty and examination controllers only</p>
           </div>
 
           {/* Form */}
@@ -142,10 +150,10 @@ export default function AdminLoginPage() {
                 placeholder="Password"
                 disabled={showOTP}
                 {...form.register("password")}
-                className="w-full h-11 bg-muted/30 border border-border rounded-xl px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all text-sm disabled:opacity-50"
+                className="w-full h-10 bg-white border border-slate-300 rounded-md px-3.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#c8102e] focus:border-[#c8102e] transition-all text-sm disabled:opacity-50 shadow-xs"
               />
               {form.formState.errors.password && (
-                <p className="text-xs text-destructive mt-1">{form.formState.errors.password.message}</p>
+                <p className="text-xs text-rose-600 mt-1">{form.formState.errors.password.message}</p>
               )}
             </div>
 
@@ -155,10 +163,10 @@ export default function AdminLoginPage() {
                   type="text"
                   placeholder="6-Digit Verification Code"
                   {...form.register("otp")}
-                  className="w-full h-11 bg-muted/30 border border-border rounded-xl px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all text-sm tracking-widest font-medium text-center"
+                  className="w-full h-10 bg-white border border-slate-300 rounded-md px-3.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#c8102e] focus:border-[#c8102e] transition-all text-sm tracking-widest font-mono text-center shadow-xs"
                 />
                 {form.formState.errors.otp && (
-                  <p className="text-xs text-destructive mt-1">{form.formState.errors.otp.message}</p>
+                  <p className="text-xs text-rose-600 mt-1">{form.formState.errors.otp.message}</p>
                 )}
               </div>
             )}
@@ -166,15 +174,15 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm transition-all flex items-center justify-center mt-3 disabled:opacity-70 shadow-md shadow-primary/20"
+              className="w-full h-10 rounded-md bg-[#c8102e] hover:bg-[#a90c25] active:bg-[#910b20] text-white font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center mt-3 disabled:opacity-70 shadow-xs"
             >
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (showOTP ? "Verify Login" : "Authenticate as Admin")}
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (showOTP ? "Verify Login" : "Authenticate as Admin")}
             </button>
           </form>
           
-          <div className="mt-6 pt-6 border-t border-border text-center">
-            <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Return to Homepage
+          <div className="mt-4 pt-4 border-t border-slate-200 text-center">
+            <Link href="/" className="text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors">
+              Return to Portal Home
             </Link>
           </div>
         </div>

@@ -81,27 +81,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <AdminSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Standardized Admin Header with CU Branding */}
-        <header className="bg-card/70 backdrop-blur-md border-b border-border h-16 flex items-center justify-between px-6 sticky top-0 z-10 shrink-0">
+        <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 sticky top-0 z-10 shrink-0 shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-md overflow-hidden bg-white shrink-0">
-              <img src="/cu-logo.jpg" alt="CU" className="w-full h-full object-contain" />
+            <div className="w-8 h-8 rounded-md overflow-hidden bg-white shrink-0 border border-slate-200 p-0.5 flex items-center justify-center">
+              <img
+                src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
+                alt="Chandigarh University"
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/cu-logo.png";
+                }}
+              />
             </div>
             <div>
-              <p className="text-xs font-bold text-foreground leading-tight">Chandigarh University</p>
-              <p className="text-[10px] text-muted-foreground">Assessment Management System</p>
+              <p className="text-xs font-bold text-slate-900 leading-tight">Chandigarh University</p>
+              <p className="text-[10px] text-slate-500 font-medium">Assessment Administration System</p>
             </div>
-            <div className="hidden md:flex items-center gap-1.5 ml-2 px-2 py-0.5 bg-emerald-500/10 rounded-full">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-semibold text-emerald-500">Live</span>
+            <div className="hidden md:flex items-center gap-1.5 ml-3 px-2 py-0.5 bg-emerald-50 border border-emerald-200 rounded">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+              <span className="text-[10px] font-semibold text-emerald-700">Campus Live</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary/10 border border-primary/20 text-primary rounded-full flex items-center justify-center font-bold text-xs">
+            <div className="w-8 h-8 bg-red-50 border border-red-200 text-[#c8102e] rounded-md flex items-center justify-center font-bold text-xs">
               {user?.name?.charAt(0) || "A"}
             </div>
             <div className="hidden sm:block">
-              <p className="text-xs font-semibold text-foreground">{user?.name || "Administrator"}</p>
-              <p className="text-[10px] text-muted-foreground">Admin</p>
+              <p className="text-xs font-semibold text-slate-900">{user?.name || "Administrator"}</p>
+              <p className="text-[10px] text-slate-500 font-medium">Institutional Admin</p>
             </div>
           </div>
         </header>

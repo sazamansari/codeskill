@@ -110,20 +110,38 @@ export default function AssessmentResultPage({
 
         {/* Scorecard Hero Banner */}
         <div
-          className={`relative overflow-hidden rounded-3xl p-8 border ${
+          className={`relative overflow-hidden rounded-lg p-6 sm:p-8 border bg-white shadow-xs ${
             attempt.passed
-              ? "bg-gradient-to-r from-emerald-500/15 via-emerald-500/5 to-transparent border-emerald-500/30"
-              : "bg-gradient-to-r from-rose-500/15 via-rose-500/5 to-transparent border-rose-500/30"
+              ? "border-emerald-200"
+              : "border-slate-200"
           }`}
         >
+          {/* Institutional Branding Header */}
+          <div className="flex items-center gap-3 pb-4 mb-4 border-b border-slate-200">
+            <div className="w-10 h-10 rounded-md overflow-hidden bg-white shrink-0 border border-slate-200 p-0.5 flex items-center justify-center">
+              <img
+                src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
+                alt="Chandigarh University"
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/cu-logo.png";
+                }}
+              />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-900 leading-tight">Chandigarh University</p>
+              <p className="text-[10px] text-[#c8102e] font-semibold uppercase tracking-wider">Official Examination Scorecard</p>
+            </div>
+          </div>
+
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider inline-flex items-center gap-1.5 ${
+                  className={`px-3 py-1 rounded text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 ${
                     attempt.passed
-                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                      : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                      : "bg-rose-50 text-rose-700 border border-rose-200"
                   }`}
                 >
                   {attempt.passed ? (
@@ -136,15 +154,15 @@ export default function AssessmentResultPage({
                     </>
                   )}
                 </span>
-                <span className="text-xs font-mono text-muted-foreground">
+                <span className="text-xs font-mono text-slate-500 font-semibold">
                   {assessment?.code}
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
                 {assessment?.title}
               </h1>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Completed on {attempt.submittedAt ? new Date(attempt.submittedAt).toLocaleDateString(undefined, { dateStyle: 'long' }) : 'Recently'}
               </p>
             </div>
