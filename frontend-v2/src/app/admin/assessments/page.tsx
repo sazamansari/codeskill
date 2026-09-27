@@ -451,9 +451,9 @@ export default function AdminAssessmentsPage() {
                 </select>
                 <p className="text-[11px] text-muted-foreground">
                   {scheduleData.allowedAttempts === 0
-                    ? "✨ Students can re-take this test anytime. Their highest score is permanently recorded."
+                    ? "Students can re-take this test anytime. Their highest score is recorded."
                     : scheduleData.allowedAttempts === 1
-                    ? "🔒 Students can only submit once. Once submitted, they cannot retake."
+                    ? "Students can only submit once. Once submitted, they cannot retake."
                     : `Students can take up to ${scheduleData.allowedAttempts} attempts. The highest score will be saved.`}
                 </p>
               </div>

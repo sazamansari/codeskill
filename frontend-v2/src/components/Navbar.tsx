@@ -6,7 +6,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { User, LogOut, Menu, X, Code2, ShieldCheck, GraduationCap } from "lucide-react";
-import { useTheme } from "next-themes";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -15,7 +14,6 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
-  const { theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);

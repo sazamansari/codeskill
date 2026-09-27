@@ -69,7 +69,7 @@ export default function AdminUniversitiesPage() {
 
   const handleDelete = async (id: string, name: string) => {
     if (
-      confirm(`⚠️ Permanently delete ${name}? This cannot be undone.`)
+      confirm(`Permanently delete ${name}? This action cannot be undone.`)
     ) {
       try {
         await adminUniversitiesAPI.delete(id);

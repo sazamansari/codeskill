@@ -15,7 +15,7 @@ import { useState, useEffect, useCallback, use, useRef } from "react";
 import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from "react-resizable-panels";
 import Editor from "@monaco-editor/react";
 import { submissionAPI, runAPI, problemsAPI, discussionsAPI } from "@/config/api";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/context/ThemeContext";
 
 const LANGUAGES = [
   { id: "c", name: "C", ext: "main.c", defaultCode: "#include <stdio.h>\n\nint main() {\n    // Read input\n    // Write your solution here\n    return 0;\n}" },

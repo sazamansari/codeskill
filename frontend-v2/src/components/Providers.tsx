@@ -4,7 +4,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ReactNode } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 import { Toaster } from "react-hot-toast";
 
@@ -19,7 +19,7 @@ export function Providers({ children }: { children: ReactNode }) {
   );
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark" enableSystem={false} enableColorScheme={false} disableTransitionOnChange>
+    <ThemeProvider defaultTheme="light">
       {clientId ? (
         <GoogleOAuthProvider clientId={clientId}>
           {content}
