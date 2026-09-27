@@ -25,8 +25,8 @@ import { useAuth } from "@/context/AuthContext";
 const studentLoginSchema = z.object({
   uid: z
     .string()
-    .min(3, { message: "University UID is required (min 3 characters)." })
-    .transform((val) => val.trim().toUpperCase()),
+    .min(3, { message: "University UID or Email is required." })
+    .transform((val) => val.trim()),
   password: z
     .string()
     .min(1, { message: "Password is required." }),
@@ -57,7 +57,7 @@ export default function LoginPage() {
   const [showForcePasswordModal, setShowForcePasswordModal] = useState(false);
   const [enteredPassword, setEnteredPassword] = useState("");
   const [passwordChangeSuccess, setPasswordChangeSuccess] = useState(false);
-  const { studentLogin, forceChangePassword, user } = useAuth();
+  const { studentLogin, adminLogin, forceChangePassword, user } = useAuth();
   const router = useRouter();
 
   const form = useForm<StudentLoginFormValues>({
@@ -73,8 +73,19 @@ export default function LoginPage() {
   const onSubmit = async (data: StudentLoginFormValues) => {
     setIsLoading(true);
     setEnteredPassword(data.password);
+    form.clearErrors("root");
     try {
-      const res = await studentLogin(data);
+      if (data.uid.includes("@")) {
+        // Administrator or Faculty email login
+        const res = await adminLogin({ email: data.uid.toLowerCase().trim(), password: data.password });
+        if (res?.requireOTP) {
+          router.push(`/admin/login?email=${encodeURIComponent(data.uid)}`);
+        } else {
+          router.push("/admin/dashboard");
+        }
+        return;
+      }
+      const res = await studentLogin({ uid: data.uid.toUpperCase(), password: data.password });
       if (res?.user?.forcePasswordChange) {
         forceForm.setValue("currentPassword", data.password);
         setShowForcePasswordModal(true);
@@ -86,7 +97,7 @@ export default function LoginPage() {
         type: "manual",
         message:
           err.message ||
-          "Invalid UID or password. Please verify your credentials.",
+          "Invalid credentials. Please verify your UID/Email and password.",
       });
     } finally {
       setIsLoading(false);
@@ -188,20 +199,20 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* UID Field */}
+            {/* UID / Email Field */}
             <div className="space-y-1.5">
               <label
                 htmlFor="uid-input"
-                className="text-xs font-semibold text-foreground"
+                className="text-xs font-semibold text-foreground flex items-center justify-between"
               >
-                University UID / Roll Number
+                <span>University UID or Admin Email</span>
               </label>
               <div className="relative">
                 <input
                   id="uid-input"
                   type="text"
-                  placeholder="e.g. CU202600101"
-                  className="w-full h-10 px-3.5 pl-10 rounded-md border border-input bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary font-mono text-sm tracking-wide uppercase transition-all shadow-xs"
+                  placeholder="e.g. 22BCS1001 or admin@cuchd.in"
+                  className="w-full h-10 px-3.5 pl-10 rounded-md border border-input bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary font-mono text-sm transition-all shadow-xs"
                   {...form.register("uid")}
                 />
                 <Building className="w-4 h-4 text-muted-foreground absolute left-3 top-3" />
@@ -260,13 +271,23 @@ export default function LoginPage() {
                 </>
               ) : (
                 <>
-                  Enter Examination Portal <ArrowRight className="w-3.5 h-3.5" />
+                  Sign In <ArrowRight className="w-3.5 h-3.5" />
                 </>
               )}
             </button>
           </form>
 
-          {/* Institutional Compliance Notice */}
+          {/* Institutional Admin Link */}
+          <div className="pt-3 border-t border-border flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Faculty or Controller?</span>
+            <Link
+              href="/admin/login"
+              className="font-semibold text-primary hover:underline flex items-center gap-1"
+            >
+              <span>Admin Console</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
           <div className="pt-4 border-t border-border text-center">
             <p className="text-xs text-muted-foreground">
               Student accounts are managed by Chandigarh University. Public self-registration is restricted.
