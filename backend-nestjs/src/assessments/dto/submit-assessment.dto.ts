@@ -13,7 +13,8 @@ export class QuestionAnswerDto {
 
   // Selected option index (0, 1, 2, 3...) or -1 if unselected
   @IsNumber()
-  selectedAnswer: number;
+  @IsOptional()
+  selectedAnswer?: number;
 
   @IsNumber()
   @IsOptional()

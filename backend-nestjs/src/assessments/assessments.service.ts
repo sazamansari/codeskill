@@ -719,7 +719,7 @@ export class AssessmentsService {
     if (dto.responses && Array.isArray(dto.responses)) {
       attempt.responses = dto.responses.map((r) => ({
         questionId: new Types.ObjectId(r.questionId),
-        selectedAnswer: r.selectedAnswer,
+        selectedAnswer: r.selectedAnswer ?? -1,
         code: r.code || '',
         language: r.language || 'python',
         testCasesPassed: r.testCasesPassed || 0,
@@ -727,7 +727,7 @@ export class AssessmentsService {
         isCorrect: false,
         marksAwarded: 0,
         timeSpentSeconds: r.timeSpentSeconds || 0,
-        status: r.status || ((r.selectedAnswer >= 0 || (r.code && r.code.trim().length > 0)) ? 'answered' : 'unvisited'),
+        status: r.status || (((r.selectedAnswer !== undefined && r.selectedAnswer >= 0) || (r.code && r.code.trim().length > 0)) ? 'answered' : 'unvisited'),
       }));
     }
 
@@ -781,7 +781,7 @@ export class AssessmentsService {
       if (!q) {
         return {
           questionId: new Types.ObjectId(r.questionId),
-          selectedAnswer: r.selectedAnswer,
+          selectedAnswer: r.selectedAnswer ?? -1,
           isCorrect: false,
           marksAwarded: 0,
           timeSpentSeconds: r.timeSpentSeconds || 0,
