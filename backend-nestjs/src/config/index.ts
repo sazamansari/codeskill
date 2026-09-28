@@ -45,6 +45,6 @@ export const adminConfig = registerAs('admin', () => ({
   emails:
     process.env.ADMIN_EMAILS ||
     process.env.ADMIN_EMAIL ||
-    'md.shadab.azam.ansari@gmail.com,kanhamishra555@gmail.com',
-  password: process.env.ADMIN_PASSWORD || 'password123',
+    'admin@codeskill.com,admin@cuchd.in,md.shadab.azam.ansari@gmail.com,kanhamishra555@gmail.com,shaikhmustakim2942@gmail.com',
+  password: process.env.ADMIN_PASSWORD || 'admin123',
 }));

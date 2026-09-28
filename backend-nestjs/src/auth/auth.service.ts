@@ -54,21 +54,35 @@ export class AuthService implements OnModuleInit {
   async seedAdmin() {
     const adminEmailsString =
       this.configService.get<string>('admin.emails') ||
-      'shaikhmustakim2942@gmail.com,admin@codeskill.com,md.shadab.azam.ansari@gmail.com,kanhamishra555@gmail.com';
+      'admin@codeskill.com,admin@cuchd.in,md.shadab.azam.ansari@gmail.com,kanhamishra555@gmail.com,shaikhmustakim2942@gmail.com';
     const adminEmails = adminEmailsString
       .split(',')
       .map((e) => e.trim().toLowerCase())
       .filter(Boolean);
+    const defaultPassword =
+      this.configService.get<string>('admin.password') || 'admin123';
 
     const results = [];
     for (const email of adminEmails) {
       try {
-        let user = await this.userModel.findOne({ email });
+        let user = await this.userModel.findOne({ email }).select('+password');
         if (user) {
+          let updated = false;
           if (!user.isAdmin) {
             user.isAdmin = true;
+            updated = true;
+          }
+          if (user.role !== 'admin' && user.role !== 'super_admin') {
+            user.role = 'super_admin';
+            updated = true;
+          }
+          if (!user.password) {
+            user.password = defaultPassword;
+            updated = true;
+          }
+          if (updated) {
             await user.save();
-            results.push({ email, status: 'Upgraded to Admin' });
+            results.push({ email, status: 'Upgraded / Updated Admin' });
           } else {
             results.push({ email, status: 'Already Admin' });
           }
@@ -81,10 +95,9 @@ export class AuthService implements OnModuleInit {
           await this.userModel.create({
             name: adminName,
             email,
-            password:
-              this.configService.get<string>('admin.password') ||
-              'password123',
+            password: defaultPassword,
             isAdmin: true,
+            role: 'super_admin',
           });
           results.push({ email, status: 'Created as Admin' });
         }

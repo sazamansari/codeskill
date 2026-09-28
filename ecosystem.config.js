@@ -2,8 +2,7 @@ module.exports = {
   apps: [
     {
       name: "codeskill-backend",
-      script: "node",
-      args: "dist/main.js",
+      script: "dist/main.js",
       cwd: "./backend-nestjs",
       instances: 1, // Single instance — child_process code execution conflicts with cluster mode
       exec_mode: "fork",
@@ -21,10 +20,11 @@ module.exports = {
     },
     {
       name: "codeskill-frontend",
-      script: "npm",
-      args: "start",
+      script: "node_modules/next/dist/bin/next",
+      args: "start -p 3000",
       cwd: "./frontend-v2",
       instances: 1,
+      exec_mode: "fork",
       autorestart: true,
       watch: false,
       max_memory_restart: "1G",

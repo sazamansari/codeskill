@@ -68,17 +68,12 @@ cd ..
 
 # 8. Start with PM2
 echo "[8/8] Starting applications with PM2..."
-cd backend-nestjs
-pm2 start dist/main.js --name "codeskill-backend"
-cd ..
-
-cd frontend-v2
-pm2 start npm --name "codeskill-frontend" -- start
-cd ..
+mkdir -p logs
+pm2 start ecosystem.config.js
 
 # Save PM2 process list so they start on reboot
 pm2 save
-pm2 startup | sudo bash
+pm2 startup | sudo bash || true
 
 echo "============================================="
 echo "   Setup Complete!                           "

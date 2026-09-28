@@ -26,42 +26,84 @@ async function main() {
   const admins = await User.find({ $or: [{ isAdmin: true }, { role: 'admin' }, { role: 'super_admin' }] });
   console.log('\n--- EXISTING ADMINS (' + admins.length + ') ---');
   for (const a of admins) {
-    console.log(`- ${a.name} | ${a.email} | role: ${a.role} | isAdmin: ${a.isAdmin}`);
+    console.log(`- ${a.name} | ${a.email} | role: ${a.role || 'admin'} | isAdmin: ${a.isAdmin}`);
   }
 
-  // Create or update dedicated admin
-  const targetEmail = 'admin@cuchd.in';
-  const targetPassword = 'Admin@CodeSkill2026';
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(targetPassword, salt);
+  // CLI Arguments or Default list of admins to seed
+  const cliEmail = process.argv[2];
+  const cliPassword = process.argv[3];
+  const cliName = process.argv[4];
 
-  let adminUser = await User.findOne({ email: targetEmail });
-  if (!adminUser) {
-    adminUser = await User.create({
+  const adminList = [
+    {
+      email: 'admin@codeskill.com',
+      password: process.env.ADMIN_PASSWORD || 'admin123',
+      name: 'System Administrator',
+      role: 'super_admin'
+    },
+    {
+      email: 'admin@cuchd.in',
+      password: process.env.ADMIN_CUCHD_PASSWORD || 'Admin@CodeSkill2026',
       name: 'Chandigarh University Administrator',
-      email: targetEmail,
-      password: hashedPassword,
-      role: 'super_admin',
-      isAdmin: true,
-      isActive: true,
-      authProvider: 'local'
+      role: 'super_admin'
+    },
+    {
+      email: 'md.shadab.azam.ansari@gmail.com',
+      password: process.env.ADMIN_PASSWORD || 'admin123',
+      name: 'Md Shadab Azam Ansari',
+      role: 'super_admin'
+    }
+  ];
+
+  if (cliEmail && cliPassword) {
+    adminList.unshift({
+      email: cliEmail.trim().toLowerCase(),
+      password: cliPassword.trim(),
+      name: cliName || 'Administrator',
+      role: 'super_admin'
     });
-    console.log('\n✅ Created new Admin account:', targetEmail);
-  } else {
-    adminUser.password = hashedPassword;
-    adminUser.isAdmin = true;
-    adminUser.role = 'super_admin';
-    adminUser.isActive = true;
-    await adminUser.save();
-    console.log('\n✅ Updated existing Admin account with new password:', targetEmail);
+  }
+
+  console.log('\n--- SEEDING / UPDATING ADMIN ACCOUNTS ---');
+  for (const item of adminList) {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(item.password, salt);
+
+    let adminUser = await User.findOne({ email: item.email.toLowerCase() });
+    if (!adminUser) {
+      adminUser = await User.create({
+        name: item.name,
+        email: item.email.toLowerCase(),
+        password: hashedPassword,
+        role: item.role,
+        isAdmin: true,
+        isActive: true,
+        authProvider: 'local'
+      });
+      console.log(`✅ Created Admin: ${item.email} (Password: ${item.password})`);
+    } else {
+      adminUser.password = hashedPassword;
+      adminUser.isAdmin = true;
+      adminUser.role = item.role;
+      adminUser.isActive = true;
+      if (!adminUser.name || adminUser.name === 'undefined') {
+        adminUser.name = item.name;
+      }
+      await adminUser.save();
+      console.log(`✅ Updated Admin: ${item.email} (Password: ${item.password})`);
+    }
   }
 
   console.log('\n========================================');
-  console.log('ADMIN LOGIN CREDENTIALS:');
-  console.log('Portal URL: http://localhost:3000/admin/login or http://localhost:3000/login');
-  console.log('Email:    admin@cuchd.in');
-  console.log('Password: Admin@CodeSkill2026');
-  console.log('Role:     super_admin');
+  console.log('ACTIVE ADMIN LOGIN CREDENTIALS:');
+  console.log('----------------------------------------');
+  for (const item of adminList) {
+    console.log(`Email:    ${item.email}`);
+    console.log(`Password: ${item.password}`);
+    console.log(`Role:     ${item.role}`);
+    console.log('----------------------------------------');
+  }
+  console.log('Login URL: /login or /admin/login');
   console.log('========================================\n');
 
   await mongoose.disconnect();
