@@ -97,16 +97,16 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight mb-1">Dashboard</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-1 text-foreground">Dashboard</h1>
+            <p className="text-sm text-muted-foreground">
               Welcome back, {user?.name || "Student"}. Here&apos;s your assessment overview.
             </p>
           </div>
           <Link
             href="/assessments"
-            className="inline-flex items-center justify-center h-10 px-6 rounded-md bg-foreground hover:opacity-90 text-background text-sm font-semibold transition-opacity shadow-sm"
+            className="inline-flex items-center justify-center h-9 px-4 rounded-md bg-foreground hover:opacity-90 text-background text-xs font-medium transition-opacity shadow-sm"
           >
-            View Assessments <ArrowRight className="w-4 h-4 ml-2" />
+            View Assessments <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
           </Link>
         </div>
 
@@ -116,11 +116,11 @@ export default function DashboardPage() {
           <div className="lg:col-span-2 space-y-6">
 
             {/* Hero / Up Next Card */}
-            <div className="bg-card rounded-xl border border-border shadow-sm p-6 overflow-hidden relative">
+            <div className="bg-card rounded-xl border border-border shadow-xs p-6 overflow-hidden relative">
               <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="bg-foreground/10 text-foreground text-xs font-bold px-2.5 py-1 rounded uppercase tracking-wider">
+                    <span className="bg-muted text-foreground text-[11px] font-medium px-2 py-0.5 rounded border border-border">
                       Up Next
                     </span>
                   </div>
@@ -132,34 +132,34 @@ export default function DashboardPage() {
                     </div>
                   ) : assessmentsError ? (
                     <div>
-                      <h2 className="text-2xl font-bold mb-1">No assessments found</h2>
-                      <p className="text-muted-foreground text-sm">
+                      <h2 className="text-lg font-semibold mb-1">No assessments found</h2>
+                      <p className="text-muted-foreground text-xs">
                         Could not load assessments. Please try again later.
                       </p>
                     </div>
                   ) : nextAssessment ? (
                     <div>
-                      <h2 className="text-2xl font-bold mb-1 truncate">{nextAssessment.title}</h2>
-                      <p className="text-muted-foreground text-sm max-w-md line-clamp-2">
+                      <h2 className="text-lg sm:text-xl font-semibold mb-1 truncate">{nextAssessment.title}</h2>
+                      <p className="text-muted-foreground text-xs sm:text-sm max-w-md line-clamp-2">
                         {nextAssessment.description ||
-                          "Complete this assessment to track your progress and earn XP."}
+                          "Complete this assessment to evaluate algorithmic performance."}
                       </p>
                       {(nextAssessment.duration || nextAssessment.totalQuestions) && (
-                        <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
                           {nextAssessment.totalQuestions && (
-                            <span className="flex items-center gap-1">
+                            <span className="flex items-center gap-1.5">
                               <FileText className="w-3.5 h-3.5" />
                               {nextAssessment.totalQuestions} questions
                             </span>
                           )}
                           {nextAssessment.duration && (
-                            <span className="flex items-center gap-1">
+                            <span className="flex items-center gap-1.5">
                               <Clock className="w-3.5 h-3.5" />
                               {nextAssessment.duration} min
                             </span>
                           )}
                           {nextAssessment.totalMarks && (
-                            <span className="flex items-center gap-1">
+                            <span className="flex items-center gap-1.5">
                               <Trophy className="w-3.5 h-3.5" />
                               {nextAssessment.totalMarks} marks
                             </span>
@@ -169,8 +169,8 @@ export default function DashboardPage() {
                     </div>
                   ) : (
                     <div>
-                      <h2 className="text-2xl font-bold mb-1">No Active Assessments</h2>
-                      <p className="text-muted-foreground text-sm max-w-md">
+                      <h2 className="text-lg font-semibold mb-1">No Active Assessments</h2>
+                      <p className="text-muted-foreground text-xs sm:text-sm max-w-md">
                         No assessments are currently available. Check back later or contact your instructor.
                       </p>
                     </div>
@@ -180,9 +180,9 @@ export default function DashboardPage() {
                 {!assessmentsLoading && nextAssessment && (
                   <Link
                     href={`/assessments/${nextAssessment._id}`}
-                    className="inline-flex items-center gap-2 justify-center h-10 px-8 rounded-md bg-foreground text-background text-sm font-semibold transition-opacity hover:opacity-90 whitespace-nowrap shadow-sm shrink-0"
+                    className="inline-flex items-center gap-2 justify-center h-9 px-5 rounded-md bg-foreground text-background text-xs font-medium transition-opacity hover:opacity-90 whitespace-nowrap shadow-xs shrink-0"
                   >
-                    <Play className="w-4 h-4" />
+                    <Play className="w-3.5 h-3.5" />
                     Start Assessment
                   </Link>
                 )}
@@ -190,14 +190,11 @@ export default function DashboardPage() {
                 {!assessmentsLoading && !nextAssessment && !assessmentsError && (
                   <Link
                     href="/assessments"
-                    className="inline-flex items-center gap-2 justify-center h-10 px-8 rounded-md bg-muted text-foreground text-sm font-semibold transition-colors hover:bg-muted/70 whitespace-nowrap shadow-sm shrink-0 border border-border"
+                    className="inline-flex items-center gap-2 justify-center h-9 px-5 rounded-md bg-muted text-foreground text-xs font-medium transition-colors hover:bg-muted/70 whitespace-nowrap shadow-xs shrink-0 border border-border"
                   >
                     Browse All
                   </Link>
                 )}
-              </div>
-              <div className="absolute top-0 right-0 p-8 opacity-5 transform translate-x-4 -translate-y-4 pointer-events-none">
-                <Target className="w-48 h-48" />
               </div>
             </div>
 
@@ -208,8 +205,8 @@ export default function DashboardPage() {
                   label: "Available Tests",
                   value: assessmentsLoading ? "—" : String(activeAssessments.length),
                   icon: ClipboardList,
-                  color: "text-blue-500",
-                  bg: "bg-blue-500/10",
+                  color: "text-foreground",
+                  bg: "bg-muted",
                 },
                 {
                   label: "Completed",
@@ -228,62 +225,62 @@ export default function DashboardPage() {
               ].map((stat, i) => (
                 <div
                   key={i}
-                  className="bg-card rounded-xl border border-border shadow-sm p-5 flex flex-col hover:border-foreground/20 transition-colors"
+                  className="bg-card rounded-xl border border-border shadow-xs p-4 flex flex-col hover:border-foreground/20 transition-colors"
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${stat.bg} ${stat.color}`}>
-                      <stat.icon className="w-5 h-5" />
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`w-8 h-8 rounded-md flex items-center justify-center ${stat.bg} ${stat.color}`}>
+                      <stat.icon className="w-4 h-4" />
                     </div>
-                    <span className="text-muted-foreground text-sm font-medium">{stat.label}</span>
+                    <span className="text-muted-foreground text-xs font-medium">{stat.label}</span>
                   </div>
-                  <span className="text-2xl font-bold text-foreground mt-auto">{stat.value}</span>
+                  <span className="text-xl sm:text-2xl font-semibold text-foreground mt-auto">{stat.value}</span>
                 </div>
               ))}
             </div>
 
             {/* Active Assessments List */}
-            <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-              <div className="p-5 border-b border-border flex items-center justify-between bg-muted/20">
-                <h2 className="text-lg font-bold text-foreground">Available Assessments</h2>
+            <div className="bg-card rounded-xl border border-border shadow-xs overflow-hidden">
+              <div className="p-4 border-b border-border flex items-center justify-between bg-muted/20">
+                <h2 className="text-sm font-semibold text-foreground">Available Assessments</h2>
                 <Link
                   href="/assessments"
-                  className="text-sm font-semibold text-foreground hover:underline flex items-center transition-colors"
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center transition-colors"
                 >
-                  View all <ChevronRight className="w-4 h-4 ml-0.5" />
+                  View all <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
                 </Link>
               </div>
 
               {assessmentsLoading ? (
                 <div className="p-8 flex items-center justify-center gap-2 text-muted-foreground">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span className="text-sm">Loading…</span>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="text-xs">Loading…</span>
                 </div>
               ) : assessmentsError ? (
                 <div className="p-8 flex flex-col items-center gap-2 text-muted-foreground">
-                  <AlertCircle className="w-5 h-5 text-destructive" />
-                  <p className="text-sm">Failed to load assessments.</p>
+                  <AlertCircle className="w-4 h-4 text-destructive" />
+                  <p className="text-xs">Failed to load assessments.</p>
                 </div>
               ) : activeAssessments.length === 0 ? (
                 <div className="p-8 flex flex-col items-center gap-2 text-muted-foreground">
-                  <ClipboardList className="w-8 h-8 opacity-30" />
-                  <p className="text-sm">No active assessments at the moment.</p>
+                  <ClipboardList className="w-6 h-6 opacity-30" />
+                  <p className="text-xs">No active assessments at the moment.</p>
                 </div>
               ) : (
                 <div className="flex flex-col divide-y divide-border">
                   {activeAssessments.slice(0, 5).map((assessment) => (
                     <div
                       key={assessment._id}
-                      className="p-4 flex items-center justify-between hover:bg-muted/40 transition-colors gap-4"
+                      className="p-3.5 flex items-center justify-between hover:bg-muted/40 transition-colors gap-4"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-foreground/5 text-foreground">
-                          <ClipboardList className="w-4 h-4" />
+                        <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 bg-muted text-foreground">
+                          <ClipboardList className="w-3.5 h-3.5" />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-semibold text-foreground text-sm truncate">
+                          <p className="font-medium text-foreground text-xs sm:text-sm truncate">
                             {assessment.title}
                           </p>
-                          <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-2 mt-0.5 text-[11px] text-muted-foreground">
                             {assessment.totalQuestions && (
                               <span>{assessment.totalQuestions} questions</span>
                             )}
@@ -301,7 +298,7 @@ export default function DashboardPage() {
                       </div>
                       <Link
                         href={`/assessments/${assessment._id}`}
-                        className="shrink-0 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-opacity"
+                        className="shrink-0 inline-flex items-center gap-1 px-3 py-1 rounded-md bg-foreground text-background text-xs font-medium hover:opacity-90 transition-opacity"
                       >
                         <Play className="w-3 h-3" />
                         Start
@@ -317,12 +314,12 @@ export default function DashboardPage() {
           <div className="space-y-6">
 
             {/* Quick Links */}
-            <div className="bg-card rounded-xl border border-border shadow-sm p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-bold text-foreground">Quick Links</h2>
-                <BookOpen className="w-4 h-4 text-muted-foreground" />
+            <div className="bg-card rounded-xl border border-border shadow-xs p-5">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-semibold text-foreground">Quick Links</h2>
+                <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {[
                   { href: "/assessments", label: "My Assessments", icon: ClipboardList },
                   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
@@ -331,27 +328,27 @@ export default function DashboardPage() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors group"
+                    className="flex items-center gap-2.5 px-2.5 py-2 rounded-md hover:bg-muted transition-colors group"
                   >
-                    <item.icon className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                    <span className="text-sm font-medium text-foreground">{item.label}</span>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
+                    <item.icon className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                    <span className="text-xs font-medium text-foreground">{item.label}</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground ml-auto" />
                   </Link>
                 ))}
               </div>
             </div>
 
             {/* All Assessments Summary */}
-            <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-              <div className="p-5 border-b border-border bg-muted/20">
-                <h2 className="text-base font-bold text-foreground">All Assessments</h2>
+            <div className="bg-card rounded-xl border border-border shadow-xs overflow-hidden">
+              <div className="p-4 border-b border-border bg-muted/20">
+                <h2 className="text-sm font-semibold text-foreground">All Assessments</h2>
               </div>
               {assessmentsLoading ? (
                 <div className="p-6 flex justify-center">
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                 </div>
               ) : assessments.length === 0 ? (
-                <div className="p-6 text-center text-sm text-muted-foreground">
+                <div className="p-5 text-center text-xs text-muted-foreground">
                   No assessments assigned.
                 </div>
               ) : (
@@ -360,19 +357,19 @@ export default function DashboardPage() {
                     <Link
                       key={assessment._id}
                       href={`/assessments/${assessment._id}`}
-                      className="px-4 py-3 hover:bg-muted/40 transition-colors flex items-center justify-between group gap-2"
+                      className="px-3.5 py-2.5 hover:bg-muted/40 transition-colors flex items-center justify-between group gap-2"
                     >
-                      <span className="text-sm text-foreground font-medium truncate">
+                      <span className="text-xs text-foreground font-medium truncate">
                         {assessment.title}
                       </span>
                       <span
-                        className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                        className={`shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded ${
                           assessment.status === "published" || assessment.status === "ongoing"
                             ? "bg-emerald-500/15 text-emerald-400"
                             : "bg-muted text-muted-foreground"
                         }`}
                       >
-                        {assessment.status === "ongoing" || assessment.status === "published" ? "ACTIVE" : assessment.status.toUpperCase()}
+                        {assessment.status === "ongoing" || assessment.status === "published" ? "Active" : assessment.status}
                       </span>
                     </Link>
                   ))}

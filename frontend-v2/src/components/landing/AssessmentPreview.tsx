@@ -5,48 +5,48 @@ import { Clock, Layers, Award, ShieldAlert, CheckCircle2, ArrowRight, Sparkles }
 
 export function AssessmentPreview() {
   return (
-    <section className="w-full py-20 sm:py-24 px-4 sm:px-6 md:px-8 border-b border-border bg-card/30 text-foreground">
-      <div className="max-w-7xl mx-auto space-y-12">
+    <section className="w-full py-16 sm:py-20 px-4 sm:px-6 md:px-8 border-b border-border bg-card/20 text-foreground">
+      <div className="max-w-7xl mx-auto space-y-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-semibold uppercase tracking-wider">
-            Examination Simulation
+        <div className="text-center max-w-xl mx-auto space-y-2.5">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-muted text-muted-foreground border border-border text-[11px] font-medium uppercase tracking-wider">
+            Examination Engine
           </div>
-          <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-            Practice. Submit. Improve.
+          <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
+            Practice, submit, and improve
           </h2>
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Experience realistic university assessments with automated test evaluation, proctoring security, and instant performance diagnostics.
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Simulate timed coding evaluations with automated compiler test cases, proctored security, and score analytics.
           </p>
         </div>
 
         {/* Dashboard-style Interactive Preview Card */}
-        <div className="max-w-4xl mx-auto bg-card border border-border rounded-2xl shadow-xl overflow-hidden">
+        <div className="max-w-4xl mx-auto bg-card border border-border rounded-lg shadow-sm overflow-hidden">
           
           {/* Header Bar */}
-          <div className="p-6 sm:p-8 border-b border-border bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="p-5 sm:p-6 border-b border-border bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-primary/10 text-primary border border-primary/20">
-                  CU-CS-302
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="px-2 py-0.5 rounded text-xs font-mono font-medium bg-primary/10 text-primary border border-primary/20">
+                  CS-302
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                  Live Examination
+                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                  Live Test
                 </span>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-foreground">
+              <h3 className="text-base sm:text-lg font-semibold text-foreground">
                 Data Structures &amp; Algorithms Mid-Term Evaluation
               </h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Chandigarh University Department of Computer Science &amp; Engineering
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Standardized Computer Science Core Benchmark
               </p>
             </div>
 
             <div className="flex items-center gap-3 self-start sm:self-auto">
-              <div className="px-4 py-2 rounded-xl bg-background border border-border text-right">
-                <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider block">Time Left</span>
-                <span className="text-sm font-bold font-mono text-foreground">34:18 mins</span>
+              <div className="px-3.5 py-1.5 rounded-md bg-background border border-border text-right">
+                <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider block">Time Remaining</span>
+                <span className="text-xs sm:text-sm font-semibold font-mono text-foreground">34:18 mins</span>
               </div>
             </div>
           </div>

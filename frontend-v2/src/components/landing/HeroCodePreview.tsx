@@ -24,20 +24,16 @@ export function HeroCodePreview() {
   };
 
   return (
-    <div className="relative w-full max-w-xl mx-auto rounded-2xl bg-card border border-border/80 shadow-2xl overflow-hidden text-xs font-mono transition-all duration-300">
-      {/* Ambient glow behind preview */}
-      <div className="absolute -top-12 -right-12 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="relative w-full max-w-xl mx-auto rounded-lg bg-card border border-border shadow-md overflow-hidden text-xs font-mono transition-all duration-200">
       {/* Editor Window Titlebar */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-muted/40 border-b border-border select-none">
+      <div className="flex items-center justify-between px-3.5 py-2 bg-muted/40 border-b border-border select-none">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-red-500/70 inline-block" />
             <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70 inline-block" />
             <span className="w-2.5 h-2.5 rounded-full bg-green-500/70 inline-block" />
           </div>
-          <div className="h-4 w-[1px] bg-border mx-1" />
+          <div className="h-3.5 w-[1px] bg-border mx-1" />
           <div className="flex items-center gap-1">
             <button
               onClick={() => setActiveTab("code")}

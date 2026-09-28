@@ -90,9 +90,9 @@ export function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`relative px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`relative px-3 py-1.5 rounded-md text-xs sm:text-[13px] font-medium transition-colors ${
                     isActive
-                      ? "text-foreground bg-muted font-semibold"
+                      ? "text-foreground bg-muted font-medium"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   }`}
                 >
@@ -100,7 +100,7 @@ export function Navbar() {
                   {isActive && (
                     <motion.span
                       layoutId="activeNavIndicator"
-                      className="absolute bottom-0 left-3 right-3 h-[2px] bg-primary rounded-full"
+                      className="absolute bottom-0 left-2.5 right-2.5 h-[2px] bg-primary rounded-full"
                     />
                   )}
                 </Link>
@@ -109,7 +109,7 @@ export function Navbar() {
           </nav>
 
           {/* Desktop Right Controls: Theme Toggle & CTAs */}
-          <div className="hidden md:flex items-center gap-2.5">
+          <div className="hidden md:flex items-center gap-2">
             <ThemeToggle />
 
             {user ? (
@@ -117,7 +117,7 @@ export function Navbar() {
                 {user.isAdmin && (
                   <Link
                     href="/admin/dashboard"
-                    className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all"
+                    className="flex items-center gap-1.5 h-8 px-2.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all"
                   >
                     <ShieldCheck className="w-3.5 h-3.5" />
                     <span>Admin</span>
@@ -125,32 +125,32 @@ export function Navbar() {
                 )}
                 <Link
                   href="/profile"
-                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-foreground bg-muted/60 hover:bg-muted border border-border transition-colors"
+                  className="flex items-center gap-1.5 h-8 px-2.5 rounded-md text-xs font-medium text-foreground bg-muted/60 hover:bg-muted border border-border transition-colors"
                 >
                   <User className="w-3.5 h-3.5 text-muted-foreground" />
                   <span>{user.name?.split(" ")[0] || "Profile"}</span>
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted border border-border transition-colors"
+                  className="flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted border border-border transition-colors"
                   title="Sign Out"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <Link
                   href="/login"
-                  className="flex items-center justify-center h-8 px-3 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  className="flex items-center justify-center h-8 px-3 rounded-md text-xs sm:text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 >
                   Log in
                 </Link>
                 <Link
                   href="/login"
-                  className="flex items-center justify-center h-8 px-3.5 rounded-lg text-xs font-semibold bg-primary hover:bg-primary/90 active:bg-primary/80 text-primary-foreground transition-all shadow-xs"
+                  className="flex items-center justify-center h-8 px-3 rounded-md text-xs sm:text-[13px] font-medium bg-primary hover:bg-primary/90 text-primary-foreground transition-all shadow-xs"
                 >
-                  Student Sign In
+                  Sign In
                 </Link>
               </div>
             )}
