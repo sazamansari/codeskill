@@ -1,9 +1,28 @@
 const path = require('path');
-const mongoose = require(path.join(__dirname, '../backend-nestjs/node_modules/mongoose'));
-const bcrypt = require(path.join(__dirname, '../backend-nestjs/node_modules/bcryptjs'));
-require('dotenv').config({ path: path.join(__dirname, '../backend-nestjs/.env') });
+const fs = require('fs');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://mdshadabazamansari:123123123123@cluster0.gwcfd5x.mongodb.net/codeskill?retryWrites=true&w=majority';
+// Load environment variables from backend-nestjs/.env
+const envPath = path.join(__dirname, '../backend-nestjs/.env');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  for (const line of envContent.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+      const idx = trimmed.indexOf('=');
+      const key = trimmed.substring(0, idx).trim();
+      const val = trimmed.substring(idx + 1).trim();
+      if (!process.env[key]) {
+        process.env[key] = val;
+      }
+    }
+  }
+}
+
+const backendModules = path.join(__dirname, '../backend-nestjs/node_modules');
+const mongoose = require(path.join(backendModules, 'mongoose'));
+const bcrypt = require(path.join(backendModules, 'bcryptjs'));
+
+const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URI || 'mongodb+srv://mdshadabazamansari:123123123123@cluster0.gwcfd5x.mongodb.net/codeskill?retryWrites=true&w=majority';
 
 async function main() {
   console.log('Connecting to MongoDB...');
