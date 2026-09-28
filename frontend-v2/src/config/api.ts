@@ -1,6 +1,23 @@
 import axios from "axios";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+const getApiBase = () => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (typeof window !== "undefined") {
+    // If accessed on remote server/domain and envUrl points to localhost, use relative /api
+    if (
+      !envUrl ||
+      envUrl === "/api" ||
+      (envUrl.includes("localhost") &&
+        window.location.hostname !== "localhost" &&
+        window.location.hostname !== "127.0.0.1")
+    ) {
+      return "/api";
+    }
+  }
+  return envUrl || "http://127.0.0.1:5001/api";
+};
+
+const API_BASE = getApiBase();
 
 const api = axios.create({ baseURL: API_BASE });
 
