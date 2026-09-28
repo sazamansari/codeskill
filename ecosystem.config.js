@@ -1,8 +1,15 @@
+const fs = require('fs');
+const path = require('path');
+
+const backendScript = fs.existsSync(path.join(__dirname, 'backend-nestjs/dist/src/main.js')) && !fs.existsSync(path.join(__dirname, 'backend-nestjs/dist/main.js'))
+  ? 'dist/src/main.js'
+  : 'dist/main.js';
+
 module.exports = {
   apps: [
     {
       name: "codeskill-backend",
-      script: "dist/main.js",
+      script: backendScript,
       cwd: "./backend-nestjs",
       instances: 1, // Single instance — child_process code execution conflicts with cluster mode
       exec_mode: "fork",
