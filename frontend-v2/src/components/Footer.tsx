@@ -38,14 +38,15 @@ export function Footer() {
 
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-base text-foreground tracking-tight">CodeSkill</span>
-                  <span className="text-xs font-semibold text-muted-foreground">
-                    <span className="text-red-500 font-bold">by</span> Chandigarh University
+                  <span className="font-extrabold text-base sm:text-lg text-foreground tracking-tight">CodeSkill</span>
+                  <span className="text-xs sm:text-sm font-bold text-foreground">
+                    <span className="text-red-500">by</span> Chandigarh University
                   </span>
                 </div>
-                <p className="text-[11px] text-muted-foreground font-medium mt-0.5">
-                  Under Chandigarh University Department of Skill Development and Lab
-                </p>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-500/10 border border-red-500/25 text-red-500 dark:text-red-400 font-bold text-[11px] sm:text-xs tracking-tight mt-1.5 shadow-xs">
+                  <GraduationCap className="w-3.5 h-3.5 shrink-0 text-red-500 dark:text-red-400" />
+                  <span>Under Chandigarh University Department of Skill Development and Lab</span>
+                </div>
               </div>
             </div>
 
@@ -97,7 +98,7 @@ export function Footer() {
         {/* Bottom Bar: Copyright & Operational Status */}
         <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
           <p>
-            © {new Date().getFullYear()} CodeSkill by Chandigarh University • Under Chandigarh University Department of Skill Development and Lab. All rights reserved.
+            © {new Date().getFullYear()} CodeSkill by Chandigarh University • <strong className="font-bold text-foreground">Under Chandigarh University Department of Skill Development and Lab</strong>. All rights reserved.
           </p>
 
           <div className="flex items-center gap-2">
