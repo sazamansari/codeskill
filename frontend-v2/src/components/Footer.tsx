@@ -36,26 +36,26 @@ export function Footer() {
                 </svg>
               </div>
 
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-base sm:text-lg text-foreground tracking-tight">CodeSkill</span>
-                  <span className="text-xs sm:text-sm font-bold text-foreground">
-                    <span className="text-red-500">by</span> Chandigarh University
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-extrabold text-lg sm:text-xl text-white tracking-tight">CodeSkill</span>
+                  <span className="text-xs sm:text-sm font-bold text-amber-400">
+                    <span className="text-white/80 font-normal">by</span> Chandigarh University
                   </span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-500/10 border border-red-500/25 text-red-500 dark:text-red-400 font-bold text-[11px] sm:text-xs tracking-tight mt-1.5 shadow-xs">
-                  <GraduationCap className="w-3.5 h-3.5 shrink-0 text-red-500 dark:text-red-400" />
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/15 border border-amber-400/40 text-amber-300 font-bold text-[11px] sm:text-xs tracking-tight mt-0.5 shadow-xs w-fit">
+                  <GraduationCap className="w-3.5 h-3.5 shrink-0 text-amber-400" />
                   <span>Under Chandigarh University Department of Skill Development and Lab</span>
                 </div>
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground leading-relaxed max-w-sm">
+            <p className="text-xs text-slate-300 dark:text-slate-300 leading-relaxed max-w-sm">
               Standardized examination portal and algorithmic skill-building platform engineered for developers, students, and technical evaluations.
             </p>
 
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/60 text-muted-foreground border border-border text-[11px]">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[11px] font-semibold">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
               <span>Proctored &amp; Verified Examination Infrastructure</span>
             </div>
           </div>
@@ -97,8 +97,8 @@ export function Footer() {
 
         {/* Bottom Bar: Copyright & Operational Status */}
         <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <p>
-            © {new Date().getFullYear()} CodeSkill by Chandigarh University • <strong className="font-bold text-foreground">Under Chandigarh University Department of Skill Development and Lab</strong>. All rights reserved.
+          <p className="text-slate-300">
+            © {new Date().getFullYear()} <span className="text-white font-bold">CodeSkill</span> <span className="text-amber-400 font-semibold">by Chandigarh University</span> • <strong className="font-bold text-amber-300">Under Chandigarh University Department of Skill Development and Lab</strong>. All rights reserved.
           </p>
 
           <div className="flex items-center gap-2">
