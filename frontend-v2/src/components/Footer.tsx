@@ -25,9 +25,9 @@ export function Footer() {
           
           {/* Brand Info (5 cols) */}
           <div className="md:col-span-5 space-y-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-start gap-3.5">
               {/* CodeSkill Primary Logo */}
-              <div className="w-9 h-9 rounded-xl overflow-hidden bg-slate-950 border border-primary/40 shadow-xs flex items-center justify-center p-1">
+              <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-950 border border-primary/30 shadow-xs flex items-center justify-center p-1.5 shrink-0 mt-0.5">
                 <svg viewBox="0 0 160 160" className="w-full h-full" fill="none">
                   <polygon points="80,10 145,45 145,115 80,150 15,115 15,45" fill="#0F172A" stroke="#C8102E" strokeWidth="8" strokeLinejoin="round" />
                   <path d="M60 62 L40 80 L60 98" stroke="#FFFFFF" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
@@ -36,26 +36,26 @@ export function Footer() {
                 </svg>
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-extrabold text-lg sm:text-xl text-white tracking-tight">CodeSkill</span>
-                  <span className="text-xs sm:text-sm font-bold text-amber-400">
-                    <span className="text-white/80 font-normal">by</span> Chandigarh University
+                  <span className="font-extrabold text-xl text-foreground tracking-tight">CodeSkill</span>
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    by Chandigarh University
                   </span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/15 border border-amber-400/40 text-amber-300 font-bold text-[11px] sm:text-xs tracking-tight mt-0.5 shadow-xs w-fit">
-                  <GraduationCap className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-                  <span>Under Chandigarh University Department of Skill Development and Lab</span>
-                </div>
+                <p className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                  <GraduationCap className="w-3.5 h-3.5 text-primary shrink-0" />
+                  <span>Department of Skill Development &amp; Lab</span>
+                </p>
               </div>
             </div>
 
-            <p className="text-xs text-slate-300 dark:text-slate-300 leading-relaxed max-w-sm">
+            <p className="text-xs text-muted-foreground leading-relaxed max-w-sm">
               Standardized examination portal and algorithmic skill-building platform engineered for developers, students, and technical evaluations.
             </p>
 
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[11px] font-semibold">
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-muted/60 text-muted-foreground border border-border text-[11px] font-medium">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
               <span>Proctored &amp; Verified Examination Infrastructure</span>
             </div>
           </div>
@@ -97,13 +97,13 @@ export function Footer() {
 
         {/* Bottom Bar: Copyright & Operational Status */}
         <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <p className="text-slate-300">
-            © {new Date().getFullYear()} <span className="text-white font-bold">CodeSkill</span> <span className="text-amber-400 font-semibold">by Chandigarh University</span> • <strong className="font-bold text-amber-300">Under Chandigarh University Department of Skill Development and Lab</strong>. All rights reserved.
+          <p className="text-xs text-muted-foreground">
+            © {new Date().getFullYear()} <span className="font-semibold text-foreground">CodeSkill</span> • Department of Skill Development &amp; Lab, Chandigarh University. All rights reserved.
           </p>
 
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-medium">All Examination Nodes Operational</span>
+            <span className="font-medium text-xs">All Examination Nodes Operational</span>
           </div>
         </div>
 

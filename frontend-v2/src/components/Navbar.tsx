@@ -72,12 +72,12 @@ export function Navbar() {
                 <span className="font-extrabold text-base sm:text-lg text-foreground tracking-tight leading-none">
                   CodeSkill
                 </span>
-                <span className="text-[11px] sm:text-xs font-semibold text-muted-foreground flex items-center gap-1">
-                  <span className="text-red-500 font-bold">by</span> Chandigarh University
+                <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
+                  <span className="text-primary font-medium">by</span> Chandigarh University
                 </span>
               </div>
               <span className="hidden sm:block text-[10px] text-muted-foreground font-normal leading-none mt-0.5">
-                Examination &amp; Algorithmic Learning System
+                Department of Skill Development &amp; Lab
               </span>
             </div>
           </Link>
