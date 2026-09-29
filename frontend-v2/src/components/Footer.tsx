@@ -39,11 +39,13 @@ export function Footer() {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-extrabold text-base text-foreground tracking-tight">CodeSkill</span>
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
-                    Platform
+                  <span className="text-xs font-semibold text-muted-foreground">
+                    <span className="text-red-500 font-bold">by</span> Chandigarh University
                   </span>
                 </div>
-                <p className="text-[11px] text-muted-foreground">Examination &amp; Algorithmic Learning System</p>
+                <p className="text-[11px] text-muted-foreground font-medium mt-0.5">
+                  Under Chandigarh University Department of Skill Development and Lab
+                </p>
               </div>
             </div>
 
@@ -95,7 +97,7 @@ export function Footer() {
         {/* Bottom Bar: Copyright & Operational Status */}
         <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
           <p>
-            © {new Date().getFullYear()} CodeSkill • Chandigarh University. All rights reserved.
+            © {new Date().getFullYear()} CodeSkill by Chandigarh University • Under Chandigarh University Department of Skill Development and Lab. All rights reserved.
           </p>
 
           <div className="flex items-center gap-2">

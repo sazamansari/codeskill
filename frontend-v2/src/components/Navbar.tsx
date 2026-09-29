@@ -68,12 +68,12 @@ export function Navbar() {
             </div>
 
             <div className="flex flex-col">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-base sm:text-lg text-foreground tracking-tight leading-none">
                   CodeSkill
                 </span>
-                <span className="hidden sm:inline-block text-[9px] font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
-                  Assessment
+                <span className="text-[11px] sm:text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                  <span className="text-red-500 font-bold">by</span> Chandigarh University
                 </span>
               </div>
               <span className="hidden sm:block text-[10px] text-muted-foreground font-normal leading-none mt-0.5">
