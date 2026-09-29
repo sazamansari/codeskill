@@ -79,6 +79,8 @@
 
     --border: 214 32% 91%;         /* #e2e8f0 crisp 1px border */
     --input: 214 32% 91%;
+    --skeleton: 210 20% 90%;
+    --btn-border: 214 32% 91%;
     --ring: 350 84% 42%;
     --radius: 0.5rem;              /* 8px standard professional radius */
 
@@ -126,6 +128,8 @@
 
     --border: 217 33% 19%;          /* #1e293b / #2d3748 */
     --input: 217 33% 19%;
+    --skeleton: 217 33% 18%;
+    --btn-border: 217 33% 19%;
     --ring: 350 84% 52%;
 
     /* Sidebar tokens */
@@ -154,10 +158,31 @@
   @keyframes shimmer {
     100% { transform: translateX(100%); }
   }
+  @keyframes ripple {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(0.9); }
+  }
+  @keyframes orbit {
+    0% {
+      transform: rotate(0deg) translateY(calc(var(--radius) * 1px)) rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg) translateY(calc(var(--radius) * 1px)) rotate(-360deg);
+    }
+  }
   .animate-gradient {
     animation: gradient 8s linear infinite;
   }
+  .animate-ripple {
+    animation: ripple 2s ease calc(var(--i, 0) * 0.2s) infinite;
+  }
+  .animate-orbit {
+    animation: orbit calc(var(--duration) * 1s) linear infinite;
+  }
   .bg-300\% {
     background-size: 300% 300%;
+  }
+  .shadow-input {
+    box-shadow: 0px 2px 3px -1px rgba(0, 0, 0, 0.1), 0px 1px 0px 0px rgba(25, 28, 33, 0.02), 0px 0px 0px 1px rgba(25, 28, 33, 0.08);
   }
 }
