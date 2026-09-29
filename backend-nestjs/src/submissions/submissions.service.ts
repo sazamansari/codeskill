@@ -23,34 +23,37 @@ export class SubmissionsService {
   ) {}
 
   async createSubmission(userId: string, data: any) {
-    // Override status to pending for background processing
+    const { status: _untrustedStatus, runtime: _untrustedRuntime, memory: _untrustedMemory, testCasesPassed: _untrustedPassed, totalTestCases: _untrustedTotal, ...submissionData } = data;
+
+    // The client can only request evaluation. It cannot declare its own result.
     const submission = await this.submissionModel.create({
       user: userId,
-      ...data,
-      status: data.status || 'pending',
+      ...submissionData,
+      status: 'pending',
     });
 
-    // Enqueue the submission for processing by the judge worker
-    await this.submissionQueue.add('evaluate-code', {
-      submissionId: submission._id,
-      problemId: data.problemId,
-      code: data.code,
-      language: data.language,
-      userId,
-    });
+    await this.submissionQueue.add(
+      'evaluate-code',
+      {
+        submissionId: submission._id,
+        problemId: submissionData.problemId,
+        code: submissionData.code,
+        language: submissionData.language,
+        userId,
+      },
+      {
+        jobId: String(submission._id),
+        attempts: 2,
+        backoff: { type: 'exponential', delay: 2_000 },
+        removeOnComplete: { age: 24 * 60 * 60 },
+        removeOnFail: { age: 7 * 24 * 60 * 60 },
+      },
+    );
 
-    const user = await this.userModel.findById(userId);
-    if (user) {
-      user.stats.totalSubmissions += 1;
-      if (data.status === 'accepted') {
-        user.stats.acceptedSubmissions += 1;
-        // Additional badge/XP logic would go here
-      }
-      if (user.updateStreak) {
-        user.updateStreak();
-      }
-      await user.save();
-    }
+    await this.userModel.updateOne(
+      { _id: userId },
+      { $inc: { 'stats.totalSubmissions': 1 } },
+    );
 
     return submission;
   }

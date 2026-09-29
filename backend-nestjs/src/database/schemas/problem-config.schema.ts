@@ -30,6 +30,20 @@ export class ProblemConfig {
   @Prop({ default: 1024 * 1024 })
   maxSourceCodeSize: number;
 
+  @Prop({ enum: ['standard', 'function'], default: 'standard' })
+  executionMode: 'standard' | 'function';
+
+  @Prop({ type: Object })
+  functionSignature?: {
+    className?: string;
+    functionName: string;
+    returnType?: string;
+    parameters?: Array<{ name: string; type: string }>;
+  };
+
+  @Prop({ default: false })
+  exactOutput: boolean;
+
   @Prop({ default: true })
   enableCustomInput: boolean;
 

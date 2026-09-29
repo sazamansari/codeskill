@@ -276,12 +276,8 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
   };
 
   const getTestCases = () => {
-    const fallback = [
-      { id: 1, input: "Mock Input 1", expected: "Mock Expected 1" },
-      { id: 2, input: "Mock Input 2", expected: "Mock Expected 2" }
-    ];
     if (!problem || !problem.testCases || !problem.testCases.cases || problem.testCases.cases.length === 0) {
-      return fallback;
+      return [];
     }
     return problem.testCases.cases.map((tc: any, i: number) => ({ id: i + 1, input: tc.input, expected: tc.output }));
   };
@@ -292,9 +288,36 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
       input: tc.input,
       expected: tc.expected,
     }));
+    if (apiTestCases.length === 0) {
+      throw new Error("This problem has no visible sample tests configured.");
+    }
 
-    const response = await runAPI.run({ code, language, testCases: apiTestCases });
-    const data = response.data;
+    const response = await runAPI.run({
+      code,
+      language,
+      testCases: apiTestCases,
+      config: {
+        timeLimit: problem?.config?.timeLimit,
+        memoryLimit: problem?.config?.memoryLimit,
+        executionMode: problem?.config?.executionMode,
+        functionSignature: problem?.config?.functionSignature,
+      },
+    });
+    let data = response.data;
+    if (data.status === "queued" && data.jobId) {
+      const deadline = Date.now() + 60_000;
+      while (Date.now() < deadline) {
+        await new Promise((resolve) => window.setTimeout(resolve, 400));
+        const jobResponse = await runAPI.getJob(data.jobId);
+        data = jobResponse.data;
+        if (!["waiting", "active", "delayed", "prioritized", "queued"].includes(data.status)) {
+          break;
+        }
+      }
+      if (["waiting", "active", "delayed", "prioritized", "queued"].includes(data.status)) {
+        throw new Error("Execution is taking longer than expected. Please try again.");
+      }
+    }
 
     let resultState: RunResult;
     if (!data.success) {

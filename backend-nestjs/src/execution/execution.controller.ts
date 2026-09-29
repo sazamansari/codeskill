@@ -2,20 +2,30 @@ import {
   Controller,
   Post,
   Body,
+  Get,
+  Param,
   HttpCode,
   HttpStatus,
   BadRequestException,
+  NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { ExecutionService, Status } from './execution.service';
 import { AzureExecutionService } from './azure-execution.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('Execution')
+@UseGuards(JwtAuthGuard)
 @Controller('execution')
 export class ExecutionController {
   constructor(
     private readonly executionService: ExecutionService,
     private readonly azureExecutionService: AzureExecutionService,
+    @InjectQueue('submissions') private readonly submissionQueue: Queue,
   ) {}
 
   @Post('run')
@@ -65,7 +75,7 @@ export class ExecutionController {
       },
     },
   })
-  async runCode(@Body() body: any) {
+  async runCode(@CurrentUser('_id') userId: string, @Body() body: any) {
     const { language, code, testCases, config = {} } = body;
 
     // Validate required fields
@@ -87,61 +97,47 @@ export class ExecutionController {
       );
     }
 
-    try {
-      const startTime = Date.now();
-      const results = await this.executionService.executeCode(
-        language,
-        code,
-        testCases,
-        config,
-      );
-      const runtime = Date.now() - startTime;
+    const job = await this.submissionQueue.add(
+      'run-code',
+      { code, language, testCases, config, userId },
+      {
+        attempts: 1,
+        removeOnComplete: { age: 15 * 60 },
+        removeOnFail: { age: 60 * 60 },
+      },
+    );
+    return {
+      success: true,
+      status: 'queued',
+      jobId: job.id,
+      message: 'Execution queued',
+    };
+  }
 
-      const passedCount = results.filter((r) => r.passed).length;
-      const totalCount = results.length;
-      const allPassed = passedCount === totalCount;
-
-      // Determine overall status
-      const hasCompileError = results.some((r) => r.status === Status.COMPILATION_ERROR);
-      const hasRuntimeError = results.some((r) => r.status === Status.RUNTIME_ERROR);
-      const hasTLE = results.some((r) => r.status === Status.TIME_LIMIT_EXCEEDED);
-      const hasSystemError = results.some((r) => r.status === Status.SYSTEM_ERROR);
-
-      let overallStatus: string;
-      if (allPassed) {
-        overallStatus = Status.ACCEPTED;
-      } else if (hasCompileError) {
-        overallStatus = Status.COMPILATION_ERROR;
-      } else if (hasRuntimeError) {
-        overallStatus = Status.RUNTIME_ERROR;
-      } else if (hasTLE) {
-        overallStatus = Status.TIME_LIMIT_EXCEEDED;
-      } else if (hasSystemError) {
-        overallStatus = Status.SYSTEM_ERROR;
-      } else {
-        overallStatus = Status.WRONG_ANSWER;
-      }
-
-      return {
-        success: true,
-        status: overallStatus,
-        results,
-        runtime,
-        passedCount,
-        totalCount,
-      };
-    } catch (error: any) {
-      // This catches unexpected system errors, not execution errors
+  @Get('jobs/:jobId')
+  @ApiOperation({ summary: 'Get an asynchronous execution result' })
+  async getJob(
+    @CurrentUser('_id') userId: string,
+    @Param('jobId') jobId: string,
+  ) {
+    const job = await this.submissionQueue.getJob(jobId);
+    if (!job || String(job.data.userId) !== String(userId)) {
+      throw new NotFoundException('Execution job not found');
+    }
+    const state = await job.getState();
+    if (state === 'completed') return job.returnvalue;
+    if (state === 'failed') {
       return {
         success: false,
         status: Status.SYSTEM_ERROR,
-        message: error.message || 'An unexpected error occurred during execution',
+        message: 'The judge worker could not complete this execution',
         results: [],
         runtime: 0,
         passedCount: 0,
-        totalCount: testCases.length,
+        totalCount: Array.isArray(job.data.testCases) ? job.data.testCases.length : 0,
       };
     }
+    return { success: true, status: state, jobId };
   }
 
   /**

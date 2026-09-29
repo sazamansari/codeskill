@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { randomUUID as uuidv4 } from 'crypto';
+import { commandBasename, getLanguageAdapter } from './language-adapters';
 
 // ── Result Status Constants ──────────────────────────────────────────────────
 export const Status = {
@@ -35,6 +36,9 @@ export interface TestCaseResult {
 interface RunOptions {
   timeout: number;
   memoryLimit?: number;
+  cpuLimit?: number;
+  language: string;
+  config: any;
 }
 
 // ── Language Configurations ──────────────────────────────────────────────────
@@ -225,6 +229,55 @@ export class ExecutionService {
       }));
     }
 
+    if (typeof code !== 'string' || !code.trim()) {
+      return testCases.map((tc) => ({
+        id: tc.id,
+        passed: false,
+        status: Status.SYSTEM_ERROR,
+        output: '',
+        expected: String(tc.expected ?? tc.output ?? ''),
+        error: 'Source code is required',
+      }));
+    }
+    if (Buffer.byteLength(code, 'utf8') > 1_000_000) {
+      return testCases.map((tc) => ({
+        id: tc.id,
+        passed: false,
+        status: Status.SYSTEM_ERROR,
+        output: '',
+        expected: String(tc.expected ?? tc.output ?? ''),
+        error: 'Source code exceeds the 1000000 byte limit',
+      }));
+    }
+
+    const functionMode = config.executionMode === 'function';
+    let sourceCode = code;
+    if (functionMode) {
+      const adapter = getLanguageAdapter(language);
+      if (!adapter) {
+        return testCases.map((tc) => ({
+          id: tc.id,
+          passed: false,
+          status: Status.SYSTEM_ERROR,
+          output: '',
+          expected: String(tc.expected ?? tc.output ?? ''),
+          error: `Unsupported language: ${language}`,
+        }));
+      }
+      try {
+        sourceCode = adapter.prepare(code, 'function', config.functionSignature).source;
+      } catch (error: any) {
+        return testCases.map((tc) => ({
+          id: tc.id,
+          passed: false,
+          status: Status.SYSTEM_ERROR,
+          output: '',
+          expected: String(tc.expected ?? tc.output ?? ''),
+          error: error?.message || 'Unable to generate function-mode wrapper',
+        }));
+      }
+    }
+
     // Compute per-test-case timeout
     let timeout = DEFAULT_TIMEOUT_MS;
     if (config.executionProfiles?.[language]) {
@@ -234,24 +287,30 @@ export class ExecutionService {
       timeout = config.timeLimit;
     }
 
-    const runOpts: RunOptions = { timeout, memoryLimit: config.memoryLimit };
+    const runOpts: RunOptions = {
+      timeout: Math.max(100, Math.min(60_000, Number(timeout) || DEFAULT_TIMEOUT_MS)),
+      memoryLimit: Math.max(32, Math.min(1_024, Number(config.memoryLimit) || 256)),
+      cpuLimit: Math.max(0.25, Math.min(2, Number(config.cpuLimit) || 1)),
+      language,
+      config,
+    };
 
     // Normalize test cases — support both formats:
     //   { input: "5\n1 2 3 4 5", expected: "15" }       — stdin/stdout
     //   { input: { nums: [2,7,11,15], target: 9 }, expected: [0,1] }  — structured
     const normalizedTestCases: TestCaseInput[] = testCases.map((tc, i) => ({
       id: tc.id ?? i + 1,
-      input: this.normalizeInput(tc.input),
+      input: this.normalizeInput(tc.input, functionMode),
       expected: this.normalizeExpected(tc.expected ?? tc.output),
     }));
 
     // For compiled languages, compile once and run against all test cases
     if (langConfig.compiled) {
-      return this.executeCompiled(langConfig, language, code, normalizedTestCases, runOpts);
+      return this.executeCompiled(langConfig, language, sourceCode, normalizedTestCases, runOpts);
     }
 
     // For interpreted languages, run each test case independently
-    return this.executeInterpreted(langConfig, language, code, normalizedTestCases, runOpts);
+    return this.executeInterpreted(langConfig, language, sourceCode, normalizedTestCases, runOpts);
   }
 
   // ── Compiled Language Execution ──────────────────────────────────────────
@@ -283,7 +342,7 @@ export class ExecutionService {
 
       // 3. Compile
       const outPath = path.join(tmpDir, 'solution');
-      const compileResult = await this.compile(langConfig, srcPath, outPath, tmpDir);
+      const compileResult = await this.compile(langConfig, srcPath, outPath, tmpDir, opts);
       if (compileResult.error) {
         // Return COMPILATION_ERROR for all test cases
         return testCases.map((tc) => ({
@@ -348,17 +407,19 @@ export class ExecutionService {
     srcPath: string,
     outPath: string,
     cwd: string,
+    opts: RunOptions,
   ): Promise<{ success: boolean; error?: string }> {
     if (!langConfig.compileCommand) {
       return Promise.resolve({ success: true });
     }
 
     const { cmd, args } = langConfig.compileCommand(srcPath, outPath, cwd);
+    const securedCommand = this.sandboxCommand(cmd, args, cwd, opts);
 
     return new Promise((resolve) => {
       const child = execFile(
-        cmd,
-        args,
+        securedCommand.cmd,
+        securedCommand.args,
         {
           timeout: DEFAULT_COMPILE_TIMEOUT_MS,
           maxBuffer: MAX_OUTPUT_BYTES,
@@ -381,6 +442,65 @@ export class ExecutionService {
 
   // ── Process Execution ────────────────────────────────────────────────────
 
+  // Production uses a container per compile/run. The bind mount contains only
+  // the generated submission directory; networking, capabilities, process
+  // count, CPU and memory are constrained by Docker.
+  private sandboxCommand(
+    cmd: string,
+    args: string[],
+    cwd: string,
+    opts: RunOptions,
+  ): { cmd: string; args: string[] } {
+    const sandbox = (
+      process.env.JUDGE_SANDBOX ||
+      (process.env.NODE_ENV === 'production' ? 'docker' : 'local')
+    ).toLowerCase();
+    if (sandbox === 'local') return { cmd, args };
+    if (sandbox !== 'docker') {
+      throw new Error(`Unsupported JUDGE_SANDBOX value: ${sandbox}`);
+    }
+
+    const adapter = getLanguageAdapter(opts.language);
+    const image = opts.config?.sandboxImage || adapter?.sandboxImage;
+    if (!image) {
+      throw new Error(`No approved sandbox image configured for ${opts.language}`);
+    }
+    const command = commandBasename({ cmd, args }, cwd);
+    const memory = Math.max(32, Math.min(1_024, Number(opts.memoryLimit) || 256));
+    const cpu = Math.max(0.25, Math.min(2, Number(opts.cpuLimit) || 1));
+    return {
+      cmd: 'docker',
+      args: [
+        'run',
+        '--rm',
+        '--network',
+        'none',
+        '--read-only',
+        '--tmpfs',
+        '/tmp:rw,noexec,nosuid,size=64m',
+        '--pids-limit',
+        '64',
+        '--memory',
+        `${memory}m`,
+        '--memory-swap',
+        `${memory}m`,
+        '--cpus',
+        String(cpu),
+        '--cap-drop',
+        'ALL',
+        '--security-opt',
+        'no-new-privileges',
+        '--mount',
+        `type=bind,src=${cwd},dst=/workspace`,
+        '--workdir',
+        '/workspace',
+        image,
+        command.cmd,
+        ...command.args,
+      ],
+    };
+  }
+
   private runProcess(
     langConfig: LanguageConfig,
     srcPath: string,
@@ -390,6 +510,7 @@ export class ExecutionService {
     opts: RunOptions,
   ): Promise<TestCaseResult> {
     const { cmd, args } = langConfig.runCommand(srcPath, outPath, cwd);
+    const securedCommand = this.sandboxCommand(cmd, args, cwd, opts);
 
     return new Promise((resolve) => {
       const startTime = Date.now();
@@ -398,12 +519,12 @@ export class ExecutionService {
       let killed = false;
       let finished = false;
 
-      const child = spawn(cmd, args, {
+      const child = spawn(securedCommand.cmd, securedCommand.args, {
         cwd,
         env: this.getSafeEnv(),
         stdio: ['pipe', 'pipe', 'pipe'],
-        // Ensure the child gets its own process group for cleanup
-        detached: false,
+        // A separate process group lets timeout cleanup kill descendants too.
+        detached: process.platform !== 'win32',
       });
 
       // Set up output size limits
@@ -568,8 +689,19 @@ export class ExecutionService {
    * Normalize test case input to a plain string for stdin.
    * Handles both string inputs and structured JSON inputs.
    */
-  private normalizeInput(input: any): string {
+  private normalizeInput(input: any, functionMode = false): string {
     if (input === null || input === undefined) return '';
+    if (functionMode) {
+      if (typeof input === 'string') {
+        try {
+          JSON.parse(input);
+          return input;
+        } catch {
+          return JSON.stringify(input);
+        }
+      }
+      return JSON.stringify(input);
+    }
     if (typeof input === 'string') return input;
 
     // Structured input (e.g., { nums: [2,7,11,15], target: 9 })

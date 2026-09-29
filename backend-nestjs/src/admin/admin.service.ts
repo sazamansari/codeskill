@@ -243,6 +243,9 @@ export class AdminService {
       timeLimit: execution?.timeLimit || 2000,
       memoryLimit: execution?.memoryLimit || 256,
       cpuLimit: execution?.cpuLimit || 1,
+      executionMode: execution?.executionMode || 'standard',
+      functionSignature: execution?.functionSignature,
+      exactOutput: execution?.exactOutput === true,
       starterCode: starterCode || {},
       referenceSolution: referenceSolution || {},
       hasCustomChecker: customChecker?.hasCustomChecker || false,
@@ -314,6 +317,9 @@ export class AdminService {
     if (execution?.timeLimit) configUpdate.timeLimit = execution.timeLimit;
     if (execution?.memoryLimit) configUpdate.memoryLimit = execution.memoryLimit;
     if (execution?.cpuLimit) configUpdate.cpuLimit = execution.cpuLimit;
+    if (execution?.executionMode) configUpdate.executionMode = execution.executionMode;
+    if (execution?.functionSignature !== undefined) configUpdate.functionSignature = execution.functionSignature;
+    if (execution?.exactOutput !== undefined) configUpdate.exactOutput = execution.exactOutput;
     if (starterCode) configUpdate.starterCode = starterCode;
     if (referenceSolution) configUpdate.referenceSolution = referenceSolution;
     if (customChecker?.hasCustomChecker !== undefined) configUpdate.hasCustomChecker = customChecker.hasCustomChecker;

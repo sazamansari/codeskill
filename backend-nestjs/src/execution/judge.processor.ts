@@ -16,6 +16,7 @@ import {
   ProblemTestCase,
   ProblemTestCaseDocument,
 } from '../database/schemas/problem-testcase.schema';
+import { User, UserDocument } from '../database/schemas/user.schema';
 import { AppGateway } from '../gateway/app.gateway';
 
 @Processor('submissions')
@@ -30,6 +31,8 @@ export class JudgeProcessor extends WorkerHost {
     private problemModel: Model<ProblemMetadataDocument>,
     @InjectModel(ProblemTestCase.name)
     private testCaseModel: Model<ProblemTestCaseDocument>,
+    @InjectModel(User.name)
+    private userModel: Model<UserDocument>,
     private readonly appGateway: AppGateway,
   ) {
     super();
@@ -40,6 +43,28 @@ export class JudgeProcessor extends WorkerHost {
       `[Judge] Processing job ${job.id} — type: ${job.name}`,
     );
 
+    if (job.name === 'run-code') {
+      const { code, language, testCases, config = {} } = job.data;
+      const results = await this.executionService.executeCode(
+        language,
+        code,
+        testCases,
+        config,
+      );
+      const passedCount = results.filter((result) => result.passed).length;
+      return {
+        success: true,
+        status: this.overallStatus(results),
+        results,
+        runtime: results.reduce(
+          (total, result) => total + (result.executionTime || 0),
+          0,
+        ),
+        passedCount,
+        totalCount: results.length,
+      };
+    }
+
     if (job.name === 'evaluate-code') {
       const { submissionId, problemId, code, language, userId } = job.data;
 
@@ -47,6 +72,7 @@ export class JudgeProcessor extends WorkerHost {
         // 1. Fetch actual test cases from DB
         const problem = await this.problemModel
           .findById(problemId)
+          .populate('config')
           .populate('testCases')
           .lean();
 
@@ -62,6 +88,7 @@ export class JudgeProcessor extends WorkerHost {
             id: i + 1,
             input: tc.input || '',
             expected: tc.output || '',
+            isHidden: tc.isHidden === true,
           }));
         }
 
@@ -75,6 +102,7 @@ export class JudgeProcessor extends WorkerHost {
               id: i + 1,
               input: tc.input || '',
               expected: tc.output || '',
+              isHidden: tc.isHidden === true,
             }));
           }
         }
@@ -106,6 +134,12 @@ export class JudgeProcessor extends WorkerHost {
         if (problemConfig) {
           if (problemConfig.timeLimit) config.timeLimit = problemConfig.timeLimit;
           if (problemConfig.memoryLimit) config.memoryLimit = problemConfig.memoryLimit;
+          if (problemConfig.cpuLimit) config.cpuLimit = problemConfig.cpuLimit;
+          if (problemConfig.executionMode) config.executionMode = problemConfig.executionMode;
+          if (problemConfig.functionSignature) {
+            config.functionSignature = problemConfig.functionSignature;
+          }
+          if (problemConfig.exactOutput === true) config.exactOutput = true;
         }
 
         // 4. Execute code
@@ -123,6 +157,7 @@ export class JudgeProcessor extends WorkerHost {
         let hasCompileError = false;
         let hasRuntimeError = false;
         let hasTLE = false;
+        let hasMemoryLimit = false;
         let compileOutput = '';
 
         for (const res of results) {
@@ -135,6 +170,7 @@ export class JudgeProcessor extends WorkerHost {
           }
           if (res.status === Status.RUNTIME_ERROR) hasRuntimeError = true;
           if (res.status === Status.TIME_LIMIT_EXCEEDED) hasTLE = true;
+          if (res.status === Status.MEMORY_LIMIT_EXCEEDED) hasMemoryLimit = true;
         }
 
         const allPassed = passedCount === testCases.length;
@@ -143,6 +179,8 @@ export class JudgeProcessor extends WorkerHost {
           status = Status.ACCEPTED;
         } else if (hasCompileError) {
           status = Status.COMPILATION_ERROR;
+        } else if (hasMemoryLimit) {
+          status = Status.MEMORY_LIMIT_EXCEEDED;
         } else if (hasRuntimeError) {
           status = Status.RUNTIME_ERROR;
         } else if (hasTLE) {
@@ -152,8 +190,8 @@ export class JudgeProcessor extends WorkerHost {
         }
 
         // 6. Update DB
-        await this.submissionModel.findByIdAndUpdate(
-          submissionId,
+        const updatedSubmission = await this.submissionModel.findOneAndUpdate(
+          { _id: submissionId, status: 'pending' },
           {
             status,
             runtime: `${runtime}ms`,
@@ -161,10 +199,25 @@ export class JudgeProcessor extends WorkerHost {
             testCasesPassed: passedCount,
             totalTestCases: testCases.length,
             compileOutput: compileOutput || undefined,
-            testResults: results,
+            testResults: results.map((result, index) =>
+              testCases[index]?.isHidden
+                ? {
+                    id: result.id,
+                    passed: result.passed,
+                    status: result.status,
+                    executionTime: result.executionTime,
+                  }
+                : result,
+            ),
           },
           { new: true },
         );
+        if (updatedSubmission && status === Status.ACCEPTED) {
+          await this.userModel.updateOne(
+            { _id: userId },
+            { $inc: { 'stats.acceptedSubmissions': 1 } },
+          );
+        }
 
         // 7. Notify user of completion
         this.appGateway.emitToUser(userId, 'execution_complete', {
@@ -173,7 +226,16 @@ export class JudgeProcessor extends WorkerHost {
           runtime,
           passedCount,
           totalCount: testCases.length,
-          results,
+          results: results.map((result, index) =>
+            testCases[index]?.isHidden
+              ? {
+                  id: result.id,
+                  passed: result.passed,
+                  status: result.status,
+                  executionTime: result.executionTime,
+                }
+              : result,
+          ),
         });
 
         this.logger.log(
@@ -201,5 +263,25 @@ export class JudgeProcessor extends WorkerHost {
         throw err;
       }
     }
+  }
+
+  private overallStatus(results: Array<{ passed: boolean; status: string }>): string {
+    if (results.every((result) => result.passed)) return Status.ACCEPTED;
+    if (results.some((result) => result.status === Status.COMPILATION_ERROR)) {
+      return Status.COMPILATION_ERROR;
+    }
+    if (results.some((result) => result.status === Status.MEMORY_LIMIT_EXCEEDED)) {
+      return Status.MEMORY_LIMIT_EXCEEDED;
+    }
+    if (results.some((result) => result.status === Status.RUNTIME_ERROR)) {
+      return Status.RUNTIME_ERROR;
+    }
+    if (results.some((result) => result.status === Status.TIME_LIMIT_EXCEEDED)) {
+      return Status.TIME_LIMIT_EXCEEDED;
+    }
+    if (results.some((result) => result.status === Status.SYSTEM_ERROR)) {
+      return Status.SYSTEM_ERROR;
+    }
+    return Status.WRONG_ANSWER;
   }
 }

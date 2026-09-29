@@ -103,6 +103,7 @@ export const submissionAPI = {
 export const runAPI = {
   run: (data: { code: string; language: string; testCases: any[]; config?: any }) =>
     api.post("/execution/run", data, { timeout: 60000 }),
+  getJob: (jobId: string) => api.get(`/execution/jobs/${jobId}`, { timeout: 60000 }),
 };
 
 // Azure-backed high-scale execution (Microsoft Azure Container Instances)
