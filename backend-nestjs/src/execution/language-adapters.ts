@@ -2,6 +2,7 @@ import * as path from 'path';
 import {
   ExecutionConfig,
   ExecutionMode,
+  FunctionParameter,
   FunctionSignature,
   canonicalLanguage,
 } from './execution.types';
@@ -17,6 +18,13 @@ export interface PreparedSource {
   entryPoint?: string;
 }
 
+export interface ResolvedFunctionSignature {
+  className: string;
+  functionName: string;
+  returnType: string;
+  parameters: FunctionParameter[];
+}
+
 export interface LanguageAdapter {
   readonly id: 'c' | 'cpp' | 'java' | 'python' | 'javascript';
   readonly compiled: boolean;
@@ -26,7 +34,7 @@ export interface LanguageAdapter {
   runCommand(sourcePath: string, outputPath: string, cwd: string, prepared: PreparedSource): Command;
 }
 
-const functionSignatureOrThrow = (signature: FunctionSignature | undefined): FunctionSignature => {
+const functionSignatureOrThrow = (signature: FunctionSignature | undefined): ResolvedFunctionSignature => {
   if (!signature?.functionName) {
     throw new Error('Function-mode problems require functionSignature.functionName');
   }
