@@ -159,10 +159,6 @@ export function FooterSectionView({
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
             <span>Proctored &amp; Verified Examination Infrastructure</span>
           </div>
-
-          <p className="text-muted-foreground mt-8 text-xs md:mt-4">
-            © {new Date().getFullYear()} {brandName} • Department of Skill Development &amp; Lab, Chandigarh University. All rights reserved.
-          </p>
         </AnimatedContainer>
 
         <div className="mt-8 grid grid-cols-2 gap-8 md:grid-cols-4 xl:col-span-2 xl:mt-0">
@@ -201,6 +197,13 @@ export function FooterSectionView({
             </AnimatedContainer>
           ))}
         </div>
+      </div>
+
+      {/* Centered Full-Width Bottom Bar */}
+      <div className="w-full pt-8 mt-12 border-t border-border/50 text-center flex flex-col items-center justify-center gap-2 text-xs text-muted-foreground">
+        <p className="text-center text-xs text-muted-foreground">
+          © {new Date().getFullYear()} <span className="font-semibold text-foreground">{brandName}</span> • Department of Skill Development &amp; Lab, Chandigarh University. All rights reserved.
+        </p>
       </div>
     </footer>
   );
