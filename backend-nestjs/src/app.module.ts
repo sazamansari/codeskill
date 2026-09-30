@@ -60,9 +60,11 @@ import { ConfigService } from '@nestjs/config';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         connection: {
-          host: configService.get<string>('redis.host'),
-          port: configService.get<number>('redis.port'),
-          password: configService.get<string>('redis.password'),
+          host: configService.get<string>('redis.host') || '127.0.0.1',
+          port: Number(configService.get<number>('redis.port')) || 6379,
+          password: configService.get<string>('redis.password') || undefined,
+          maxRetriesPerRequest: null,
+          connectTimeout: 5000,
         },
       }),
       inject: [ConfigService],
