@@ -80,6 +80,8 @@ api.interceptors.response.use(
           window.location.href = "/login";
         }
       }
+    } else if (error.response?.status === 400 && typeof window !== "undefined") {
+      console.warn(`[API 400 Bad Request] ${error.config?.url}:`, error.response?.data);
     }
     return Promise.reject(error);
   }
