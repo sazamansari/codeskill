@@ -403,8 +403,8 @@ export function CodingExperience() {
         
         {/* Section Header */}
         <div className="text-center max-w-xl mx-auto space-y-2.5">
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-600 dark:text-amber-400 text-xs font-semibold uppercase tracking-wider">
-            <Code2 className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border border-border bg-muted/60 text-foreground text-xs font-semibold uppercase tracking-wider">
+            <Code2 className="w-3.5 h-3.5 text-primary" />
             <span>Online Judge</span>
           </div>
 
@@ -474,7 +474,7 @@ export function CodingExperience() {
                     exit={{ opacity: 0 }}
                     className="flex items-center gap-2 font-mono text-xs text-neutral-500"
                   >
-                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     <span>Executing in isolated sandbox...</span>
                   </motion.div>
                 ) : showResult ? (
@@ -504,7 +504,7 @@ export function CodingExperience() {
             <button
               onClick={triggerRun}
               disabled={isRunning}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs transition-all duration-200 hover:scale-105 active:scale-95 shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-white hover:bg-neutral-100 text-black font-bold text-xs transition-all duration-200 hover:scale-105 active:scale-95 shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
             >
               <Play className={`w-3 h-3 fill-current ${isRunning ? "animate-spin" : ""}`} />
               <span>{isRunning ? "Running..." : "Run Solution"}</span>

@@ -19,7 +19,7 @@ export function LeaderboardPreview() {
         {/* Section Header */}
         <div className="text-center max-w-xl mx-auto space-y-2.5">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-muted text-muted-foreground border border-border text-[11px] font-medium uppercase tracking-wider">
-            <Trophy className="w-3.5 h-3.5 text-amber-500" /> Platform Standings
+            <Trophy className="w-3.5 h-3.5 text-primary" /> Platform Standings
           </div>
           <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
             Rankings and peer benchmarks
@@ -60,7 +60,7 @@ export function LeaderboardPreview() {
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                   <div className="w-7 text-center shrink-0">
                     {student.rank === 1 ? (
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500/10 text-amber-500 font-bold text-xs border border-amber-500/20">
+                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-foreground text-background font-bold text-xs shadow-xs">
                         1
                       </span>
                     ) : student.rank === 2 ? (
@@ -68,7 +68,7 @@ export function LeaderboardPreview() {
                         2
                       </span>
                     ) : student.rank === 3 ? (
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-700/10 text-amber-700 font-bold text-xs border border-amber-700/20">
+                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-muted text-muted-foreground font-bold text-xs border border-border">
                         3
                       </span>
                     ) : (

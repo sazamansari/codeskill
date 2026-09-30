@@ -9,7 +9,7 @@ export function Hero() {
   return (
     <section className="relative w-full pt-28 sm:pt-32 md:pt-36 pb-16 sm:pb-20 px-4 sm:px-6 md:px-8 border-b border-border/70 overflow-hidden bg-background text-foreground">
       {/* Background architectural fine grid & subtle warmth */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(250,204,21,0.08),transparent)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(250,204,21,0.05),transparent)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(255,255,255,0.06),transparent)] pointer-events-none" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.12] dark:opacity-[0.2] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
@@ -23,9 +23,9 @@ export function Hero() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10 text-xs font-semibold text-amber-600 dark:text-amber-400 shadow-xs"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-muted/60 text-xs font-semibold text-foreground shadow-xs"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>Algorithmic Assessment &amp; Skill System</span>
             </motion.div>
 
@@ -39,7 +39,7 @@ export function Hero() {
               Build Stronger <br className="hidden sm:inline" />
               <span className="text-foreground relative inline-block">
                 Coding Skills.
-                <span className="absolute bottom-1 left-0 right-0 h-2 bg-amber-400/30 -z-10 rounded-sm" />
+                <span className="absolute bottom-1 left-0 right-0 h-2 bg-foreground/10 -z-10 rounded-sm" />
               </span>
             </motion.h1>
 
@@ -62,7 +62,7 @@ export function Hero() {
             >
               <Link
                 href="/problems"
-                className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-sm transition-all shadow-sm hover:shadow-md hover:scale-[1.02] group active:scale-[0.98]"
+                className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-white hover:bg-neutral-100 text-black font-bold text-sm transition-all shadow-sm hover:shadow-md hover:scale-[1.02] group active:scale-[0.98]"
               >
                 <span>Start Coding</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -70,7 +70,7 @@ export function Hero() {
 
               <Link
                 href="/assessments"
-                className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-card hover:bg-muted text-foreground font-semibold text-sm border border-border transition-all shadow-xs hover:border-amber-400/40"
+                className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-card hover:bg-muted text-foreground font-semibold text-sm border border-border transition-all shadow-xs hover:border-foreground/30"
               >
                 <span>View Assessments</span>
               </Link>

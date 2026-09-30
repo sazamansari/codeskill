@@ -50,8 +50,8 @@ export function FeatureGrid() {
 
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-600 dark:text-amber-400 text-xs font-semibold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-muted/60 text-foreground text-xs font-semibold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
             <span>Comprehensive Skill Suite</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
@@ -73,11 +73,11 @@ export function FeatureGrid() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: idx * 0.08 }}
-                className="p-6 rounded-2xl bg-card border border-border/80 hover:border-amber-400/50 hover:shadow-lg transition-all flex flex-col justify-between space-y-4 group"
+                className="p-6 rounded-2xl bg-card border border-border/80 hover:border-foreground/40 hover:shadow-lg transition-all flex flex-col justify-between space-y-4 group"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-amber-400/10 text-amber-500 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="w-10 h-10 rounded-xl bg-foreground/5 text-foreground flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Icon className="w-5 h-5" />
                     </div>
                     <span className="text-[10px] font-mono uppercase font-bold text-muted-foreground px-2 py-0.5 rounded bg-muted/60 border border-border/60">
@@ -94,7 +94,7 @@ export function FeatureGrid() {
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-border/40 text-[11px] font-semibold text-amber-500 dark:text-amber-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <div className="pt-2 border-t border-border/40 text-[11px] font-semibold text-foreground/80 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                   <span>Explore module &rarr;</span>
                 </div>
               </motion.div>

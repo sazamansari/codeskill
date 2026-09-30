@@ -5,8 +5,8 @@ import { BarChart3, Trophy, Flame, CheckCircle2, TrendingUp, Sparkles, Activity 
 import { motion } from "framer-motion";
 
 const SKILL_METRICS = [
-  { name: "Data Structures", score: 88, color: "bg-amber-400" },
-  { name: "Algorithms & Logic", score: 76, color: "bg-amber-500" },
+  { name: "Data Structures", score: 88, color: "bg-blue-500" },
+  { name: "Algorithms & Logic", score: 76, color: "bg-indigo-500" },
   { name: "Problem Solving", score: 79, color: "bg-emerald-500" },
   { name: "Overall DSA Mastery", score: 82, color: "bg-cyan-500" },
 ];
@@ -18,8 +18,8 @@ export function StudentAnalyticsPreview() {
 
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-600 dark:text-amber-400 text-xs font-semibold uppercase tracking-wider">
-            <Activity className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-muted/60 text-foreground text-xs font-semibold uppercase tracking-wider">
+            <Activity className="w-3.5 h-3.5 text-primary" />
             <span>Telemetry &amp; Progress Insights</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
@@ -50,7 +50,7 @@ export function StudentAnalyticsPreview() {
                   <TrendingUp className="w-3 h-3" /> +14 this week
                 </div>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-amber-400/10 text-amber-500 dark:text-amber-400 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
             </motion.div>
@@ -83,10 +83,10 @@ export function StudentAnalyticsPreview() {
             >
               <div className="space-y-1">
                 <span className="text-xs font-mono uppercase text-muted-foreground">Current Streak</span>
-                <div className="text-3xl font-extrabold text-amber-500 dark:text-amber-400 font-mono">21 days</div>
-                <div className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">Top 3% consistency</div>
+                <div className="text-3xl font-extrabold text-foreground font-mono">21 days</div>
+                <div className="text-[11px] text-emerald-500 font-semibold">Top 3% consistency</div>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-amber-400/10 text-amber-500 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-foreground/5 text-foreground flex items-center justify-center">
                 <Flame className="w-6 h-6" />
               </div>
             </motion.div>
@@ -105,7 +105,7 @@ export function StudentAnalyticsPreview() {
                 <h4 className="font-bold text-base text-foreground">Algorithmic Skill Breakdown</h4>
                 <span className="text-xs text-muted-foreground">Mastery levels across core curriculum domains</span>
               </div>
-              <span className="text-xs font-mono font-bold text-amber-500 bg-amber-400/10 px-2.5 py-1 rounded-md border border-amber-400/30">
+              <span className="text-xs font-mono font-bold text-foreground bg-muted px-2.5 py-1 rounded-md border border-border">
                 Tier: Expert
               </span>
             </div>
@@ -143,10 +143,10 @@ export function StudentAnalyticsPreview() {
                     className={`h-3 rounded-xs ${i % 7 === 0
                         ? "bg-muted"
                         : i % 5 === 0
-                          ? "bg-amber-400/40"
+                          ? "bg-emerald-500/40"
                           : i % 2 === 0
-                            ? "bg-amber-400/80"
-                            : "bg-amber-400"
+                            ? "bg-emerald-500/80"
+                            : "bg-emerald-500"
                       }`}
                   />
                 ))}

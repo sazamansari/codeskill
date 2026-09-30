@@ -51,8 +51,8 @@ export function AssessmentPreview() {
 
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-600 dark:text-amber-400 text-xs font-semibold uppercase tracking-wider">
-            <FileCheck2 className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-muted/60 text-foreground text-xs font-semibold uppercase tracking-wider">
+            <FileCheck2 className="w-3.5 h-3.5 text-primary" />
             <span>Structured Evaluation Pipeline</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
@@ -76,12 +76,12 @@ export function AssessmentPreview() {
                 transition={{ duration: 0.4, delay: idx * 0.08 }}
                 onClick={() => setActiveStep(idx)}
                 className={`p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 ${activeStep === idx
-                    ? "bg-card border-amber-400 shadow-md ring-1 ring-amber-400/30"
+                    ? "bg-card border-foreground/50 shadow-md ring-1 ring-foreground/20"
                     : "bg-background border-border/80 hover:border-border hover:bg-card"
                   }`}
               >
                 <div className="space-y-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-400/10 text-amber-500 dark:text-amber-400 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-foreground/5 text-foreground flex items-center justify-center">
                     <Icon className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-sm text-foreground">{step.title}</h3>
@@ -103,7 +103,7 @@ export function AssessmentPreview() {
               <h4 className="text-lg font-bold text-foreground">Mid-Term Algorithmic Assessment 2026</h4>
             </div>
             <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1 text-xs font-mono text-amber-500 bg-amber-400/10 border border-amber-400/30 px-2.5 py-1 rounded-md">
+              <span className="flex items-center gap-1 text-xs font-mono text-foreground bg-muted border border-border px-2.5 py-1 rounded-md">
                 <Clock className="w-3.5 h-3.5" /> 58:42 Remaining
               </span>
               <span className="flex items-center gap-1 text-xs font-mono text-emerald-500 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-md">
@@ -123,7 +123,7 @@ export function AssessmentPreview() {
             </div>
             <div className="p-3.5 rounded-xl bg-background border border-border/80 space-y-1">
               <span className="text-muted-foreground text-[11px]">Security Score</span>
-              <div className="font-bold text-amber-400 text-sm">99.8% Integrity</div>
+              <div className="font-bold text-emerald-500 text-sm">99.8% Integrity</div>
             </div>
           </div>
         </div>
