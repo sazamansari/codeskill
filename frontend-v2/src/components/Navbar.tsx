@@ -142,7 +142,7 @@ export function Navbar() {
           </Link>
 
           {/* 3. CENTER — NAVIGATION */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-1 shrink-0">
             {navLinks.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -151,23 +151,23 @@ export function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-[16px] transition-all duration-150 ${
+                  className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-[15px] whitespace-nowrap shrink-0 transition-all duration-150 ${
                     isActive
                       ? "text-white bg-white/[0.08] font-bold border border-white/10 shadow-xs"
                       : "text-[#A3A3A3] hover:text-white hover:bg-white/[0.04] font-medium border border-transparent"
                   }`}
                 >
                   <Icon
-                    className={`w-4.5 h-4.5 transition-colors duration-150 ${
+                    className={`w-4 h-4 shrink-0 transition-colors duration-150 ${
                       isActive ? "text-[#3B82F6]" : "text-[#A3A3A3] group-hover:text-white"
                     }`}
                   />
-                  <span>{item.name}</span>
+                  <span className="whitespace-nowrap">{item.name}</span>
 
                   {isActive && (
                     <motion.span
                       layoutId="activeNavIndicator"
-                      className="absolute -bottom-[5px] left-3.5 right-3.5 h-[2.5px] bg-[#2563EB] rounded-full shadow-[0_0_6px_rgba(37,99,235,0.5)]"
+                      className="absolute -bottom-[5px] left-3.5 right-3.5 h-[2px] bg-[#2563EB] rounded-full shadow-[0_0_6px_rgba(37,99,235,0.5)]"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -177,49 +177,49 @@ export function Navbar() {
           </nav>
 
           {/* 4. RIGHT SIDE — Theme Toggle, Log In & Get Started */}
-          <div className="hidden sm:flex items-center gap-2.5">
-            <ThemeToggle className="w-9 h-9" />
+          <div className="hidden sm:flex items-center gap-3 shrink-0">
+            <ThemeToggle className="w-8.5 h-8.5 shrink-0" />
 
             {user ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 {user.isAdmin && (
                   <Link
                     href="/admin/dashboard"
-                    className="flex items-center gap-1.5 h-9.5 px-3.5 rounded-lg text-xs font-semibold bg-white/10 text-white border border-white/15 hover:bg-white hover:text-black transition-all duration-150"
+                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-xs font-semibold bg-white/10 text-white border border-white/15 hover:bg-white hover:text-black transition-all duration-150 whitespace-nowrap shrink-0"
                   >
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>Admin</span>
+                    <ShieldCheck className="w-4 h-4 shrink-0" />
+                    <span className="whitespace-nowrap">Admin</span>
                   </Link>
                 )}
                 <Link
                   href="/profile"
-                  className="flex items-center gap-1.5 h-9.5 px-3.5 rounded-lg text-[14px] font-medium text-[#F5F5F5] bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 transition-colors duration-150"
+                  className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-[14px] font-medium text-[#F5F5F5] bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 transition-colors duration-150 whitespace-nowrap shrink-0"
                 >
-                  <User className="w-4 h-4 text-[#A3A3A3]" />
-                  <span>{user.name?.split(" ")[0] || "Profile"}</span>
+                  <User className="w-4 h-4 text-[#A3A3A3] shrink-0" />
+                  <span className="whitespace-nowrap">{user.name?.split(" ")[0] || "Profile"}</span>
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center justify-center h-9.5 w-9.5 rounded-lg text-[#A3A3A3] hover:text-white hover:bg-white/[0.06] border border-white/10 transition-colors duration-150 cursor-pointer"
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-[#A3A3A3] hover:text-white hover:bg-white/[0.06] border border-white/10 transition-colors duration-150 cursor-pointer shrink-0"
                   title="Sign Out"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-4 h-4 shrink-0" />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5 shrink-0">
                 <Link
                   href="/login"
-                  className="flex items-center justify-center h-9.5 px-4 rounded-lg text-[16px] font-semibold text-[#D4D4D4] hover:text-white transition-colors duration-150"
+                  className="inline-flex items-center justify-center h-9 px-3.5 rounded-lg text-[15px] font-medium text-[#D4D4D4] hover:text-white transition-colors duration-150 whitespace-nowrap shrink-0"
                 >
                   Log In
                 </Link>
                 <Link
                   href="/register"
-                  className="flex items-center justify-center gap-1.5 h-9.5 px-4.5 rounded-xl text-[16px] font-bold bg-white hover:bg-neutral-100 text-[#111111] shadow-xs hover:shadow transition-all duration-150"
+                  className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-xl text-[15px] font-bold bg-white hover:bg-neutral-100 text-[#111111] shadow-xs hover:shadow transition-all duration-150 whitespace-nowrap shrink-0"
                 >
-                  <span>Get Started</span>
-                  <ArrowRight className="w-4.5 h-4.5" />
+                  <span className="whitespace-nowrap">Get Started</span>
+                  <ArrowRight className="w-4 h-4 shrink-0" />
                 </Link>
               </div>
             )}
