@@ -122,8 +122,8 @@ export class StudentsService {
   }
 
   async findById(id: string) {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Invalid student ID');
+    if (!id || !Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(`Student '${id}' not found`);
     }
     const student = await this.userModel
       .findById(id)
