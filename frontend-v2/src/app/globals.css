@@ -2,13 +2,46 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Nimbus Sans Font System */
+@font-face {
+  font-family: "Nimbus Sans";
+  src: url("/fonts/NimbusSanL-Reg.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nimbus Sans";
+  src: url("/fonts/NimbusSanL-Bol.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nimbus Sans";
+  src: url("/fonts/NimbusSanL-RegIta.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nimbus Sans";
+  src: url("/fonts/NimbusSanL-BolIta.otf") format("opentype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
-  --font-sans: "Inter", var(--font-sans);
-  --font-heading: "Inter", var(--font-sans);
+  --font-sans: "Nimbus Sans", "NimbusSanL", var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, Helvetica, sans-serif;
+  --font-heading: "Nimbus Sans", "NimbusSanL", var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, Helvetica, sans-serif;
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
   --color-popover: hsl(var(--popover));
@@ -143,8 +176,34 @@
     @apply border-border outline-ring/50;
   }
 
+  html,
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    font-family: "Nimbus Sans", "NimbusSanL", var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, Helvetica, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    @apply bg-background text-foreground;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Nimbus Sans", "NimbusSanL", var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, Helvetica, sans-serif;
+    font-weight: 700;
+  }
+
+  h1 {
+    letter-spacing: -0.025em;
+  }
+
+  h2 {
+    letter-spacing: -0.02em;
+  }
+
+  h3 {
+    letter-spacing: -0.015em;
+  }
+
+  button, input, select, textarea, optgroup {
+    font-family: inherit;
   }
 }
 
