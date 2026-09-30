@@ -9,7 +9,7 @@ export function Hero() {
   return (
     <section className="relative w-full pt-28 sm:pt-32 md:pt-36 pb-16 sm:pb-20 px-4 sm:px-6 md:px-8 border-b border-border/70 overflow-hidden bg-background text-foreground">
       {/* Background architectural fine grid & subtle warmth */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(255,255,255,0.06),transparent)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(250,204,21,0.08),transparent)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(250,204,21,0.05),transparent)] pointer-events-none" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.12] dark:opacity-[0.2] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
@@ -39,7 +39,7 @@ export function Hero() {
               <span className="hover:text-amber-400 transition-colors duration-300">Build Stronger</span> <br className="hidden sm:inline" />
               <span className="text-foreground hover:text-amber-400 relative inline-block transition-colors duration-300 group/coding">
                 Coding Skills.
-                <span className="absolute bottom-1 left-0 right-0 h-2 bg-foreground/10 group-hover/coding:bg-amber-400/40 group-hover/headline:bg-amber-400/40 -z-10 rounded-sm transition-all duration-300" />
+                <span className="absolute bottom-1 left-0 right-0 h-2.5 bg-amber-400/30 group-hover/coding:bg-amber-400/60 group-hover/headline:bg-amber-400/60 -z-10 rounded-sm transition-all duration-300" />
               </span>
             </motion.h1>
 
