@@ -87,7 +87,7 @@ export function Navbar() {
     <>
       <header className="fixed top-2.5 sm:top-3 left-0 right-0 z-50 px-3 sm:px-6 max-w-7xl mx-auto transition-all duration-200">
         <div
-          className={`w-full bg-[#FFFFFF]/95 dark:bg-[#121212]/96 backdrop-blur-md border border-black/8 dark:border-white/10 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.30)] px-3 sm:px-5 h-[56px] flex items-center justify-between transition-all duration-200 ${
+          className={`w-full bg-[#FFFFFF]/95 dark:bg-[#121212]/96 backdrop-blur-md border border-black/8 dark:border-white/10 rounded-2xl shadow-[0_6px_24px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.30)] px-3 sm:px-5 h-[56px] flex items-center justify-between transition-all duration-200 ${
             scrolled
               ? "bg-[#FFFFFF] dark:bg-[#111111]/98 border-black/10 dark:border-white/15 shadow-[0_12px_36px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.45)]"
               : ""

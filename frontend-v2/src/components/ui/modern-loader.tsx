@@ -17,12 +17,11 @@ export interface ModernLoaderProps {
 }
 
 const COLORS = [
-  "bg-gray-500",
-  "bg-teal-500",
-  "bg-blue-500",
-  "bg-emerald-500",
-  "bg-amber-500",
-  "bg-rose-500",
+  "bg-[#3B82F6]",
+  "bg-[#10B981]",
+  "bg-[#F59E0B]",
+  "bg-[#EF4444]",
+  "bg-[#9CA3AF]",
 ];
 
 function seededRandom(seed: number) {
@@ -134,7 +133,7 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
-        className="relative bg-white dark:bg-card h-[380px] sm:h-[420px] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.08)] dark:shadow-2xl overflow-hidden border border-black/10 dark:border-border"
+        className="relative bg-white dark:bg-card h-[380px] sm:h-[420px] rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.07)] dark:shadow-2xl overflow-hidden border border-black/[0.09] dark:border-border"
       >
         <div className="px-4 py-3 flex items-center z-10 relative border-b border-black/[0.08] dark:border-border/50 bg-[#FAFAFA] dark:bg-muted/20">
           <div className="flex items-center gap-1.5">
@@ -154,7 +153,7 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
               typingSpeed="slow"
               deletingSpeed="slow"
               pauseDuration={2000}
-              className="text-neutral-600 dark:text-muted-foreground text-xs font-mono font-medium"
+              className="text-[#525252] dark:text-muted-foreground text-xs font-mono font-medium"
             />
           </motion.div>
         </div>
@@ -191,7 +190,7 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
                             animate={{ scale: 1 }}
                             transition={{ duration: 0.2, delay: 0.05 }}
                             className={cn(
-                              "w-4 h-4 rounded-full opacity-50",
+                              "w-4 h-4 rounded-full opacity-85 dark:opacity-60",
                               seg.color,
                             )}
                           />
@@ -202,7 +201,7 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
                             animate={{ width: seg.width }}
                             transition={{ duration: 0.25, ease: "easeOut" }}
                             className={cn(
-                              "h-3 rounded-sm opacity-50",
+                              "h-3 rounded-sm opacity-85 dark:opacity-60",
                               seg.color,
                             )}
                             style={{ width: seg.width }}
@@ -213,7 +212,7 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
 
                     {(actualIndex + 1) % 6 === 0 && (
                       <motion.div
-                        className="w-full h-1 bg-background rounded-sm opacity-30"
+                        className="w-full h-1 bg-neutral-200/50 dark:bg-background rounded-sm opacity-30"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -239,7 +238,7 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
                 <motion.div
                   animate={{ opacity: cursorVisible ? 1 : 0 }}
                   transition={{ duration: 0.1 }}
-                  className="w-0.5 h-3.5 bg-primary"
+                  className="w-0.5 h-3.5 bg-[#111111] dark:bg-primary"
                 />
               </motion.div>
             )}

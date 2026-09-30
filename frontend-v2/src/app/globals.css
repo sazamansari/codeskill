@@ -78,8 +78,8 @@
   :root {
     color-scheme: light;
 
-    /* Light Mode: Warm Off-White Page (#FAFAF9), Pure White Cards (#FFFFFF), Rich Dark Typography (#111111 / #525252) */
-    --background: 40 10% 98%;      /* #FAFAF9 warm off-white page */
+    /* Light Mode: PAGE: #F8F8F6 | SURFACES: #FFFFFF | SECONDARY: #F4F4F2 | TEXT: #111111 / #525252 */
+    --background: 60 8% 97%;       /* #F8F8F6 soft warm off-white page */
     --foreground: 0 0% 7%;         /* #111111 primary text */
 
     --card: 0 0% 100%;             /* #FFFFFF elevated pure white surfaces */
@@ -91,10 +91,10 @@
     --primary: 0 0% 7%;            /* #111111 solid primary button */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 96%;         /* #F5F5F5 secondary surface */
+    --secondary: 60 4% 95%;        /* #F4F4F2 secondary surface */
     --secondary-foreground: 0 0% 7%;
 
-    --muted: 0 0% 96%;             /* #F5F5F5 */
+    --muted: 60 4% 95%;            /* #F4F4F2 */
     --muted-foreground: 0 0% 32%;  /* #525252 supporting/secondary text */
 
     --accent: 221 83% 53%;         /* #2563EB restrained developer blue */
@@ -103,15 +103,15 @@
     --destructive: 0 72% 51%;      /* #dc2626 */
     --destructive-foreground: 0 0% 100%;
 
-    --success: 152 76% 36%;        /* #10B981 emerald accent */
+    --success: 152 76% 36%;        /* #10B981 emerald */
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
+    --warning: 38 92% 50%;         /* #F59E0B amber */
     --warning-foreground: 0 0% 100%;
 
-    --border: 0 0% 91%;            /* subtle rgba(0,0,0,0.08) border */
+    --border: 0 0% 92%;            /* subtle rgba(0,0,0,0.08) border */
     --input: 0 0% 90%;
-    --skeleton: 0 0% 93%;
+    --skeleton: 60 4% 93%;
     --btn-border: 0 0% 90%;
     --ring: 221 83% 53%;
     --radius: 0.375rem;
@@ -119,8 +119,8 @@
     /* Sidebar tokens */
     --sidebar: 0 0% 100%;
     --sidebar-foreground: 0 0% 7%;
-    --sidebar-border: 0 0% 91%;
-    --sidebar-accent: 0 0% 96%;
+    --sidebar-border: 0 0% 92%;
+    --sidebar-accent: 60 4% 95%;
     --sidebar-accent-foreground: 0 0% 7%;
   }
 
