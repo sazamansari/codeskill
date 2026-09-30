@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { User, LogOut, Menu, X, ShieldCheck, GraduationCap } from "lucide-react";
+import { User, LogOut, Menu, X, ShieldCheck } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function Navbar() {
@@ -48,13 +48,16 @@ export function Navbar() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${scrolled
-            ? "bg-background/95 backdrop-blur-md border-b border-border shadow-xs py-2"
-            : "bg-background/80 backdrop-blur-sm border-b border-border/60 py-2.5"
-          }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 border-b border-border/70 bg-background/95 backdrop-blur-md overflow-hidden ${
+          scrolled ? "py-2 shadow-xs" : "py-2.5"
+        }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex items-center justify-between h-11">
+        {/* Soft Pinkish-Red Radial Gradient Glow (matching the Footer) */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(45%_55px_at_50%_0%,rgba(200,16,46,0.11),transparent)] dark:bg-[radial-gradient(45%_55px_at_50%_0%,rgba(200,16,46,0.18),transparent)]" />
+        <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-[1px] w-1/3 bg-gradient-to-r from-transparent via-[#C8102E]/35 to-transparent blur-[0.5px]" />
 
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex items-center justify-between h-11 relative z-10">
+          
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
             {/* CodeSkill Primary Logo */}
@@ -85,15 +88,16 @@ export function Navbar() {
           {/* Desktop Center Navigation Links */}
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(`${item.href}/`));
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`relative px-3 py-1.5 rounded-md text-xs sm:text-[13px] font-medium transition-colors ${isActive
+                  className={`relative px-3 py-1.5 rounded-md text-xs sm:text-[13px] font-medium transition-colors ${
+                    isActive
                       ? "text-foreground bg-muted font-semibold"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                    }`}
+                  }`}
                 >
                   {item.name}
                   {isActive && (
@@ -247,3 +251,5 @@ export function Navbar() {
     </>
   );
 }
+
+export default Navbar;
