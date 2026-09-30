@@ -691,10 +691,10 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                     {activeSidebarTab === "editorial" && (
                       <div className="p-5">
                         {problem.editorial ? (
-                          <div className="prose dark:prose-invert prose-sm max-w-none
-                            prose-headings:text-foreground
-                            prose-code:text-indigo-400 prose-code:bg-indigo-500/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs
-                            prose-pre:bg-[#1e1e1e] prose-pre:border prose-pre:border-border prose-pre:rounded-xl
+                          <div className="prose dark:prose-invert prose-sm max-w-none text-[#E5E5E5] text-[15px] leading-[1.6]
+                            prose-headings:text-[#F5F5F5]
+                            prose-code:text-[#A5B4FC] prose-code:bg-[rgba(99,102,241,0.10)] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs
+                            prose-pre:bg-[#171717] prose-pre:border prose-pre:border-white/[0.08] prose-pre:rounded-xl
                           ">
                             <div dangerouslySetInnerHTML={{ __html: problem.editorial }} />
                           </div>
@@ -713,12 +713,12 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                       <div className="p-4">
                         {submissionsLoading ? (
                           <div className="flex items-center justify-center py-12">
-                            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                            <Loader2 className="w-5 h-5 animate-spin text-[#737373]" />
                           </div>
                         ) : submissions.length > 0 ? (
                           <div className="space-y-2">
                             {submissions.map((sub: any, i: number) => (
-                              <div key={i} className="p-3 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer group">
+                              <div key={i} className="p-3 rounded-xl border border-white/[0.08] bg-[#151515] hover:bg-[#191919] transition-colors cursor-pointer group">
                                 <div className="flex items-center justify-between mb-1.5">
                                   <span className={`text-xs font-bold ${
                                     sub.status === "accepted" ? "text-emerald-400" :
@@ -727,11 +727,11 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                     {sub.status === "accepted" ? "✓ Accepted" :
                                      sub.status === "wrong_answer" ? "✗ Wrong Answer" : "⚠ Error"}
                                   </span>
-                                  <span className="text-[10px] text-muted-foreground">
+                                  <span className="text-[10px] text-[#737373]">
                                     {new Date(sub.createdAt).toLocaleDateString()}
                                   </span>
                                 </div>
-                                <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                                <div className="flex items-center gap-3 text-[10px] text-[#A3A3A3]">
                                   <span className="flex items-center gap-1"><Code2 className="w-3 h-3" />{sub.language}</span>
                                   {sub.runtime && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{sub.runtime}ms</span>}
                                   <span className="flex items-center gap-1"><Target className="w-3 h-3" />{sub.testCasesPassed}/{sub.totalTestCases}</span>
@@ -755,7 +755,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                         {problem.hints?.length > 0 ? (
                           <div className="space-y-3">
                             {problem.hints.map((hint: string, i: number) => (
-                              <div key={i} className="border border-border rounded-xl overflow-hidden">
+                              <div key={i} className="border border-white/[0.08] bg-[#151515] rounded-xl overflow-hidden">
                                 <button
                                   onClick={() => {
                                     const newSet = new Set(revealedHints);
@@ -763,13 +763,13 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                     else newSet.add(i);
                                     setRevealedHints(newSet);
                                   }}
-                                  className="w-full flex items-center justify-between p-3 text-left hover:bg-muted/30 transition-colors"
+                                  className="w-full flex items-center justify-between p-3 text-left hover:bg-white/[0.04] transition-colors"
                                 >
-                                  <span className="text-xs font-semibold text-foreground flex items-center gap-2">
+                                  <span className="text-xs font-semibold text-[#F5F5F5] flex items-center gap-2">
                                     <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
                                     Hint {i + 1}
                                   </span>
-                                  <span className="text-[10px] text-muted-foreground">
+                                  <span className="text-[10px] text-[#737373]">
                                     {revealedHints.has(i) ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                                   </span>
                                 </button>
@@ -782,7 +782,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                       transition={{ duration: 0.2 }}
                                       className="overflow-hidden"
                                     >
-                                      <div className="px-3 pb-3 text-xs text-muted-foreground leading-relaxed border-t border-border pt-2"
+                                      <div className="px-3 pb-3 text-xs text-[#A3A3A3] leading-relaxed border-t border-white/[0.08] pt-2"
                                         dangerouslySetInnerHTML={{ __html: hint }}
                                       />
                                     </motion.div>
@@ -808,11 +808,11 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                           value={noteContent}
                           onChange={(e) => setNoteContent(e.target.value)}
                           placeholder="Write your notes here... Markdown is supported."
-                          className="flex-1 min-h-[200px] w-full bg-muted/20 border border-border rounded-xl p-4 text-sm text-foreground placeholder:text-muted-foreground/50 resize-none outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all font-mono"
+                          className="flex-1 min-h-[200px] w-full bg-[#151515] border border-white/[0.08] rounded-xl p-4 text-sm text-[#F5F5F5] placeholder:text-[#737373] resize-none outline-none focus:border-indigo-500/50 transition-all font-mono"
                         />
                         <div className="flex items-center justify-between mt-3">
-                          <span className="text-[10px] text-muted-foreground">{noteContent.length} characters</span>
-                          <Button size="sm" onClick={handleSaveNote} disabled={noteSaving} className="h-7 px-3 text-xs bg-indigo-600 hover:bg-indigo-700 text-white">
+                          <span className="text-[10px] text-[#737373]">{noteContent.length} characters</span>
+                          <Button size="sm" onClick={handleSaveNote} disabled={noteSaving} className="h-7 px-3 text-xs bg-[#4F46E5] hover:bg-[#6366F1] text-white">
                             {noteSaving ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <CheckCircle2 className="w-3 h-3 mr-1" />}
                             {noteSaving ? "Saving..." : "Save Note"}
                           </Button>
@@ -822,30 +822,30 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
 
                     {/* ──────────── DISCUSSION TAB ──────────── */}
                     {activeSidebarTab === "discussion" && (
-                      <div className="flex flex-col h-full bg-background relative">
+                      <div className="flex flex-col h-full bg-[#111111] relative">
                         {discussionLoading ? (
                           <div className="flex items-center justify-center py-12">
-                            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                            <Loader2 className="w-5 h-5 animate-spin text-[#737373]" />
                           </div>
                         ) : activeThread ? (
                           /* Thread Detail View */
-                          <div className="flex flex-col h-full absolute inset-0 bg-card overflow-y-auto z-10">
-                            <div className="p-4 border-b border-border sticky top-0 bg-card/90 backdrop-blur-sm flex items-center gap-2">
-                              <button onClick={() => setActiveThread(null)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground transition-all">
+                          <div className="flex flex-col h-full absolute inset-0 bg-[#111111] overflow-y-auto z-10">
+                            <div className="p-4 border-b border-white/[0.08] sticky top-0 bg-[#141414]/95 backdrop-blur-sm flex items-center gap-2">
+                              <button onClick={() => setActiveThread(null)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#A3A3A3] hover:text-[#F5F5F5] transition-all">
                                 <ArrowLeft className="w-4 h-4" />
                               </button>
-                              <div className="flex-1 truncate font-semibold text-sm">{activeThread.title}</div>
+                              <div className="flex-1 truncate font-semibold text-sm text-[#F5F5F5]">{activeThread.title}</div>
                             </div>
                             
                             <div className="p-5">
                               {/* Main Post */}
                               <div className="flex gap-4">
                                 <div className="flex flex-col items-center gap-1">
-                                  <button onClick={() => handleVoteThread(activeThread._id, 'up')} className={`p-1.5 rounded-lg ${activeThread.upvotedBy?.includes('me') ? 'text-indigo-400 bg-indigo-500/10' : 'text-muted-foreground hover:bg-muted'}`}>
+                                  <button onClick={() => handleVoteThread(activeThread._id, 'up')} className={`p-1.5 rounded-lg ${activeThread.upvotedBy?.includes('me') ? 'text-indigo-400 bg-indigo-500/10' : 'text-[#737373] hover:text-[#F5F5F5] hover:bg-white/[0.04]'}`}>
                                     <ThumbsUp className="w-4 h-4" />
                                   </button>
-                                  <span className="text-xs font-bold font-mono">{activeThread.upvotes - activeThread.downvotes}</span>
-                                  <button onClick={() => handleVoteThread(activeThread._id, 'down')} className={`p-1.5 rounded-lg ${activeThread.downvotedBy?.includes('me') ? 'text-rose-400 bg-rose-500/10' : 'text-muted-foreground hover:bg-muted'}`}>
+                                  <span className="text-xs font-bold font-mono text-[#F5F5F5]">{activeThread.upvotes - activeThread.downvotes}</span>
+                                  <button onClick={() => handleVoteThread(activeThread._id, 'down')} className={`p-1.5 rounded-lg ${activeThread.downvotedBy?.includes('me') ? 'text-rose-400 bg-rose-500/10' : 'text-[#737373] hover:text-[#F5F5F5] hover:bg-white/[0.04]'}`}>
                                     <ThumbsDown className="w-4 h-4" />
                                   </button>
                                 </div>
@@ -854,38 +854,38 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                     <div className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] font-bold">
                                       {activeThread.author?.name?.[0] || 'U'}
                                     </div>
-                                    <span className="text-xs font-semibold text-foreground">{activeThread.author?.name || 'User'}</span>
-                                    <span className="text-[10px] text-muted-foreground">{new Date(activeThread.createdAt).toLocaleDateString()}</span>
+                                    <span className="text-xs font-semibold text-[#F5F5F5]">{activeThread.author?.name || 'User'}</span>
+                                    <span className="text-[10px] text-[#737373]">{new Date(activeThread.createdAt).toLocaleDateString()}</span>
                                     {activeThread.tags?.map((t: string) => (
-                                      <span key={t} className="ml-auto text-[9px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground uppercase tracking-wider">{t}</span>
+                                      <span key={t} className="ml-auto text-[9px] font-semibold px-2 py-0.5 rounded-full bg-[#151515] text-[#A3A3A3] border border-white/[0.07] uppercase tracking-wider">{t}</span>
                                     ))}
                                   </div>
-                                  <div className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{activeThread.body}</div>
+                                  <div className="text-sm text-[#E5E5E5] leading-relaxed whitespace-pre-wrap">{activeThread.body}</div>
                                 </div>
                               </div>
                               
-                              <div className="w-full h-px bg-border my-6" />
+                              <div className="w-full h-px bg-white/[0.08] my-6" />
                               
-                              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Replies ({replies.length})</h3>
+                              <h3 className="text-xs font-bold uppercase tracking-wider text-[#737373] mb-4">Replies ({replies.length})</h3>
                               
                               {/* Replies */}
                               <div className="space-y-6">
                                 {replies.map((reply: any) => (
                                   <div key={reply._id} className="flex gap-3">
-                                    <div className="w-6 h-6 rounded-full bg-muted flex shrink-0 items-center justify-center text-[10px] font-bold text-muted-foreground mt-1">
+                                    <div className="w-6 h-6 rounded-full bg-[#191919] border border-white/[0.08] flex shrink-0 items-center justify-center text-[10px] font-bold text-[#A3A3A3] mt-1">
                                       {reply.author?.name?.[0] || 'U'}
                                     </div>
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2 mb-1.5">
-                                        <span className="text-xs font-semibold text-foreground">{reply.author?.name || 'User'}</span>
-                                        <span className="text-[10px] text-muted-foreground">{new Date(reply.createdAt).toLocaleDateString()}</span>
+                                        <span className="text-xs font-semibold text-[#F5F5F5]">{reply.author?.name || 'User'}</span>
+                                        <span className="text-[10px] text-[#737373]">{new Date(reply.createdAt).toLocaleDateString()}</span>
                                       </div>
-                                      <div className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap mb-2">{reply.body}</div>
+                                      <div className="text-sm text-[#E5E5E5] leading-relaxed whitespace-pre-wrap mb-2">{reply.body}</div>
                                       <div className="flex items-center gap-3">
-                                        <button onClick={() => handleVoteReply(reply._id, 'up')} className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground hover:text-indigo-400 transition-colors">
+                                        <button onClick={() => handleVoteReply(reply._id, 'up')} className="flex items-center gap-1.5 text-[10px] font-semibold text-[#737373] hover:text-indigo-400 transition-colors">
                                           <ThumbsUp className="w-3.5 h-3.5" /> {reply.upvotes}
                                         </button>
-                                        <button onClick={() => handleVoteReply(reply._id, 'down')} className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground hover:text-rose-400 transition-colors">
+                                        <button onClick={() => handleVoteReply(reply._id, 'down')} className="flex items-center gap-1.5 text-[10px] font-semibold text-[#737373] hover:text-rose-400 transition-colors">
                                           <ThumbsDown className="w-3.5 h-3.5" />
                                         </button>
                                       </div>
@@ -902,10 +902,10 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                     value={replyContent}
                                     onChange={(e) => setReplyContent(e.target.value)}
                                     placeholder="Write a reply..."
-                                    className="w-full bg-muted/30 border border-border rounded-xl p-3 text-sm text-foreground placeholder:text-muted-foreground/50 resize-none outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 min-h-[80px]"
+                                    className="w-full bg-[#151515] border border-white/[0.08] rounded-xl p-3 text-sm text-[#F5F5F5] placeholder:text-[#737373] resize-none outline-none focus:border-indigo-500/50 min-h-[80px]"
                                   />
                                   <div className="flex justify-end">
-                                    <Button size="sm" disabled={!replyContent.trim() || replySubmitting} onClick={handleSubmitReply} className="h-7 text-xs px-3 bg-indigo-600 hover:bg-indigo-700 text-white">
+                                    <Button size="sm" disabled={!replyContent.trim() || replySubmitting} onClick={handleSubmitReply} className="h-7 text-xs px-3 bg-[#4F46E5] hover:bg-[#6366F1] text-white">
                                       {replySubmitting ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : <Send className="w-3 h-3 mr-1.5" />} Post Reply
                                     </Button>
                                   </div>
@@ -915,30 +915,30 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                           </div>
                         ) : showCreateThread ? (
                           /* Create Thread View */
-                          <div className="p-5 flex flex-col h-full bg-card">
-                            <div className="flex items-center gap-2 mb-4 pb-4 border-b border-border">
-                              <button onClick={() => setShowCreateThread(false)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground transition-all">
+                          <div className="p-5 flex flex-col h-full bg-[#111111]">
+                            <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/[0.08]">
+                              <button onClick={() => setShowCreateThread(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#A3A3A3] hover:text-[#F5F5F5] transition-all">
                                 <ArrowLeft className="w-4 h-4" />
                               </button>
-                              <div className="font-semibold text-sm">New Discussion</div>
+                              <div className="font-semibold text-sm text-[#F5F5F5]">New Discussion</div>
                             </div>
                             
                             <div className="space-y-4 flex-1">
                               <div>
-                                <label className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1 block">Title</label>
+                                <label className="text-[10px] uppercase tracking-wider font-semibold text-[#737373] mb-1 block">Title</label>
                                 <input 
                                   value={newThread.title}
                                   onChange={(e) => setNewThread({...newThread, title: e.target.value})}
                                   placeholder="What's on your mind?"
-                                  className="w-full bg-muted/30 border border-border rounded-lg h-9 px-3 text-sm text-foreground outline-none focus:border-indigo-500/50"
+                                  className="w-full bg-[#151515] border border-white/[0.08] rounded-lg h-9 px-3 text-sm text-[#F5F5F5] outline-none focus:border-indigo-500/50"
                                 />
                               </div>
                               <div>
-                                <label className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1 block">Category</label>
+                                <label className="text-[10px] uppercase tracking-wider font-semibold text-[#737373] mb-1 block">Category</label>
                                 <select 
                                   value={newThread.tag}
                                   onChange={(e) => setNewThread({...newThread, tag: e.target.value})}
-                                  className="w-full bg-muted/30 border border-border rounded-lg h-9 px-3 text-sm text-foreground outline-none focus:border-indigo-500/50 appearance-none"
+                                  className="w-full bg-[#151515] border border-white/[0.08] rounded-lg h-9 px-3 text-sm text-[#F5F5F5] outline-none focus:border-indigo-500/50 appearance-none"
                                 >
                                   <option value="general">General</option>
                                   <option value="approach">Approach</option>
@@ -947,19 +947,19 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                 </select>
                               </div>
                               <div className="flex-1 flex flex-col">
-                                <label className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1 block">Body</label>
+                                <label className="text-[10px] uppercase tracking-wider font-semibold text-[#737373] mb-1 block">Body</label>
                                 <textarea 
                                   value={newThread.body}
                                   onChange={(e) => setNewThread({...newThread, body: e.target.value})}
                                   placeholder="Describe your question, approach, or solution in detail..."
-                                  className="w-full flex-1 bg-muted/30 border border-border rounded-lg p-3 text-sm text-foreground resize-none outline-none focus:border-indigo-500/50 min-h-[200px]"
+                                  className="w-full flex-1 bg-[#151515] border border-white/[0.08] rounded-lg p-3 text-sm text-[#F5F5F5] resize-none outline-none focus:border-indigo-500/50 min-h-[200px]"
                                 />
                               </div>
                             </div>
                             
-                            <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-border">
-                              <Button variant="outline" size="sm" onClick={() => setShowCreateThread(false)} className="h-8 text-xs">Cancel</Button>
-                              <Button size="sm" onClick={handleCreateThread} disabled={!newThread.title.trim() || !newThread.body.trim() || threadSubmitting} className="h-8 text-xs bg-indigo-600 hover:bg-indigo-700 text-white">
+                            <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-white/[0.08]">
+                              <Button variant="outline" size="sm" onClick={() => setShowCreateThread(false)} className="h-8 text-xs bg-[#191919] border-white/[0.08] text-[#F5F5F5] hover:bg-[#222222]">Cancel</Button>
+                              <Button size="sm" onClick={handleCreateThread} disabled={!newThread.title.trim() || !newThread.body.trim() || threadSubmitting} className="h-8 text-xs bg-[#4F46E5] hover:bg-[#6366F1] text-white">
                                 {threadSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : null} Post Discussion
                               </Button>
                             </div>
@@ -967,11 +967,11 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                         ) : (
                           /* Thread List View */
                           <>
-                            <div className="p-3 border-b border-border flex justify-between items-center sticky top-0 bg-background/90 backdrop-blur-sm z-10">
+                            <div className="p-3 border-b border-white/[0.08] flex justify-between items-center sticky top-0 bg-[#141414]/95 backdrop-blur-sm z-10">
                               <select 
                                 value={discussionFilter}
                                 onChange={(e) => setDiscussionFilter(e.target.value)}
-                                className="bg-transparent text-xs font-semibold text-foreground outline-none cursor-pointer hover:bg-muted/50 px-2 py-1 rounded"
+                                className="bg-[#191919] border border-white/[0.08] text-xs font-semibold text-[#F5F5F5] outline-none cursor-pointer px-2.5 py-1 rounded-md"
                               >
                                 <option value="all">All Topics</option>
                                 <option value="approach">Approaches</option>
@@ -986,24 +986,24 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                             
                             <div className="flex-1 overflow-y-auto p-3 space-y-2">
                               {threads.length > 0 ? threads.map((thread: any) => (
-                                <div key={thread._id} onClick={() => loadThread(thread)} className="p-3 rounded-xl border border-border bg-card hover:bg-muted/40 transition-colors cursor-pointer group flex gap-3 items-start">
+                                <div key={thread._id} onClick={() => loadThread(thread)} className="p-3 rounded-xl border border-white/[0.08] bg-[#151515] hover:bg-[#191919] transition-colors cursor-pointer group flex gap-3 items-start">
                                   <div className="flex flex-col items-center gap-1 min-w-[40px]">
-                                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground group-hover:bg-indigo-500/20 group-hover:text-indigo-400 transition-colors">
+                                    <div className="w-8 h-8 rounded-full bg-[#191919] border border-white/[0.08] flex items-center justify-center text-xs font-bold text-[#A3A3A3] group-hover:bg-indigo-500/20 group-hover:text-indigo-400 transition-colors">
                                       {thread.author?.name?.[0] || 'U'}
                                     </div>
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <h4 className="text-sm font-semibold text-foreground truncate mb-1 group-hover:text-indigo-400 transition-colors">{thread.title}</h4>
-                                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                                      <span className="truncate max-w-[100px]">{thread.author?.name || 'User'}</span>
-                                      <span className="w-1 h-1 rounded-full bg-border" />
+                                    <h4 className="text-sm font-semibold text-[#F5F5F5] truncate mb-1 group-hover:text-indigo-400 transition-colors">{thread.title}</h4>
+                                    <div className="flex items-center gap-3 text-[10px] text-[#737373]">
+                                      <span className="truncate max-w-[100px] text-[#A3A3A3]">{thread.author?.name || 'User'}</span>
+                                      <span className="w-1 h-1 rounded-full bg-white/[0.12]" />
                                       <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
-                                      <span className="w-1 h-1 rounded-full bg-border" />
+                                      <span className="w-1 h-1 rounded-full bg-white/[0.12]" />
                                       <span className="flex items-center gap-1"><ThumbsUp className="w-3 h-3" /> {thread.upvotes - thread.downvotes}</span>
                                       <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" /> {thread.replyCount}</span>
                                       
                                       {thread.tags?.map((t: string) => (
-                                        <span key={t} className="ml-auto px-1.5 py-0.5 rounded bg-muted/50 border border-border uppercase tracking-wider text-[9px] font-semibold">{t}</span>
+                                        <span key={t} className="ml-auto px-1.5 py-0.5 rounded bg-[#191919] border border-white/[0.07] uppercase tracking-wider text-[9px] font-semibold text-[#A3A3A3]">{t}</span>
                                       ))}
                                     </div>
                                   </div>
@@ -1030,17 +1030,17 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                               <Brain className="w-4 h-4 text-white" />
                             </div>
                             <div>
-                              <h3 className="text-sm font-bold text-foreground">AI Tutor</h3>
-                              <p className="text-[10px] text-muted-foreground">Powered by advanced AI</p>
+                              <h3 className="text-sm font-bold text-[#F5F5F5]">AI Tutor</h3>
+                              <p className="text-[10px] text-[#737373]">Powered by advanced AI</p>
                             </div>
                           </div>
-                          <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+                          <p className="text-xs text-[#A3A3A3] leading-relaxed mb-4">
                             Get personalized guidance without spoilers. The AI tutor will help you understand the problem,
                             suggest approaches, and explain concepts — all without giving away the solution.
                           </p>
                           <div className="space-y-2">
                             {["Explain the problem in simpler terms", "What data structure should I consider?", "Give me a hint about the time complexity", "Help me debug my approach"].map((prompt, i) => (
-                              <button key={i} className="w-full text-left px-3 py-2 rounded-lg border border-border bg-background/50 text-xs text-foreground hover:bg-muted/50 hover:border-indigo-500/30 transition-all group">
+                              <button key={i} className="w-full text-left px-3 py-2 rounded-lg border border-white/[0.08] bg-[#151515] text-xs text-[#E5E5E5] hover:bg-[#191919] hover:border-indigo-500/30 transition-all group">
                                 <span className="text-indigo-400 mr-1.5 group-hover:text-indigo-300">→</span> {prompt}
                               </button>
                             ))}
@@ -1300,7 +1300,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
             onClick={() => setShowLoginModal(false)}
           >
             <motion.div 
@@ -1308,30 +1308,26 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
               onClick={(e: any) => e.stopPropagation()}
-              className="bg-card border border-border rounded-2xl p-8 max-w-sm w-full shadow-2xl relative overflow-hidden"
+              className="bg-[#111111] border border-white/[0.12] rounded-2xl p-8 max-w-sm w-full shadow-2xl relative overflow-hidden"
             >
-              {/* Decorative background gradients */}
-              <div className="absolute -top-24 -right-24 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
-              
               <div className="relative z-10 text-center">
                 <div className="w-16 h-16 bg-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-indigo-500/20">
                   <User className="w-8 h-8 text-indigo-400" />
                 </div>
                 
-                <h3 className="text-xl font-bold text-foreground mb-2">Login Required</h3>
-                <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
+                <h3 className="text-xl font-bold text-[#F5F5F5] mb-2">Login Required</h3>
+                <p className="text-sm text-[#A3A3A3] mb-8 leading-relaxed">
                   You need to be logged in to save your code submissions and track your progress.
                 </p>
                 
                 <div className="flex flex-col gap-3">
                   <Link href="/login" className="w-full block">
-                    <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 transition-all border-0">
+                    <Button className="w-full bg-[#4F46E5] hover:bg-[#6366F1] text-white transition-all border-0 font-semibold">
                       Log In to Account
                     </Button>
                   </Link>
                   <Link href="/register" className="w-full block">
-                    <Button variant="outline" className="w-full border-border hover:bg-muted transition-all">
+                    <Button variant="outline" className="w-full bg-[#191919] border-white/[0.08] text-[#F5F5F5] hover:bg-[#222222] transition-all">
                       Create an Account
                     </Button>
                   </Link>
@@ -1340,7 +1336,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
               
               <button 
                 onClick={() => setShowLoginModal(false)}
-                className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md"
+                className="absolute top-4 right-4 text-[#737373] hover:text-[#F5F5F5] transition-colors p-1 rounded-md"
               >
                 <XCircle className="w-5 h-5" />
               </button>
@@ -1362,16 +1358,16 @@ function SidebarIcon({ icon: Icon, label, shortcut, active = false, onClick }: a
       className={`p-2 rounded-lg transition-all relative group ${
         active 
           ? 'bg-indigo-500/15 text-indigo-400' 
-          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+          : 'text-[#737373] hover:bg-white/[0.04] hover:text-[#F5F5F5]'
       }`}
     >
       <Icon className="w-[18px] h-[18px]" />
       {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 bg-indigo-500 rounded-r-full" />}
       
       {/* Tooltip */}
-      <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded-lg bg-popover border border-border shadow-lg text-[10px] font-medium text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+      <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded-lg bg-[#191919] border border-white/[0.08] shadow-lg text-[10px] font-medium text-[#F5F5F5] whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
         {label}
-        {shortcut && <span className="ml-2 text-muted-foreground font-mono">{shortcut}</span>}
+        {shortcut && <span className="ml-2 text-[#737373] font-mono">{shortcut}</span>}
       </div>
     </button>
   );
@@ -1383,8 +1379,8 @@ function TabButton({ active, onClick, icon: Icon, children }: any) {
       onClick={onClick}
       className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
         active 
-          ? "bg-background text-foreground shadow-sm border border-border" 
-          : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent"
+          ? "bg-[#191919] text-[#F5F5F5] shadow-xs border border-white/[0.12]" 
+          : "text-[#737373] hover:text-[#F5F5F5] hover:bg-white/[0.04] border border-transparent"
       }`}
     >
       {Icon && <Icon className="w-3 h-3" />}
@@ -1396,7 +1392,7 @@ function TabButton({ active, onClick, icon: Icon, children }: any) {
 function MetaBadge({ icon: Icon, label, className = "" }: any) {
   return (
     <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border ${
-      className || "text-muted-foreground bg-muted/30 border-border"
+      className || "text-[#A3A3A3] bg-[#151515] border-white/[0.07]"
     }`}>
       <Icon className="w-3 h-3" />
       {label}
@@ -1407,11 +1403,11 @@ function MetaBadge({ icon: Icon, label, className = "" }: any) {
 function EmptyState({ icon: Icon, title, description }: any) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="w-12 h-12 rounded-xl bg-muted/30 flex items-center justify-center mb-3">
-        <Icon className="w-6 h-6 text-muted-foreground/40" />
+      <div className="w-12 h-12 rounded-xl bg-[#151515] border border-white/[0.06] flex items-center justify-center mb-3">
+        <Icon className="w-6 h-6 text-[#737373]" />
       </div>
-      <h3 className="text-sm font-semibold text-foreground mb-1">{title}</h3>
-      <p className="text-xs text-muted-foreground max-w-[240px] leading-relaxed">{description}</p>
+      <h3 className="text-sm font-semibold text-[#F5F5F5] mb-1">{title}</h3>
+      <p className="text-xs text-[#737373] max-w-[240px] leading-relaxed">{description}</p>
     </div>
   );
 }
