@@ -4,6 +4,7 @@ import { Hero } from "@/components/landing/Hero";
 import { TrustBar } from "@/components/landing/TrustBar";
 import { CodingExperience } from "@/components/landing/CodingExperience";
 import { FeatureGrid } from "@/components/landing/FeatureGrid";
+import { ProblemTablePreview } from "@/components/landing/ProblemTablePreview";
 import { AssessmentPreview } from "@/components/landing/AssessmentPreview";
 import { StudentAnalyticsPreview } from "@/components/landing/StudentAnalyticsPreview";
 import { InstitutionalSection } from "@/components/landing/InstitutionalSection";
@@ -14,38 +15,41 @@ import { FinalCTA } from "@/components/landing/FinalCTA";
 
 export default function Home() {
   return (
-    <div className="flex-1 flex flex-col w-full font-sans bg-background text-foreground selection:bg-amber-400/30 selection:text-amber-900 dark:selection:text-amber-200">
-      {/* 1. Hero Section with 50/50 Split & Realistic Coding Interface */}
+    <div className="flex-1 flex flex-col w-full font-sans bg-background text-foreground selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-black">
+      {/* 1. Hero Section with Realistic Coding Interface */}
       <Hero />
 
       {/* 2. Compact Product Capability & Trust Highlights */}
       <TrustBar />
 
-      {/* 3. Online Judge & Interactive Coding Experience (Code. Run. Improve.) */}
+      {/* 3. Problem List Section (LeetCode-style Problem Table) */}
+      <ProblemTablePreview />
+
+      {/* 4. Online Judge & Interactive Coding Experience (Code. Run. Improve.) */}
       <CodingExperience />
 
-      {/* 4. Platform Features (Everything you need to become interview-ready) */}
+      {/* 5. Platform Features (Everything you need to improve your coding skills) */}
       <FeatureGrid />
 
-      {/* 5. Assessment Architecture (Assess skills with confidence) */}
+      {/* 6. Assessment Architecture (DSA, Frontend, Backend, Full Stack) */}
       <AssessmentPreview />
 
-      {/* 6. Student Dashboard & Skill Analytics Preview (247 Solved, 21-day Streak) */}
+      {/* 7. Student Developer Dashboard (247 Solved, Recent Activity Table) */}
       <StudentAnalyticsPreview />
 
-      {/* 7. Institutional & University Section (Built for classrooms, assessments, and hiring) */}
+      {/* 8. Institutional & Admin Dashboard Section */}
       <InstitutionalSection />
 
-      {/* 8. Polyglot Supported Languages (One platform. Multiple languages. Instant evaluation.) */}
+      {/* 9. Polyglot Supported Languages (C++, Java, Python, JS, TS, C) */}
       <SupportedLanguages />
 
-      {/* 9. Live Campus Leaderboard Standings Preview */}
+      {/* 10. Live Campus Leaderboard Standings */}
       <LeaderboardPreview />
 
-      {/* 10. Interactive Matrix Preview (GSAP-accelerated) */}
+      {/* 11. Interactive Assessment Matrix */}
       <InteractiveListSection />
 
-      {/* 11. Final Action Callout (Start building better coding skills today) */}
+      {/* 12. Final Action Callout */}
       <FinalCTA />
     </div>
   );
