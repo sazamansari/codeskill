@@ -1,81 +1,91 @@
 "use client";
 
-import { FileCheck, Code2, LineChart, Trophy, ArrowUpRight } from "lucide-react";
-import Link from "next/link";
+import React from "react";
+import { Code2, FileCheck2, ShieldCheck, Zap, BarChart3, Briefcase, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+
+const FEATURES = [
+  {
+    icon: Code2,
+    title: "Practice",
+    description: "Solve curated DSA problems with multiple difficulty levels, structured hints, and comprehensive editorial guides.",
+    tag: "Core DSA",
+  },
+  {
+    icon: FileCheck2,
+    title: "Assessments",
+    description: "Take structured technical assessments with automated evaluation, timed sections, and standardized scoring rubrics.",
+    tag: "Evaluations",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Proctored Exams",
+    description: "Secure assessment environment with browser lockdown, tab-switch monitoring, and anti-cheating audit controls.",
+    tag: "Security",
+  },
+  {
+    icon: Zap,
+    title: "Instant Evaluation",
+    description: "Get immediate feedback from automated test-case execution with memory quotas and runtime performance breakdowns.",
+    tag: "Speed",
+  },
+  {
+    icon: BarChart3,
+    title: "Skill Analytics",
+    description: "Track your progress across algorithms, data structures, and programming languages with radar charts and ELO ratings.",
+    tag: "Analytics",
+  },
+  {
+    icon: Briefcase,
+    title: "Interview Preparation",
+    description: "Practice problems designed around real technical interview patterns from top software engineering companies.",
+    tag: "Placement",
+  },
+];
 
 export function FeatureGrid() {
-  const features = [
-    {
-      num: "01",
-      icon: FileCheck,
-      title: "Coding Assessments",
-      description: "Practice structured programming assessments with real-time automated evaluation, test cases, and time limits.",
-      link: "/assessments",
-      linkText: "View Assessments",
-    },
-    {
-      num: "02",
-      icon: Code2,
-      title: "Algorithm Practice",
-      description: "Master data structures and algorithms through targeted problems categorized by difficulty, topic, and patterns.",
-      link: "/problems",
-      linkText: "Browse Problems",
-    },
-    {
-      num: "03",
-      icon: LineChart,
-      title: "Performance Tracking",
-      description: "Track scores, submission histories, benchmark percentiles, and technical improvement over time with rich analytics.",
-      link: "/dashboard",
-      linkText: "View Dashboard",
-    },
-    {
-      num: "04",
-      icon: Trophy,
-      title: "Leaderboards",
-      description: "Compare performance with peers across university batches and maintain healthy competitive motivation.",
-      link: "/leaderboard",
-      linkText: "Check Standings",
-    },
-  ];
-
   return (
-    <section className="w-full py-16 sm:py-20 px-4 sm:px-6 md:px-8 border-b border-border bg-background text-foreground">
-      <div className="max-w-7xl mx-auto space-y-10">
+    <section id="features" className="w-full py-20 px-4 sm:px-6 md:px-8 border-b border-border/70 bg-background text-foreground">
+      <div className="max-w-7xl mx-auto space-y-12">
         
         {/* Section Header */}
-        <div className="text-center max-w-xl mx-auto space-y-2.5">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-muted text-muted-foreground border border-border text-[11px] font-medium uppercase tracking-wider">
-            Evaluation &amp; Practice
+        <div className="text-center max-w-3xl mx-auto space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-600 dark:text-amber-400 text-xs font-semibold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Comprehensive Skill Suite</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
-            Everything you need to prepare
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            Everything you need to become interview-ready.
           </h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            A focused environment built for problem solving, proctored examinations, and algorithmic mastery.
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+            Designed for collegiate students, competitive coders, and technical recruiters seeking uncompromising evaluation fidelity.
           </p>
         </div>
 
-        {/* 4 Feature Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {features.map((feature, idx) => {
+        {/* 6 Feature Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {FEATURES.map((feature, idx) => {
             const Icon = feature.icon;
             return (
-              <div
-                key={idx}
-                className="group relative flex flex-col justify-between p-5 rounded-lg bg-card border border-border hover:border-border/80 hover:shadow-sm transition-all duration-150"
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.08 }}
+                className="p-6 rounded-2xl bg-card border border-border/80 hover:border-amber-400/50 hover:shadow-lg transition-all flex flex-col justify-between space-y-4 group"
               >
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs font-mono font-medium text-muted-foreground/70 px-1.5 py-0.5 rounded bg-muted border border-border/40">
-                      {feature.num}
-                    </span>
-                    <div className="w-8 h-8 rounded-md bg-primary/10 text-primary flex items-center justify-center">
-                      <Icon className="w-4 h-4" />
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-amber-400/10 text-amber-500 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Icon className="w-5 h-5" />
                     </div>
+                    <span className="text-[10px] font-mono uppercase font-bold text-muted-foreground px-2 py-0.5 rounded bg-muted/60 border border-border/60">
+                      {feature.tag}
+                    </span>
                   </div>
 
-                  <h3 className="text-sm sm:text-base font-semibold text-foreground mb-1.5">
+                  <h3 className="font-bold text-base text-foreground tracking-tight">
                     {feature.title}
                   </h3>
 
@@ -84,16 +94,10 @@ export function FeatureGrid() {
                   </p>
                 </div>
 
-                <div className="pt-4 mt-4 border-t border-border/50">
-                  <Link
-                    href={feature.link}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                  >
-                    <span>{feature.linkText}</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </Link>
+                <div className="pt-2 border-t border-border/40 text-[11px] font-semibold text-amber-500 dark:text-amber-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  <span>Explore module &rarr;</span>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>

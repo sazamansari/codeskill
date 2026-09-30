@@ -8,8 +8,26 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "CodeSkill — Technical Assessment & Algorithmic Learning Platform",
-  description: "Official examination, algorithmic learning, and technical assessment platform.",
+  title: "CodeSkill — Algorithmic Assessment & Skill System",
+  description:
+    "Practice DSA, solve coding problems, take proctored assessments, and prepare for technical interviews with CodeSkill.",
+  keywords: [
+    "CodeSkill",
+    "DSA practice",
+    "algorithmic assessment",
+    "proctored coding exams",
+    "technical interview preparation",
+    "Chandigarh University",
+    "online judge",
+    "coding evaluation",
+  ],
+  openGraph: {
+    title: "CodeSkill — Algorithmic Assessment & Skill System",
+    description:
+      "Practice DSA, solve coding problems, take proctored assessments, and prepare for technical interviews with CodeSkill.",
+    type: "website",
+    siteName: "CodeSkill",
+  },
   icons: {
     icon: "/codeskill-option1.svg",
     shortcut: "/codeskill-option1.svg",

@@ -38,8 +38,9 @@ export function Navbar() {
   };
 
   const navLinks = [
-    { name: "Assessments", href: "/assessments" },
     { name: "Problems", href: "/problems" },
+    { name: "Assessments", href: "/assessments" },
+    { name: "Contests", href: "/leaderboard" },
     { name: "Leaderboard", href: "/leaderboard" },
     { name: "Dashboard", href: "/dashboard" },
   ];
@@ -58,11 +59,11 @@ export function Navbar() {
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
             {/* CodeSkill Primary Logo */}
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-950 border border-primary/40 shadow-xs flex items-center justify-center p-1 group-hover:scale-105 transition-transform z-10">
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-950 border border-amber-400/40 shadow-xs flex items-center justify-center p-1 group-hover:scale-105 transition-transform z-10">
               <svg viewBox="0 0 160 160" className="w-full h-full" fill="none">
-                <polygon points="80,10 145,45 145,115 80,150 15,115 15,45" fill="#0F172A" stroke="#C8102E" strokeWidth="8" strokeLinejoin="round" />
+                <polygon points="80,10 145,45 145,115 80,150 15,115 15,45" fill="#0F172A" stroke="#FACC15" strokeWidth="8" strokeLinejoin="round" />
                 <path d="M60 62 L40 80 L60 98" stroke="#FFFFFF" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M85 55 L75 105" stroke="#C8102E" strokeWidth="10" strokeLinecap="round" />
+                <path d="M85 55 L75 105" stroke="#FACC15" strokeWidth="10" strokeLinecap="round" />
                 <path d="M100 62 L120 80 L100 98" stroke="#38BDF8" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
@@ -73,7 +74,7 @@ export function Navbar() {
                   CodeSkill
                 </span>
                 <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
-                  <span className="text-primary font-medium">by</span> Chandigarh University
+                  <span className="text-amber-500 dark:text-amber-400 font-medium">by</span> Chandigarh University
                 </span>
               </div>
               <span className="hidden sm:block text-[10px] text-muted-foreground font-normal leading-none mt-0.5">
@@ -92,7 +93,7 @@ export function Navbar() {
                   href={item.href}
                   className={`relative px-3 py-1.5 rounded-md text-xs sm:text-[13px] font-medium transition-colors ${
                     isActive
-                      ? "text-foreground bg-muted font-medium"
+                      ? "text-foreground bg-muted font-semibold"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   }`}
                 >
@@ -100,7 +101,7 @@ export function Navbar() {
                   {isActive && (
                     <motion.span
                       layoutId="activeNavIndicator"
-                      className="absolute bottom-0 left-2.5 right-2.5 h-[2px] bg-primary rounded-full"
+                      className="absolute bottom-0 left-2.5 right-2.5 h-[2px] bg-amber-400 rounded-full"
                     />
                   )}
                 </Link>
@@ -117,7 +118,7 @@ export function Navbar() {
                 {user.isAdmin && (
                   <Link
                     href="/admin/dashboard"
-                    className="flex items-center gap-1.5 h-8 px-2.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all"
+                    className="flex items-center gap-1.5 h-8 px-2.5 rounded-md text-xs font-medium bg-amber-400/10 text-amber-500 dark:text-amber-400 border border-amber-400/30 hover:bg-amber-400 hover:text-slate-950 transition-all"
                   >
                     <ShieldCheck className="w-3.5 h-3.5" />
                     <span>Admin</span>
@@ -132,7 +133,7 @@ export function Navbar() {
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted border border-border transition-colors"
+                  className="flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted border border-border transition-colors cursor-pointer"
                   title="Sign Out"
                 >
                   <LogOut className="w-3.5 h-3.5" />
@@ -144,13 +145,13 @@ export function Navbar() {
                   href="/login"
                   className="flex items-center justify-center h-8 px-3 rounded-md text-xs sm:text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 >
-                  Log in
+                  Log In
                 </Link>
                 <Link
                   href="/login"
-                  className="flex items-center justify-center h-8 px-3 rounded-md text-xs sm:text-[13px] font-medium bg-primary hover:bg-primary/90 text-primary-foreground transition-all shadow-xs"
+                  className="flex items-center justify-center h-8 px-3.5 rounded-md text-xs sm:text-[13px] font-semibold bg-amber-400 hover:bg-amber-300 text-slate-950 transition-all shadow-xs"
                 >
-                  Sign In
+                  Get Started
                 </Link>
               </div>
             )}

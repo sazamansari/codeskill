@@ -1,63 +1,84 @@
 "use client";
 
-import { Shield, Cpu, Award, GraduationCap } from "lucide-react";
+import React from "react";
+import { ShieldCheck, Zap, Code2, Clock, CheckCircle2 } from "lucide-react";
+import { motion } from "framer-motion";
+
+const CAPABILITIES = [
+  {
+    icon: ShieldCheck,
+    title: "Secure Code Execution",
+    desc: "Isolated Docker sandbox runtime",
+  },
+  {
+    icon: Zap,
+    title: "Instant Test Evaluation",
+    desc: "Millisecond automated test runs",
+  },
+  {
+    icon: Code2,
+    title: "Multiple Languages",
+    desc: "C++, Java, Python, JS, TS",
+  },
+  {
+    icon: Clock,
+    title: "Real-Time Submissions",
+    desc: "Instant metrics, memory & runtime",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Automated Scoring",
+    desc: "Objective rubric & benchmark ELO",
+  },
+];
 
 export function TrustBar() {
-  const trustPillars = [
-    {
-      icon: GraduationCap,
-      title: "Academic & Enterprise",
-      subtitle: "Verified Evaluation Standards",
-    },
-    {
-      icon: Cpu,
-      title: "Algorithmic Assessment",
-      subtitle: "Automated Sandbox Evaluator",
-    },
-    {
-      icon: Shield,
-      title: "Proctored Examinations",
-      subtitle: "Multi-factor Integrity Checks",
-    },
-    {
-      icon: Award,
-      title: "Interview Preparation",
-      subtitle: "Industry-standard DSA Benchmarks",
-    },
-  ];
-
   return (
-    <section className="w-full bg-card/40 border-b border-border py-6 px-4 sm:px-6 md:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          
-          <div className="shrink-0">
-            <p className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">
-              Trusted Learning &amp; Assessment Infrastructure
-            </p>
+    <section className="w-full border-b border-border/70 bg-card/60 py-8 px-4 sm:px-6 md:px-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        
+        {/* Capability Header */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            <span className="text-xs font-bold uppercase tracking-wider text-foreground">
+              Proctored execution environment with instant evaluation
+            </span>
           </div>
+          <span className="text-xs text-muted-foreground font-mono">
+            Enterprise Grade • Zero Setup Required
+          </span>
+        </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full lg:w-auto">
-            {trustPillars.map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3 p-2.5 rounded-xl bg-background/60 border border-border/60 hover:border-border transition-colors"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                    <Icon className="w-4 h-4" />
+        {/* 5 Capability Cards Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+          {CAPABILITIES.map((cap, i) => {
+            const Icon = cap.icon;
+            return (
+              <motion.div
+                key={cap.title}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                className="p-3.5 rounded-xl bg-background border border-border/80 hover:border-amber-400/40 hover:shadow-xs transition-all flex flex-col items-start gap-2 group"
+              >
+                <div className="w-7 h-7 rounded-lg bg-amber-400/10 text-amber-500 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Icon className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-semibold text-xs text-foreground tracking-tight">
+                    {cap.title}
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold text-foreground truncate">{item.title}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{item.subtitle}</p>
+                  <div className="text-[11px] text-muted-foreground leading-tight mt-0.5">
+                    {cap.desc}
                   </div>
                 </div>
-              );
-            })}
-          </div>
-
+              </motion.div>
+            );
+          })}
         </div>
+
       </div>
     </section>
   );

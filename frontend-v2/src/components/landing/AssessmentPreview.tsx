@@ -1,150 +1,132 @@
 "use client";
 
-import Link from "next/link";
-import { Clock, Layers, Award, ShieldAlert, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
+import React, { useState } from "react";
+import {
+  FileCheck2,
+  Clock,
+  Code2,
+  ShieldCheck,
+  CheckCircle2,
+  BarChart3,
+  Users,
+  Settings,
+  Sparkles,
+  Layers,
+} from "lucide-react";
+import { motion } from "framer-motion";
+
+const ASSESSMENT_STEPS = [
+  {
+    icon: Settings,
+    title: "1. Assessment Configuration",
+    desc: "Set time limits, proctoring strictness, and allowed programming runtimes.",
+    metric: "60 mins • Multi-section",
+  },
+  {
+    icon: Code2,
+    title: "2. Question Selection",
+    desc: "Pick from curated DSA question banks or add custom proprietary problem specs.",
+    metric: "4 Algorithmic Tasks",
+  },
+  {
+    icon: ShieldCheck,
+    title: "3. Proctored Taking",
+    desc: "Secure full-screen candidate examination with anti-tamper telemetry.",
+    metric: "Live Integrity Shield",
+  },
+  {
+    icon: BarChart3,
+    title: "4. Automated Evaluation",
+    desc: "Instant test execution, code quality audits, and candidate rank generation.",
+    metric: "Instant Scorecards",
+  },
+];
 
 export function AssessmentPreview() {
+  const [activeStep, setActiveStep] = useState(0);
+
   return (
-    <section className="w-full py-16 sm:py-20 px-4 sm:px-6 md:px-8 border-b border-border bg-card/20 text-foreground">
-      <div className="max-w-7xl mx-auto space-y-10">
+    <section className="w-full py-20 px-4 sm:px-6 md:px-8 border-b border-border/70 bg-muted/20 text-foreground">
+      <div className="max-w-7xl mx-auto space-y-12">
         
         {/* Section Header */}
-        <div className="text-center max-w-xl mx-auto space-y-2.5">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-muted text-muted-foreground border border-border text-[11px] font-medium uppercase tracking-wider">
-            Examination Engine
+        <div className="text-center max-w-3xl mx-auto space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-600 dark:text-amber-400 text-xs font-semibold uppercase tracking-wider">
+            <FileCheck2 className="w-3.5 h-3.5" />
+            <span>Structured Evaluation Pipeline</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
-            Practice, submit, and improve
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            Assess skills with confidence.
           </h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Simulate timed coding evaluations with automated compiler test cases, proctored security, and score analytics.
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+            Create structured coding assessments for students, candidates, and technical teams with automated evaluation and performance analytics.
           </p>
         </div>
 
-        {/* Dashboard-style Interactive Preview Card */}
-        <div className="max-w-4xl mx-auto bg-card border border-border rounded-lg shadow-sm overflow-hidden">
-          
-          {/* Header Bar */}
-          <div className="p-5 sm:p-6 border-b border-border bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="px-2 py-0.5 rounded text-xs font-mono font-medium bg-primary/10 text-primary border border-primary/20">
-                  CS-302
-                </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                  Live Test
-                </span>
-              </div>
-              <h3 className="text-base sm:text-lg font-semibold text-foreground">
-                Data Structures &amp; Algorithms Mid-Term Evaluation
-              </h3>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Standardized Computer Science Core Benchmark
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3 self-start sm:self-auto">
-              <div className="px-3.5 py-1.5 rounded-md bg-background border border-border text-right">
-                <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider block">Time Remaining</span>
-                <span className="text-xs sm:text-sm font-semibold font-mono text-foreground">34:18 mins</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Assessment Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6 border-b border-border bg-background/50 text-xs">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <Clock className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="text-muted-foreground text-[11px]">Duration</p>
-                <p className="font-bold text-foreground">45 Minutes</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
-                <Layers className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="text-muted-foreground text-[11px]">Questions</p>
-                <p className="font-bold text-foreground">12 Problems</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                <Award className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="text-muted-foreground text-[11px]">Total Marks</p>
-                <p className="font-bold text-foreground">100 Points</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-                <ShieldAlert className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="text-muted-foreground text-[11px]">Proctoring</p>
-                <p className="font-bold text-foreground">Active &amp; Audited</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Progress & Breakdown */}
-          <div className="p-6 sm:p-8 space-y-6">
-            
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-foreground">Overall Completion Progress</span>
-                <span className="font-mono font-bold text-primary">10 of 12 Solved (83%)</span>
-              </div>
-              <div className="w-full h-2.5 rounded-full bg-muted overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-primary to-amber-500 rounded-full transition-all duration-500 w-[83%]" />
-              </div>
-            </div>
-
-            {/* Questions Snapshot Matrix */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-              <div className="p-3 rounded-xl bg-muted/40 border border-border flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Easy Problems (4)</span>
-                <span className="text-xs font-bold text-emerald-500 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> 4/4 Passed
-                </span>
-              </div>
-              <div className="p-3 rounded-xl bg-muted/40 border border-border flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Medium Problems (6)</span>
-                <span className="text-xs font-bold text-emerald-500 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> 5/6 Passed
-                </span>
-              </div>
-              <div className="p-3 rounded-xl bg-muted/40 border border-border flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Hard Problems (2)</span>
-                <span className="text-xs font-bold text-amber-500 flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5" /> 1/2 In Progress
-                </span>
-              </div>
-            </div>
-
-            {/* Action Bar */}
-            <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p className="text-xs text-muted-foreground">
-                All submissions are automatically verified by the sandbox compiler engine.
-              </p>
-              <Link
-                href="/assessments"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 h-11 px-6 rounded-xl bg-primary hover:bg-primary/90 active:bg-primary/80 text-primary-foreground font-semibold text-xs uppercase tracking-wider transition-all shadow-md"
+        {/* 4-Step Interactive Pipeline Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {ASSESSMENT_STEPS.map((step, idx) => {
+            const Icon = step.icon;
+            return (
+              <motion.div
+                key={step.title}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.08 }}
+                onClick={() => setActiveStep(idx)}
+                className={`p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
+                  activeStep === idx
+                    ? "bg-card border-amber-400 shadow-md ring-1 ring-amber-400/30"
+                    : "bg-background border-border/80 hover:border-border hover:bg-card"
+                }`}
               >
-                <span>Continue Assessment</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
+                <div className="space-y-2">
+                  <div className="w-8 h-8 rounded-lg bg-amber-400/10 text-amber-500 dark:text-amber-400 flex items-center justify-center">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <h3 className="font-bold text-sm text-foreground">{step.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{step.desc}</p>
+                </div>
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border/60 w-fit">
+                  {step.metric}
+                </span>
+              </motion.div>
+            );
+          })}
+        </div>
 
+        {/* Assessment Interface Card Preview */}
+        <div className="max-w-4xl mx-auto rounded-2xl bg-card border border-border/80 p-6 sm:p-8 shadow-xl space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/70 pb-4">
+            <div>
+              <div className="text-xs font-mono uppercase text-muted-foreground">Active Examination</div>
+              <h4 className="text-lg font-bold text-foreground">Mid-Term Algorithmic Assessment 2026</h4>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1 text-xs font-mono text-amber-500 bg-amber-400/10 border border-amber-400/30 px-2.5 py-1 rounded-md">
+                <Clock className="w-3.5 h-3.5" /> 58:42 Remaining
+              </span>
+              <span className="flex items-center gap-1 text-xs font-mono text-emerald-500 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-md">
+                <ShieldCheck className="w-3.5 h-3.5" /> Proctor Active
+              </span>
+            </div>
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono">
+            <div className="p-3.5 rounded-xl bg-background border border-border/80 space-y-1">
+              <span className="text-muted-foreground text-[11px]">Candidate Batch</span>
+              <div className="font-bold text-foreground text-sm">CSE 2026 - Section A</div>
+            </div>
+            <div className="p-3.5 rounded-xl bg-background border border-border/80 space-y-1">
+              <span className="text-muted-foreground text-[11px]">Submission Status</span>
+              <div className="font-bold text-emerald-500 text-sm">3 / 4 Solved (100%)</div>
+            </div>
+            <div className="p-3.5 rounded-xl bg-background border border-border/80 space-y-1">
+              <span className="text-muted-foreground text-[11px]">Security Score</span>
+              <div className="font-bold text-amber-400 text-sm">99.8% Integrity</div>
+            </div>
+          </div>
         </div>
 
       </div>
