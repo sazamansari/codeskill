@@ -1,11 +1,7 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Hexagon Base -->
-  <path d="M256 32L446.526 142V362L256 472L65.474 362V142L256 32Z" fill="#4F46E5" fill-opacity="0.2"/>
-  <path d="M256 32L446.526 142V362L256 472L65.474 362V142L256 32Z" stroke="#4F46E5" stroke-width="24" stroke-linejoin="round"/>
-  
-  <!-- "C" part -->
-  <path d="M280 180H220C186.863 180 160 206.863 160 240V272C160 305.137 186.863 332 220 332H256" stroke="#FFFFFF" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
-  
-  <!-- "S" part -->
-  <path d="M232 180H292C325.137 180 352 206.863 352 240V272C352 305.137 325.137 332 292 332H232" stroke="#4F46E5" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+<svg width="512" height="512" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="160" height="160" rx="36" fill="#0A0A0A"/>
+  <polygon points="80,14 142,48 142,112 80,146 18,112 18,48" fill="#0F172A" stroke="#FFB800" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M60 62 L40 80 L60 98" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M85 55 L75 105" stroke="#FFB800" stroke-width="10" stroke-linecap="round"/>
+  <path d="M100 62 L120 80 L100 98" stroke="#38BDF8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

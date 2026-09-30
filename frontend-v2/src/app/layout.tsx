@@ -29,9 +29,12 @@ export const metadata: Metadata = {
     siteName: "CodeSkill",
   },
   icons: {
-    icon: "/codeskill-option1.svg",
-    shortcut: "/codeskill-option1.svg",
-    apple: "/codeskill-option1.svg",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
   },
 };
 
