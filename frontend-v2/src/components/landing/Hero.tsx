@@ -34,12 +34,12 @@ export function Hero() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-[54px] font-extrabold tracking-tight leading-[1.12] text-foreground"
+              className="text-4xl sm:text-5xl lg:text-[54px] font-extrabold tracking-tight leading-[1.12] text-foreground group/headline select-none"
             >
-              Build Stronger <br className="hidden sm:inline" />
-              <span className="text-foreground relative inline-block">
+              <span className="hover:text-amber-400 transition-colors duration-300">Build Stronger</span> <br className="hidden sm:inline" />
+              <span className="text-foreground hover:text-amber-400 relative inline-block transition-colors duration-300 group/coding">
                 Coding Skills.
-                <span className="absolute bottom-1 left-0 right-0 h-2 bg-foreground/10 -z-10 rounded-sm" />
+                <span className="absolute bottom-1 left-0 right-0 h-2 bg-foreground/10 group-hover/coding:bg-amber-400/40 group-hover/headline:bg-amber-400/40 -z-10 rounded-sm transition-all duration-300" />
               </span>
             </motion.h1>
 
