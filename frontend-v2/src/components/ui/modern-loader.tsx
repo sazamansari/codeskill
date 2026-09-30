@@ -48,9 +48,9 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
       Array.from({ length: count }, (_, idx) => ({
         id: Date.now() + idx + Math.random(),
         segments: Array.from(
-          { length: Math.floor(Math.random() * 4) + 1 },
+          { length: Math.floor(Math.random() * 5) + 1 },
           () => ({
-            width: `${Math.floor(Math.random() * 80) + 50}px`,
+            width: `${Math.floor(Math.random() * 140) + 70}px`,
             color: colors[Math.floor(Math.random() * colors.length)],
             isCircle: Math.random() > 0.93,
             indent: Math.random() > 0.7 ? 1 : 0,
@@ -113,12 +113,12 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
   const visibleLines = lines.slice(visibleStart, visibleEnd);
 
   return (
-    <div className={cn("w-full max-w-md mx-auto p-4 sm:p-8", className)}>
+    <div className={cn("w-full max-w-2xl mx-auto p-2 sm:p-4", className)}>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
-        className="relative bg-card h-[320px] rounded-2xl shadow-2xl overflow-hidden border border-border"
+        className="relative bg-card h-[380px] sm:h-[420px] rounded-2xl shadow-2xl overflow-hidden border border-border"
       >
         <div className="px-4 py-3 flex items-center z-10 relative border-b border-border/50 bg-muted/20">
           <div className="flex items-center gap-1.5">
