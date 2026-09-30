@@ -48,14 +48,13 @@ export function Navbar() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
-          scrolled
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${scrolled
             ? "bg-background/95 backdrop-blur-md border-b border-border shadow-xs py-2"
             : "bg-background/80 backdrop-blur-sm border-b border-border/60 py-2.5"
-        }`}
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex items-center justify-between h-11">
-          
+
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
             {/* CodeSkill Primary Logo */}
@@ -91,11 +90,10 @@ export function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`relative px-3 py-1.5 rounded-md text-xs sm:text-[13px] font-medium transition-colors ${
-                    isActive
+                  className={`relative px-3 py-1.5 rounded-md text-xs sm:text-[13px] font-medium transition-colors ${isActive
                       ? "text-foreground bg-muted font-semibold"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}
+                    }`}
                 >
                   {item.name}
                   {isActive && (

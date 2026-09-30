@@ -48,7 +48,7 @@ export function AssessmentPreview() {
   return (
     <section className="w-full py-20 px-4 sm:px-6 md:px-8 border-b border-border/70 bg-muted/20 text-foreground">
       <div className="max-w-7xl mx-auto space-y-12">
-        
+
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-600 dark:text-amber-400 text-xs font-semibold uppercase tracking-wider">
@@ -75,11 +75,10 @@ export function AssessmentPreview() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: idx * 0.08 }}
                 onClick={() => setActiveStep(idx)}
-                className={`p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
-                  activeStep === idx
+                className={`p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 ${activeStep === idx
                     ? "bg-card border-amber-400 shadow-md ring-1 ring-amber-400/30"
                     : "bg-background border-border/80 hover:border-border hover:bg-card"
-                }`}
+                  }`}
               >
                 <div className="space-y-2">
                   <div className="w-8 h-8 rounded-lg bg-amber-400/10 text-amber-500 dark:text-amber-400 flex items-center justify-center">

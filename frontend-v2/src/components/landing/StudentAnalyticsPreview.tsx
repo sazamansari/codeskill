@@ -15,7 +15,7 @@ export function StudentAnalyticsPreview() {
   return (
     <section className="w-full py-20 px-4 sm:px-6 md:px-8 border-b border-border/70 bg-background text-foreground">
       <div className="max-w-7xl mx-auto space-y-12">
-        
+
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-600 dark:text-amber-400 text-xs font-semibold uppercase tracking-wider">
@@ -32,10 +32,10 @@ export function StudentAnalyticsPreview() {
 
         {/* Dashboard Preview Container */}
         <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
+
           {/* Left Column: Topline Metric Stats (3 cards) */}
           <div className="lg:col-span-5 flex flex-col gap-4">
-            
+
             {/* Stat 1: Problems Solved */}
             <motion.div
               initial={{ opacity: 0, x: -10 }}
@@ -140,15 +140,14 @@ export function StudentAnalyticsPreview() {
                 {Array.from({ length: 36 }).map((_, i) => (
                   <div
                     key={i}
-                    className={`h-3 rounded-xs ${
-                      i % 7 === 0
+                    className={`h-3 rounded-xs ${i % 7 === 0
                         ? "bg-muted"
                         : i % 5 === 0
-                        ? "bg-amber-400/40"
-                        : i % 2 === 0
-                        ? "bg-amber-400/80"
-                        : "bg-amber-400"
-                    }`}
+                          ? "bg-amber-400/40"
+                          : i % 2 === 0
+                            ? "bg-amber-400/80"
+                            : "bg-amber-400"
+                      }`}
                   />
                 ))}
               </div>

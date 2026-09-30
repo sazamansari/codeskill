@@ -14,10 +14,10 @@ export function Hero() {
 
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          
+
           {/* Left Column: Structured Typography & Conversion CTAs */}
           <div className="lg:col-span-6 flex flex-col items-start text-left space-y-6">
-            
+
             {/* Small Label Badge */}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
