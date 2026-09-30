@@ -26,9 +26,9 @@ const LANGUAGES = [
 ];
 
 const DIFFICULTY_COLORS: Record<string, string> = {
-  Easy: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-  Medium: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-  Hard: "text-rose-400 bg-rose-500/10 border-rose-500/20",
+  Easy: "text-[#10B981] bg-[rgba(16,185,129,0.10)] border-[rgba(16,185,129,0.25)]",
+  Medium: "text-[#F59E0B] bg-[rgba(245,158,11,0.10)] border-[rgba(245,158,11,0.25)]",
+  Hard: "text-[#EF4444] bg-[rgba(239,68,68,0.10)] border-[rgba(239,68,68,0.25)]",
 };
 
 interface TestResult {
@@ -487,18 +487,18 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
     : "N/A";
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden font-sans">
+    <div className="flex h-screen bg-[#0A0A0A] overflow-hidden font-sans">
       
       {/* ═══════════════════════════════════════════════════════════════════════
           1. SLIM LEFT SIDEBAR (Activity Bar) — VS Code inspired icon rail
          ═══════════════════════════════════════════════════════════════════════ */}
-      <div className="w-12 border-r border-border bg-card/80 backdrop-blur-sm flex flex-col items-center py-3 gap-1 z-10 shrink-0">
+      <div className="w-12 border-r border-white/[0.08] bg-[#111111] flex flex-col items-center py-3 gap-1 z-10 shrink-0">
         <Link href="/problems" title="Back to Problems">
-          <div className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-all cursor-pointer mb-2">
+          <div className="p-2 rounded-lg text-[#737373] hover:bg-white/[0.05] hover:text-[#F5F5F5] transition-all cursor-pointer mb-2">
             <ArrowLeft className="w-4.5 h-4.5" />
           </div>
         </Link>
-        <div className="w-7 h-px bg-border mb-1" />
+        <div className="w-7 h-px bg-white/[0.08] mb-1" />
         
         {SIDEBAR_TABS.map(tab => (
           <SidebarIcon
@@ -521,20 +521,20 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
       <div className="flex-1 flex flex-col min-w-0">
         
         {/* ─── TOP NAVBAR ─────────────────────────────────────────────────── */}
-        <header className="h-12 border-b border-border bg-background/80 backdrop-blur-sm flex items-center justify-between px-4 shrink-0">
+        <header className="h-12 border-b border-white/[0.08] bg-[#111111] flex items-center justify-between px-4 shrink-0">
           <div className="flex items-center gap-3">
-            <h1 className="text-sm font-semibold text-foreground truncate max-w-[300px]">
+            <h1 className="text-[16px] font-bold text-[#F5F5F5] truncate max-w-[320px] whitespace-nowrap">
               {problem.title}
             </h1>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wide ${difficultyClass}`}>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-wide ${difficultyClass}`}>
               {problem.difficulty}
             </span>
             {lastSaved && (
               <motion.span 
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className="text-[10px] text-muted-foreground ml-1 flex items-center gap-1"
+                className="text-[11px] text-[#A3A3A3] ml-1 flex items-center gap-1.5"
               >
-                <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" /> Saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </motion.span>
             )}
           </div>
@@ -543,24 +543,24 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="appearance-none bg-muted/40 border border-border text-foreground text-xs font-semibold rounded-lg h-8 px-3 cursor-pointer outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
+              className="appearance-none bg-[#191919] border border-white/[0.08] text-[#F5F5F5] text-xs font-semibold rounded-lg h-8 px-3 cursor-pointer outline-none focus:border-indigo-500/50 transition-all"
             >
               {LANGUAGES.map(lang => (
                 <option key={lang.id} value={lang.id}>{lang.name}</option>
               ))}
             </select>
             
-            <div className="w-px h-5 bg-border" />
+            <div className="w-px h-5 bg-white/[0.08]" />
             
-            <Button variant="outline" size="sm" onClick={handleRun} disabled={isRunning || isSubmitting} className="h-8 px-3 text-xs font-semibold gap-1.5 border-border">
-              {isRunning ? <Loader2 className="w-3.5 h-3.5 text-emerald-500 animate-spin" /> : <Play className="w-3.5 h-3.5 text-emerald-500" />}
+            <Button variant="outline" size="sm" onClick={handleRun} disabled={isRunning || isSubmitting} className="h-8 px-3 text-xs font-bold gap-1.5 bg-[#191919] hover:bg-[#222222] text-[#F5F5F5] border-white/[0.08]">
+              {isRunning ? <Loader2 className="w-3.5 h-3.5 text-[#10B981] animate-spin" /> : <Play className="w-3.5 h-3.5 text-[#10B981]" />}
               Run
-              <kbd className="hidden sm:inline-flex text-[9px] font-mono text-muted-foreground bg-muted px-1 rounded ml-1">⌘↵</kbd>
+              <kbd className="hidden sm:inline-flex text-[9px] font-mono text-[#737373] bg-[#151515] px-1 rounded ml-1">⌘↵</kbd>
             </Button>
-            <Button size="sm" onClick={handleSubmit} disabled={isRunning || isSubmitting} className="bg-indigo-600 hover:bg-indigo-700 text-white h-8 px-4 text-xs font-semibold gap-1.5 shadow-sm shadow-indigo-500/20">
+            <Button size="sm" onClick={handleSubmit} disabled={isRunning || isSubmitting} className="bg-[#4F46E5] hover:bg-[#6366F1] text-white h-8 px-4 text-xs font-bold gap-1.5 shadow-sm shadow-indigo-500/20">
               {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
               Submit
-              <kbd className="hidden sm:inline-flex text-[9px] font-mono text-white/50 bg-white/10 px-1 rounded ml-1">⇧⌘↵</kbd>
+              <kbd className="hidden sm:inline-flex text-[9px] font-mono text-white/60 bg-white/10 px-1 rounded ml-1">⇧⌘↵</kbd>
             </Button>
           </div>
         </header>
@@ -572,17 +572,17 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
             {/* ═══════════════════════════════════════════════════════════════
                 CENTER PANEL — Problem Description / Editorial / Hints / etc.
                ═══════════════════════════════════════════════════════════════ */}
-            <Panel defaultSize={40} minSize={20} className="bg-card border border-border rounded-xl overflow-hidden flex flex-col shadow-sm">
+            <Panel defaultSize={40} minSize={20} className="bg-[#111111] border border-white/[0.08] rounded-xl overflow-hidden flex flex-col shadow-sm">
               
               {/* Panel Header */}
-              <div className="px-3 py-2 border-b border-border bg-muted/20 flex items-center justify-between">
+              <div className="px-3.5 py-2 border-b border-white/[0.08] bg-[#141414] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {(() => {
                     const tab = SIDEBAR_TABS.find(t => t.id === activeSidebarTab);
                     const TabIcon = tab?.icon || FileText;
                     return <TabIcon className="w-3.5 h-3.5 text-indigo-400" />;
                   })()}
-                  <span className="text-xs font-semibold text-foreground capitalize">
+                  <span className="text-xs font-bold text-[#F5F5F5] capitalize">
                     {activeSidebarTab.replace('_', ' ')}
                   </span>
                 </div>
@@ -605,47 +605,47 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                         {/* Problem Metadata Bar */}
                         <div className="flex flex-wrap gap-2 mb-5">
                           <MetaBadge icon={Target} label={problem.difficulty} className={difficultyClass} />
-                          <MetaBadge icon={BarChart3} label={`${acceptanceRate}% acceptance`} />
-                          <MetaBadge icon={Zap} label={`${problem.stats?.totalSubmissions || 0} submissions`} />
-                          {problem.config?.timeLimit && <MetaBadge icon={Clock} label={`${problem.config.timeLimit}ms`} />}
-                          {problem.config?.memoryLimit && <MetaBadge icon={Code2} label={`${problem.config.memoryLimit}MB`} />}
+                          <MetaBadge icon={BarChart3} label={`${acceptanceRate}% acceptance`} className="bg-[#151515] border-white/[0.07] text-[#A3A3A3] text-[11px]" />
+                          <MetaBadge icon={Zap} label={`${problem.stats?.totalSubmissions || 0} submissions`} className="bg-[#151515] border-white/[0.07] text-[#A3A3A3] text-[11px]" />
+                          {problem.config?.timeLimit && <MetaBadge icon={Clock} label={`${problem.config.timeLimit}ms`} className="bg-[#151515] border-white/[0.07] text-[#A3A3A3] text-[11px]" />}
+                          {problem.config?.memoryLimit && <MetaBadge icon={Code2} label={`${problem.config.memoryLimit}MB`} className="bg-[#151515] border-white/[0.07] text-[#A3A3A3] text-[11px]" />}
                         </div>
                         
                         {/* Tags */}
                         {(problem.tags?.length > 0 || problem.categories?.length > 0) && (
                           <div className="flex flex-wrap gap-1.5 mb-5">
                             {(problem.categories || []).map((cat: string) => (
-                              <span key={cat} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                              <span key={cat} className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-[rgba(99,102,241,0.10)] text-[#A5B4FC] border border-[rgba(99,102,241,0.25)]">
                                 {cat}
                               </span>
                             ))}
                             {(problem.tags || []).map((tag: string) => (
-                              <span key={tag} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
-                                <Hash className="w-2.5 h-2.5 inline mr-0.5" />{tag}
+                              <span key={tag} className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-[#151515] text-[#A3A3A3] border border-white/[0.07]">
+                                <Hash className="w-2.5 h-2.5 inline mr-0.5 text-[#737373]" />{tag}
                               </span>
                             ))}
                           </div>
                         )}
                         
                         {/* Description Content */}
-                        <div className="prose dark:prose-invert prose-sm max-w-none
-                          prose-headings:text-foreground prose-headings:font-bold
-                          prose-p:text-muted-foreground prose-p:leading-relaxed
-                          prose-strong:text-foreground
-                          prose-code:text-indigo-400 prose-code:bg-indigo-500/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-mono
-                          prose-pre:bg-[#1e1e1e] prose-pre:border prose-pre:border-border prose-pre:rounded-xl
-                          prose-ul:text-muted-foreground prose-ol:text-muted-foreground
+                        <div className="prose dark:prose-invert prose-sm max-w-none text-[#E5E5E5] text-[15px] leading-[1.6]
+                          prose-headings:text-[#F5F5F5] prose-headings:font-bold
+                          prose-p:text-[#E5E5E5] prose-p:leading-[1.6] prose-p:text-[15px]
+                          prose-strong:text-[#F5F5F5]
+                          prose-code:text-[#A5B4FC] prose-code:bg-[rgba(99,102,241,0.10)] prose-code:border prose-code:border-[rgba(99,102,241,0.20)] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-mono
+                          prose-pre:bg-[#171717] prose-pre:border prose-pre:border-white/[0.08] prose-pre:rounded-xl
+                          prose-ul:text-[#A3A3A3] prose-ol:text-[#A3A3A3]
                         ">
                           <div dangerouslySetInnerHTML={{ __html: problem.statement?.description || problem.description || "" }} />
                         </div>
                         
                         {/* Constraints */}
                         {(problem.statement?.constraints || problem.constraints) && (
-                          <div className="mt-6 p-4 bg-amber-500/5 border border-amber-500/10 rounded-xl">
-                            <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                          <div className="mt-6 p-4 bg-[rgba(245,158,11,0.07)] border border-[rgba(245,158,11,0.20)] rounded-xl">
+                            <h3 className="text-xs font-bold text-[#F59E0B] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                               <AlertTriangle className="w-3.5 h-3.5" /> Constraints
                             </h3>
-                            <div className="text-xs text-muted-foreground leading-relaxed prose dark:prose-invert prose-sm max-w-none"
+                            <div className="text-xs text-[#A3A3A3] leading-relaxed prose dark:prose-invert prose-sm max-w-none"
                               dangerouslySetInnerHTML={{ __html: problem.statement?.constraints || problem.constraints || "" }}
                             />
                           </div>
@@ -654,28 +654,28 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                         {/* Sample Test Cases in Description */}
                         {problem.statement?.samples?.length > 0 && (
                           <div className="mt-6 space-y-3">
-                            <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Examples</h3>
+                            <h3 className="text-xs font-bold text-[#F5F5F5] uppercase tracking-wider">Examples</h3>
                             {problem.statement.samples.map((sample: any, i: number) => (
-                              <div key={i} className="border border-border rounded-xl overflow-hidden">
-                                <div className="bg-muted/30 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                              <div key={i} className="border border-white/[0.07] bg-[#151515] rounded-xl overflow-hidden">
+                                <div className="bg-[#191919] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#A3A3A3]">
                                   Example {i + 1}
                                 </div>
-                                <div className="p-3 space-y-2 font-mono text-xs">
+                                <div className="p-3.5 space-y-2.5 font-mono text-xs">
                                   {sample.input && (
                                     <div>
-                                      <span className="text-muted-foreground text-[10px] uppercase">Input: </span>
-                                      <pre className="bg-muted/30 rounded-lg p-2 mt-1 text-foreground whitespace-pre-wrap">{sample.input}</pre>
+                                      <span className="text-[#737373] text-[10px] font-sans font-semibold uppercase">Input: </span>
+                                      <pre className="bg-[#191919] border border-white/[0.06] rounded-lg p-2.5 mt-1 text-[#E5E5E5] whitespace-pre-wrap">{sample.input}</pre>
                                     </div>
                                   )}
                                   {sample.output && (
                                     <div>
-                                      <span className="text-muted-foreground text-[10px] uppercase">Output: </span>
-                                      <pre className="bg-muted/30 rounded-lg p-2 mt-1 text-foreground whitespace-pre-wrap">{sample.output}</pre>
+                                      <span className="text-[#737373] text-[10px] font-sans font-semibold uppercase">Output: </span>
+                                      <pre className="bg-[#191919] border border-white/[0.06] rounded-lg p-2.5 mt-1 text-[#E5E5E5] whitespace-pre-wrap">{sample.output}</pre>
                                     </div>
                                   )}
                                   {sample.explanation && (
-                                    <div className="text-muted-foreground text-[11px] mt-2 leading-relaxed">
-                                      <span className="font-semibold text-foreground">Explanation: </span>
+                                    <div className="text-[#A3A3A3] font-sans text-xs mt-2 leading-relaxed">
+                                      <span className="font-semibold text-[#F5F5F5]">Explanation: </span>
                                       {sample.explanation}
                                     </div>
                                   )}
@@ -1053,7 +1053,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
               </div>
             </Panel>
 
-            <PanelResizeHandle className="w-1.5 rounded-full bg-border/40 hover:bg-indigo-500/50 transition-colors cursor-col-resize" />
+            <PanelResizeHandle className="w-1.5 rounded-full bg-white/[0.06] hover:bg-indigo-500/50 transition-colors cursor-col-resize" />
 
             {/* ═══════════════════════════════════════════════════════════════
                 RIGHT PANEL — Editor + Console
@@ -1062,32 +1062,32 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
               <PanelGroup orientation="vertical" className="gap-1.5">
                 
                 {/* ─── Editor ──────────────────────────────────────────── */}
-                <Panel defaultSize={65} className="bg-card border border-border rounded-xl overflow-hidden flex flex-col shadow-sm">
-                  <div className="px-3 py-1.5 border-b border-border bg-muted/20 flex justify-between items-center h-9">
+                <Panel defaultSize={65} className="bg-[#111111] border border-white/[0.08] rounded-xl overflow-hidden flex flex-col shadow-sm">
+                  <div className="px-3.5 py-1.5 border-b border-white/[0.08] bg-[#141414] flex justify-between items-center h-9">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-semibold text-muted-foreground bg-muted/50 px-2 py-0.5 rounded border border-border font-mono">
+                      <span className="text-xs font-semibold text-[#F5F5F5] bg-[#191919] px-2.5 py-0.5 rounded border border-white/[0.08] font-mono">
                         {LANGUAGES.find(l => l.id === language)?.ext}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button onClick={handleCopyCode} title="Copy code" className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
+                      <button onClick={handleCopyCode} title="Copy code" className="p-1 rounded text-[#737373] hover:text-[#F5F5F5] hover:bg-white/[0.06] transition-all">
                         <Copy className="w-3.5 h-3.5" />
                       </button>
-                      <button onClick={handleResetCode} title="Reset to default" className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
+                      <button onClick={handleResetCode} title="Reset to default" className="p-1 rounded text-[#737373] hover:text-[#F5F5F5] hover:bg-white/[0.06] transition-all">
                         <RotateCcw className="w-3.5 h-3.5" />
                       </button>
-                      <div className="w-px h-4 bg-border" />
-                      <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors select-none">
-                        <input type="checkbox" checked={vimMode} onChange={(e) => setVimMode(e.target.checked)} className="rounded border-border bg-muted w-3 h-3" />
+                      <div className="w-px h-4 bg-white/[0.08]" />
+                      <label className="flex items-center gap-1.5 text-[11px] text-[#A3A3A3] cursor-pointer hover:text-[#F5F5F5] transition-colors select-none">
+                        <input type="checkbox" checked={vimMode} onChange={(e) => setVimMode(e.target.checked)} className="rounded border-white/[0.12] bg-[#191919] w-3 h-3" />
                         Vim
                       </label>
                     </div>
                   </div>
                   
                   {/* Vim Status Bar */}
-                  <div id="vim-status" className={`text-[10px] px-3 bg-muted/50 text-foreground border-b border-border flex items-center font-mono transition-all ${vimMode ? 'h-5 opacity-100' : 'h-0 opacity-0 overflow-hidden border-none'}`}></div>
+                  <div id="vim-status" className={`text-[10px] px-3 bg-[#151515] text-[#F5F5F5] border-b border-white/[0.08] flex items-center font-mono transition-all ${vimMode ? 'h-5 opacity-100' : 'h-0 opacity-0 overflow-hidden border-none'}`}></div>
 
-                  <div className="flex-1 relative bg-[#1e1e1e]">
+                  <div className="flex-1 relative bg-[#171717]">
                     <Editor
                       height="100%"
                       language={language}
@@ -1121,20 +1121,20 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                   </div>
                 </Panel>
 
-                <PanelResizeHandle className="h-1.5 rounded-full bg-border/40 hover:bg-indigo-500/50 transition-colors cursor-row-resize" />
+                <PanelResizeHandle className="h-1.5 rounded-full bg-white/[0.06] hover:bg-indigo-500/50 transition-colors cursor-row-resize" />
 
                 {/* ─── Console / Testcases ─────────────────────────────── */}
-                <Panel defaultSize={35} className="bg-card border border-border rounded-xl overflow-hidden flex flex-col shadow-sm">
-                  <div className="flex items-center border-b border-border bg-muted/20 px-1 py-0.5 gap-0.5">
+                <Panel defaultSize={35} className="bg-[#111111] border border-white/[0.08] rounded-xl overflow-hidden flex flex-col shadow-sm">
+                  <div className="flex items-center border-b border-white/[0.08] bg-[#141414] px-1.5 py-1 gap-1">
                     <TabButton active={activeBottomTab === "testcases"} onClick={() => setActiveBottomTab("testcases")} icon={Terminal}>Testcases</TabButton>
                     <TabButton active={activeBottomTab === "console"} onClick={() => setActiveBottomTab("console")}>
                       Console
                       {runResult && (
                         <span className={`ml-1.5 w-2 h-2 rounded-full inline-block ${
-                          runResult.status === "accepted" ? "bg-emerald-500" :
-                          runResult.status === "wrong_answer" ? "bg-rose-500" :
-                          runResult.status === "compile_error" ? "bg-orange-500" :
-                          runResult.status === "time_limit" ? "bg-yellow-500" : "bg-amber-500"
+                          runResult.status === "accepted" ? "bg-[#10B981]" :
+                          runResult.status === "wrong_answer" ? "bg-[#EF4444]" :
+                          runResult.status === "compile_error" ? "bg-[#F97316]" :
+                          runResult.status === "time_limit" ? "bg-[#F59E0B]" : "bg-[#F59E0B]"
                         }`} />
                       )}
                     </TabButton>
@@ -1150,8 +1150,8 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                               onClick={() => setActiveTestCase(index)}
                               className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all flex items-center gap-1.5 ${
                                 activeTestCase === index 
-                                  ? "bg-background text-foreground border border-border shadow-sm" 
-                                  : "text-muted-foreground hover:bg-muted border border-transparent"
+                                  ? "bg-[#191919] text-[#F5F5F5] border border-white/[0.12] shadow-xs" 
+                                  : "text-[#737373] hover:text-[#F5F5F5] hover:bg-white/[0.04] border border-transparent"
                               }`}
                             >
                               Case {tc.id}
@@ -1161,26 +1161,26 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                         
                         <div className="space-y-3 font-mono text-xs">
                           <div>
-                            <div className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-sans font-semibold">Input</div>
-                            <div className="bg-muted/30 border border-border rounded-lg p-2.5 text-foreground whitespace-pre-wrap">{testCases[activeTestCase]?.input}</div>
+                            <div className="text-[10px] text-[#737373] mb-1 uppercase tracking-wider font-sans font-semibold">Input</div>
+                            <div className="bg-[#191919] border border-white/[0.07] rounded-lg p-2.5 text-[#E5E5E5] whitespace-pre-wrap">{testCases[activeTestCase]?.input}</div>
                           </div>
                           <div>
-                            <div className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-sans font-semibold">Expected Output</div>
-                            <div className="bg-muted/30 border border-border rounded-lg p-2.5 text-foreground whitespace-pre-wrap">{testCases[activeTestCase]?.expected}</div>
+                            <div className="text-[10px] text-[#737373] mb-1 uppercase tracking-wider font-sans font-semibold">Expected Output</div>
+                            <div className="bg-[#191919] border border-white/[0.07] rounded-lg p-2.5 text-[#E5E5E5] whitespace-pre-wrap">{testCases[activeTestCase]?.expected}</div>
                           </div>
                         </div>
                       </>
                     ) : (
                       <div className="font-mono text-xs">
                         {!runResult && !isRunning && !isSubmitting && (
-                          <div className="text-muted-foreground text-xs flex flex-col h-full items-center justify-center py-8 gap-2">
-                            <Terminal className="w-6 h-6 text-muted-foreground/30" />
-                            <span>Click <kbd className="font-sans text-[10px] bg-muted px-1.5 py-0.5 rounded border border-border">Run</kbd> or <kbd className="font-sans text-[10px] bg-muted px-1.5 py-0.5 rounded border border-border">Submit</kbd> to execute your code.</span>
+                          <div className="text-[#737373] text-xs flex flex-col h-full items-center justify-center py-8 gap-2">
+                            <Terminal className="w-6 h-6 text-[#737373]/30" />
+                            <span>Click <kbd className="font-sans text-[10px] bg-[#191919] text-[#A3A3A3] px-1.5 py-0.5 rounded border border-white/[0.08]">Run</kbd> or <kbd className="font-sans text-[10px] bg-[#191919] text-[#A3A3A3] px-1.5 py-0.5 rounded border border-white/[0.08]">Submit</kbd> to execute your code.</span>
                           </div>
                         )}
                         
                         {(isRunning || isSubmitting) && (
-                           <div className="text-muted-foreground text-xs flex h-full items-center justify-center py-8 gap-2">
+                           <div className="text-[#A3A3A3] text-xs flex h-full items-center justify-center py-8 gap-2">
                              <Loader2 className="w-4 h-4 animate-spin text-indigo-400" /> 
                              <span>{isSubmitting ? "Submitting..." : "Executing..."}</span>
                            </div>
@@ -1211,7 +1211,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                               ) : (
                                 <><AlertTriangle className="w-4.5 h-4.5" /> Error</>
                               )}
-                              <span className="text-muted-foreground ml-auto text-[10px] font-sans font-medium bg-muted/40 px-2 py-0.5 rounded-full border border-border">
+                              <span className="text-[#A3A3A3] ml-auto text-[10px] font-sans font-medium bg-[#151515] px-2 py-0.5 rounded-full border border-white/[0.08]">
                                 {runResult.passedCount}/{runResult.totalCount} passed
                               </span>
                             </div>
@@ -1226,8 +1226,8 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                       onClick={() => setActiveResultCase(i)}
                                       className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all flex items-center gap-1.5 ${
                                         activeResultCase === i
-                                          ? "bg-background text-foreground border border-border shadow-sm"
-                                          : "text-muted-foreground hover:bg-muted border border-transparent"
+                                          ? "bg-[#191919] text-[#F5F5F5] border border-white/[0.12] shadow-xs"
+                                          : "text-[#737373] hover:text-[#F5F5F5] hover:bg-white/[0.04] border border-transparent"
                                       }`}
                                     >
                                       <span className={`w-1.5 h-1.5 rounded-full ${r.passed ? "bg-emerald-500" : "bg-rose-500"}`} />
@@ -1239,14 +1239,14 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                 {runResult.results[activeResultCase] && (
                                   <div className="space-y-2.5">
                                     <div>
-                                      <div className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-sans font-semibold">Your Output</div>
+                                      <div className="text-[10px] text-[#737373] mb-1 uppercase tracking-wider font-sans font-semibold">Your Output</div>
                                       <div className={`border rounded-lg p-2.5 whitespace-pre-wrap ${runResult.results[activeResultCase].passed ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-400" : "bg-rose-500/5 border-rose-500/20 text-rose-400"}`}>
                                         {runResult.results[activeResultCase].output || "No output"}
                                       </div>
                                     </div>
                                     <div>
-                                      <div className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-sans font-semibold">Expected</div>
-                                      <div className="bg-muted/30 border border-border rounded-lg p-2.5 text-foreground whitespace-pre-wrap">
+                                      <div className="text-[10px] text-[#737373] mb-1 uppercase tracking-wider font-sans font-semibold">Expected</div>
+                                      <div className="bg-[#191919] border border-white/[0.07] rounded-lg p-2.5 text-[#E5E5E5] whitespace-pre-wrap">
                                         {runResult.results[activeResultCase].expected}
                                       </div>
                                     </div>
@@ -1265,9 +1265,9 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
 
                             {/* Logs */}
                             {runResult.logs.length > 0 && (
-                              <div className="mt-4 pt-3 border-t border-border">
-                                <div className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-wider font-sans font-semibold">Stdout</div>
-                                <div className="bg-[#1e1e1e] border border-border rounded-lg p-2.5 space-y-0.5 font-mono text-[11px] text-gray-300 max-h-32 overflow-auto">
+                              <div className="mt-4 pt-3 border-t border-white/[0.07]">
+                                <div className="text-[10px] text-[#737373] mb-1.5 uppercase tracking-wider font-sans font-semibold">Stdout</div>
+                                <div className="bg-[#171717] border border-white/[0.08] rounded-lg p-2.5 space-y-0.5 font-mono text-[11px] text-[#E5E5E5] max-h-32 overflow-auto">
                                   {runResult.logs.map((log, i) => (
                                     <div key={i}>{log}</div>
                                   ))}
@@ -1276,8 +1276,8 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                             )}
 
                             {/* Runtime Stats */}
-                            <div className="mt-4 pt-3 border-t border-border flex gap-4 text-muted-foreground font-sans text-[11px]">
-                              <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Runtime: <span className="text-foreground font-semibold">{runResult.runtime} ms</span></span>
+                            <div className="mt-4 pt-3 border-t border-white/[0.07] flex gap-4 text-[#A3A3A3] font-sans text-[11px]">
+                              <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Runtime: <span className="text-[#F5F5F5] font-semibold">{runResult.runtime} ms</span></span>
                             </div>
                           </motion.div>
                         )}
