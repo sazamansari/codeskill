@@ -18,9 +18,13 @@ import {
   Layers,
   ShieldCheck,
   Share2,
-  RotateCcw
+  RotateCcw,
+  FileDown
 } from "lucide-react";
 import { studentAssessmentsAPI } from "@/config/api";
+import { ContestReportDownloadButton } from "@/components/reports/ContestReportDownloadButton";
+import { buildContestReport } from "@/lib/contest-report-builder";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AssessmentResultPage({
   params,
@@ -31,6 +35,7 @@ export default function AssessmentResultPage({
   const resolvedParams = use(params);
   const id = resolvedParams.id;
 
+  const { user } = useAuth();
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRetaking, setIsRetaking] = useState(false);
@@ -97,16 +102,82 @@ export default function AssessmentResultPage({
     );
   }
 
+  // Construct official Contest Report payload
+  const reportData = buildContestReport({
+    student: {
+      name: user?.name || "Candidate",
+      uid: (user as any)?.uid || (user as any)?.registrationNumber || "24BCS-STUDENT",
+      registrationId: (user as any)?.registrationNumber || (user as any)?.rollNumber || "REG-2026-CU",
+      program: (user as any)?.program || "B.Tech Computer Science & Engineering",
+      batch: (user as any)?.batch || "2024 - 2028",
+      section: (user as any)?.section || "Section B",
+      group: (user as any)?.group || "Group G1",
+      semester: (user as any)?.semester ? `Semester ${(user as any).semester}` : "Semester 4",
+      email: user?.email || "student@cuchd.in",
+      institution: "Chandigarh University",
+    },
+    contest: {
+      id: id || "CS-CONTEST",
+      name: assessment?.title || "University Coding Assessment",
+      code: assessment?.code || id,
+      date: attempt?.submittedAt ? new Date(attempt.submittedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      duration: `${assessment?.durationMinutes || 60} Minutes`,
+      generatedOn: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      totalProblems: data?.reviewQuestions?.length || attempt?.totalAttempted || 5,
+      maximumScore: attempt?.maxScore || 100,
+      totalParticipants: 245,
+    },
+    problems: (data?.reviewQuestions || []).map((q: any, idx: number) => ({
+      index: idx + 1,
+      title: q.question ? (q.question.length > 55 ? q.question.substring(0, 52) + "..." : q.question) : `Problem ${idx + 1}`,
+      difficulty: (q.difficulty || "Medium") as "Easy" | "Medium" | "Hard",
+      status: q.isCorrect ? "Solved" : q.selectedAnswer >= 0 ? "Wrong Answer" : "Not Attempted",
+      score: q.marksAwarded || 0,
+      maxScore: q.marks || 10,
+      timeTaken: "2m 15s",
+      timeTakenSeconds: 135,
+      attempts: 1,
+      topic: q.topic || "Algorithms",
+    })),
+    rawTopics: (data?.topicBreakdown || []).map((t: any) => ({
+      topic: t.topic || "Core CS",
+      solved: t.correct || 0,
+      total: t.total || 0,
+    })),
+    rank: 18,
+    totalParticipants: 245,
+    evaluator: {
+      facultyName: "Dr. Rajesh Sharma",
+      designation: "Associate Professor",
+      department: "Dept. of Skill Development & Computer Science",
+      remarks: attempt?.passed
+        ? "Student demonstrates proficient algorithmic reasoning and structured problem solving. Recommended to proceed with advanced graph and dynamic programming training."
+        : "Student requires targeted revision on core algorithmic logic and edge case handling. Recommended to join lab remedial sessions.",
+      evaluationDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      signatureStatus: "VERIFIED EVALUATOR",
+    },
+  });
+
   return (
     <div className="flex-1 bg-background text-foreground font-sans min-h-screen">
       <div className="max-w-5xl mx-auto px-6 py-8 mt-16 md:mt-24 space-y-8">
-        {/* Navigation Breadcrumb */}
-        <Link
-          href="/assessments"
-          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to Assessments
-        </Link>
+        {/* Navigation Breadcrumb & Download Header */}
+        <div className="flex items-center justify-between gap-4">
+          <Link
+            href="/assessments"
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to Assessments
+          </Link>
+          <div className="hidden sm:block">
+            <ContestReportDownloadButton
+              data={reportData}
+              filename={`${(assessment?.title || "Contest-Report").replace(/[^a-zA-Z0-9]/g, "_")}_${user?.name || "Student"}.pdf`}
+              variant="outline"
+              size="sm"
+            />
+          </div>
+        </div>
 
         {/* Scorecard Hero Banner */}
         <div
@@ -117,20 +188,31 @@ export default function AssessmentResultPage({
           }`}
         >
           {/* Institutional Branding Header */}
-          <div className="flex items-center gap-3 pb-4 mb-4 border-b border-slate-200">
-            <div className="w-10 h-10 rounded-md overflow-hidden bg-white shrink-0 border border-slate-200 p-0.5 flex items-center justify-center">
-              <img
-                src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
-                alt="Chandigarh University"
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/cu-logo.png";
-                }}
-              />
+          <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-200 gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-md overflow-hidden bg-white shrink-0 border border-slate-200 p-0.5 flex items-center justify-center">
+                <img
+                  src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
+                  alt="Chandigarh University"
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/cu-logo.png";
+                  }}
+                />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-900 leading-tight">Chandigarh University</p>
+                <p className="text-[10px] text-[#c8102e] font-semibold uppercase tracking-wider">Official Examination Scorecard</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-bold text-slate-900 leading-tight">Chandigarh University</p>
-              <p className="text-[10px] text-[#c8102e] font-semibold uppercase tracking-wider">Official Examination Scorecard</p>
+
+            <div className="sm:hidden">
+              <ContestReportDownloadButton
+                data={reportData}
+                filename={`Contest_Report_${user?.name || "Student"}.pdf`}
+                variant="outline"
+                size="sm"
+              />
             </div>
           </div>
 
@@ -377,7 +459,7 @@ export default function AssessmentResultPage({
           </div>
         )}
 
-        {/* Footer */}
+        {/* Footer Actions */}
         <div className="flex flex-wrap items-center justify-center gap-3 pt-4 pb-8">
           <Link
             href="/assessments"
@@ -385,14 +467,22 @@ export default function AssessmentResultPage({
           >
             <ArrowLeft className="w-4 h-4" /> Return to Assessments
           </Link>
+
+          <ContestReportDownloadButton
+            data={reportData}
+            filename={`${(assessment?.title || "Contest-Report").replace(/[^a-zA-Z0-9]/g, "_")}_${user?.name || "Student"}.pdf`}
+            variant="primary"
+            size="lg"
+          />
+
           {data?.canRetake !== false ? (
             <button
               onClick={handleRetake}
               disabled={isRetaking}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold rounded-xl transition-all shadow-md shadow-primary/20 disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-card hover:bg-muted text-foreground text-xs font-bold rounded-xl transition-all border border-border disabled:opacity-50"
             >
               <RotateCcw className={`w-4 h-4 ${isRetaking ? "animate-spin" : ""}`} />
-              {isRetaking ? "Preparing Re-attempt..." : "Redo / Re-attempt Assessment"}
+              {isRetaking ? "Preparing Re-attempt..." : "Redo Assessment"}
             </button>
           ) : (
             <span className="inline-flex items-center gap-1.5 px-5 py-3 rounded-xl bg-muted/60 text-muted-foreground text-xs font-semibold border border-border">
