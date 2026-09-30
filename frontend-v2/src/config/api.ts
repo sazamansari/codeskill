@@ -1,9 +1,10 @@
 import axios from "axios";
 
-const getApiBase = () => {
-  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+// Dynamically determine the correct API base URL
+const getDynamicBaseURL = (): string => {
   if (typeof window !== "undefined") {
-    // If accessed on remote server/domain and envUrl points to localhost, use relative /api
+    const envUrl = process.env.NEXT_PUBLIC_API_URL;
+    // In browser: if envUrl is missing or points to localhost/127.0.0.1 on a non-local domain, use relative /api
     if (
       !envUrl ||
       envUrl === "/api" ||
@@ -13,24 +14,34 @@ const getApiBase = () => {
     ) {
       return "/api";
     }
+    return envUrl;
   }
-  return envUrl || "http://127.0.0.1:5001/api";
+  return process.env.INTERNAL_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5001/api";
 };
 
-const API_BASE = getApiBase();
+const api = axios.create({
+  baseURL: getDynamicBaseURL(),
+});
 
-const api = axios.create({ baseURL: API_BASE });
-
-// Attach JWT token to every request and fix URL resolution
+// Attach JWT token to every request and ensure correct baseURL/URL formatting
 api.interceptors.request.use((config) => {
-  // Normalize URL resolution:
-  // If baseURL does not end with a slash, append it.
+  // Dynamically update baseURL in browser to prevent stale baked build URLs
+  if (typeof window !== "undefined") {
+    config.baseURL = getDynamicBaseURL();
+  }
+
+  // Normalize baseURL & url resolution
   if (config.baseURL && !config.baseURL.endsWith("/")) {
     config.baseURL += "/";
   }
-  // If the request URL starts with a slash, remove it so it appends correctly to baseURL.
+
   if (config.url && config.url.startsWith("/")) {
     config.url = config.url.substring(1);
+  }
+
+  // Prevent double "/api/api" if baseURL is /api/ and url starts with api/
+  if (config.baseURL?.endsWith("/api/") && config.url?.startsWith("api/")) {
+    config.url = config.url.substring(4);
   }
 
   if (typeof window !== "undefined") {
@@ -40,14 +51,34 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 errors globally
+// Handle 401 errors globally without breaking login pages or public routes
 api.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401 && typeof window !== "undefined") {
-      localStorage.removeItem("codeskill_token");
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
+      const pathname = window.location.pathname;
+      const isAuthPage =
+        pathname === "/login" ||
+        pathname === "/register" ||
+        pathname === "/admin/login" ||
+        pathname === "/student-login" ||
+        pathname.startsWith("/forgot-password") ||
+        pathname.startsWith("/reset-password");
+
+      const reqUrl = error.config?.url || "";
+      const isAuthRequest =
+        reqUrl.includes("auth/login") ||
+        reqUrl.includes("auth/admin-login") ||
+        reqUrl.includes("auth/student-login") ||
+        reqUrl.includes("auth/register");
+
+      // Only clear token and redirect if NOT on an auth page, NOT during an auth request, and NOT on public pages
+      if (!isAuthPage && !isAuthRequest) {
+        localStorage.removeItem("codeskill_token");
+        const isPublicPage = pathname === "/" || pathname === "/problems" || pathname.startsWith("/problems/");
+        if (!isPublicPage) {
+          window.location.href = "/login";
+        }
       }
     }
     return Promise.reject(error);
