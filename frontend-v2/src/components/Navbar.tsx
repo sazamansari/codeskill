@@ -16,8 +16,34 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const [isShimmering, setIsShimmering] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+
+    const triggerShimmer = () => {
+      setIsShimmering(true);
+      const timer = setTimeout(() => {
+        setIsShimmering(false);
+      }, 2200);
+      return timer;
+    };
+
+    // 1. Initial Load: trigger automatically as soon as component mounts
+    const initialTimer = setTimeout(() => {
+      triggerShimmer();
+    }, 400);
+
+    // 2. 2-Minute Interval: repeat exactly every 2 minutes (120,000 ms)
+    const intervalId = setInterval(() => {
+      triggerShimmer();
+    }, 120000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(intervalId);
+    };
+  }, []);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setScrolled(latest > 10);
@@ -58,28 +84,61 @@ export function Navbar() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex items-center justify-between h-11 relative z-10">
           
-          {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+          {/* Brand Logo with 2-Minute Repeating Shimmer Animation */}
+          <Link href="/" className="flex items-center gap-2.5 group shrink-0 select-none">
             {/* CodeSkill Primary Logo */}
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-950 border border-amber-400/40 shadow-xs flex items-center justify-center p-1 group-hover:scale-105 transition-transform z-10">
+            <div
+              className={`relative w-8 h-8 rounded-lg overflow-hidden bg-slate-950 border shadow-xs flex items-center justify-center p-1 group-hover:scale-105 transition-all duration-700 z-10 ${
+                isShimmering
+                  ? "border-amber-400 ring-2 ring-amber-400/40 shadow-amber-400/20 shadow-md scale-[1.03]"
+                  : "border-amber-400/40"
+              }`}
+            >
               <svg viewBox="0 0 160 160" className="w-full h-full" fill="none">
                 <polygon points="80,10 145,45 145,115 80,150 15,115 15,45" fill="#0F172A" stroke="#FACC15" strokeWidth="8" strokeLinejoin="round" />
                 <path d="M60 62 L40 80 L60 98" stroke="#FFFFFF" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M85 55 L75 105" stroke="#FACC15" strokeWidth="10" strokeLinecap="round" />
                 <path d="M100 62 L120 80 L100 98" stroke="#38BDF8" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
+
+              {/* Shimmer sweep beam across logo container */}
+              <AnimatePresence>
+                {isShimmering && (
+                  <motion.div
+                    initial={{ x: "-130%", opacity: 0 }}
+                    animate={{ x: "220%", opacity: [0, 0.9, 0] }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 1.4, ease: "easeInOut" }}
+                    className="pointer-events-none absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/55 to-transparent -skew-x-25 z-20"
+                  />
+                )}
+              </AnimatePresence>
             </div>
 
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-base sm:text-lg text-foreground tracking-tight leading-none">
+                <span
+                  className={`font-extrabold text-base sm:text-lg tracking-tight leading-none transition-all duration-700 ${
+                    isShimmering
+                      ? "text-transparent bg-clip-text bg-gradient-to-r from-foreground via-amber-500 to-foreground"
+                      : "text-foreground"
+                  }`}
+                >
                   CodeSkill
                 </span>
-                <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
+                <span
+                  className={`text-[11px] font-semibold flex items-center gap-1 transition-colors duration-700 ${
+                    isShimmering ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                >
                   <span className="text-amber-500 dark:text-amber-400 font-medium">by</span> Chandigarh University
                 </span>
               </div>
-              <span className="hidden sm:block text-[10px] text-muted-foreground font-normal leading-none mt-0.5">
+              <span
+                className={`hidden sm:block text-[10px] font-normal leading-none mt-0.5 transition-colors duration-700 ${
+                  isShimmering ? "text-neutral-700 dark:text-neutral-300" : "text-muted-foreground"
+                }`}
+              >
                 Department of Skill Development &amp; Lab
               </span>
             </div>
