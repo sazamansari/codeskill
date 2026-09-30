@@ -186,6 +186,25 @@ const LANGUAGE_CONFIGS: Record<string, LanguageConfig> = {
       args: [srcPath],
     }),
   },
+
+  // ── TypeScript ──
+  typescript: {
+    extension: '.ts',
+    compiled: false,
+    runCommand: (srcPath) => ({
+      cmd: 'npx',
+      args: ['--yes', 'tsx', srcPath],
+    }),
+  },
+
+  ts: {
+    extension: '.ts',
+    compiled: false,
+    runCommand: (srcPath) => ({
+      cmd: 'npx',
+      args: ['--yes', 'tsx', srcPath],
+    }),
+  },
 };
 
 // ── Default Limits ───────────────────────────────────────────────────────────

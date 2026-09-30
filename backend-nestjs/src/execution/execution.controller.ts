@@ -90,7 +90,20 @@ export class ExecutionController {
     }
 
     // Validate supported language
-    const supportedLanguages = ['c', 'cpp', 'c++', 'java', 'python', 'python3', 'py', 'javascript', 'js', 'node'];
+    const supportedLanguages = [
+      'c',
+      'cpp',
+      'c++',
+      'java',
+      'python',
+      'python3',
+      'py',
+      'javascript',
+      'js',
+      'node',
+      'typescript',
+      'ts',
+    ];
     if (!supportedLanguages.includes(language.toLowerCase())) {
       throw new BadRequestException(
         `Unsupported language: "${language}". Supported: ${supportedLanguages.join(', ')}`,
@@ -102,8 +115,8 @@ export class ExecutionController {
       { code, language, testCases, config, userId },
       {
         attempts: 1,
-        removeOnComplete: { age: 15 * 60 },
-        removeOnFail: { age: 60 * 60 },
+        removeOnComplete: { age: 15 * 60, count: 2000 },
+        removeOnFail: { age: 60 * 60, count: 2000 },
       },
     );
     return {
@@ -121,7 +134,7 @@ export class ExecutionController {
     @Param('jobId') jobId: string,
   ) {
     const job = await this.submissionQueue.getJob(jobId);
-    if (!job || String(job.data.userId) !== String(userId)) {
+    if (!job || (job.data.userId && String(job.data.userId) !== String(userId))) {
       throw new NotFoundException('Execution job not found');
     }
     const state = await job.getState();
@@ -143,12 +156,13 @@ export class ExecutionController {
   /**
    * Azure-backed code execution endpoint.
    * For 3000+ concurrent students — routes to Microsoft Azure ACI via Judge0.
-   * Falls back to local execution if Azure is not configured.
+   * Falls back to BullMQ queue if Azure is not configured.
    */
   @Post('azure-run')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Execute code via Azure Container Instances (Microsoft-powered, high scale)' })
   async azureRun(
+    @CurrentUser('_id') userId: string,
     @Body()
     body: {
       code: string;
@@ -163,47 +177,38 @@ export class ExecutionController {
       throw new BadRequestException('code and language are required');
     }
 
-    // If Azure is not configured, fall back to local executor
+    // If Azure is not configured, route to isolated BullMQ worker queue
     if (!this.azureExecutionService.isAvailable) {
       const isSingleRun = !body.testCases || body.testCases.length === 0;
       const testCases = isSingleRun
         ? [{ id: 'run', input: body.stdin || '', expected: '' }]
         : body.testCases!;
 
-      const rawResults = await this.executionService.runCode(
-        body.code,
-        body.language,
-        testCases.map((tc) => ({ id: tc.id, input: tc.input, expected: tc.expected })),
-        { timeout: body.timeoutMs || 10000 },
+      const job = await this.submissionQueue.add(
+        'run-code',
+        {
+          code: body.code,
+          language: body.language,
+          testCases,
+          config: {
+            timeLimit: body.timeoutMs || 10000,
+            memoryLimit: body.memoryMB || 256,
+          },
+          userId,
+        },
+        {
+          attempts: 1,
+          removeOnComplete: { age: 15 * 60, count: 2000 },
+          removeOnFail: { age: 60 * 60, count: 2000 },
+        },
       );
-
-      const normalizedResults = rawResults.map((r, idx) => {
-        const hasErr = r.status === 'compilation_error' || r.status === 'runtime_error' || r.status === 'time_limit_exceeded' || r.status === 'system_error';
-        const isRunWithoutExpected = isSingleRun && !testCases[idx]?.expected;
-        const finalStatus = isRunWithoutExpected ? (hasErr ? r.status : 'success') : r.status;
-        const passed = isRunWithoutExpected ? !hasErr : r.passed;
-
-        return {
-          id: r.id,
-          passed,
-          status: finalStatus,
-          stdout: r.output || '',
-          stderr: r.error || '',
-          output: r.output || '',
-          expected: r.expected || '',
-          executionTimeMs: r.executionTime,
-        };
-      });
-
-      const passedCount = normalizedResults.filter((r) => r.passed).length;
 
       return {
         success: true,
-        engine: 'local',
-        passedCount,
-        totalCount: normalizedResults.length,
-        results: normalizedResults,
-        result: isSingleRun ? normalizedResults[0] : undefined,
+        engine: 'queue',
+        status: 'queued',
+        jobId: job.id,
+        message: 'Execution queued to isolated runner pool',
       };
     }
 

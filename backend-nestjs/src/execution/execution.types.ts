@@ -68,9 +68,13 @@ export const SUPPORTED_LANGUAGES = [
   'javascript',
   'js',
   'node',
+  'typescript',
+  'ts',
 ] as const;
 
-export function canonicalLanguage(language: string): 'c' | 'cpp' | 'java' | 'python' | 'javascript' | undefined {
+export function canonicalLanguage(
+  language: string,
+): 'c' | 'cpp' | 'java' | 'python' | 'javascript' | 'typescript' | undefined {
   switch (language.toLowerCase()) {
     case 'c':
       return 'c';
@@ -87,6 +91,9 @@ export function canonicalLanguage(language: string): 'c' | 'cpp' | 'java' | 'pyt
     case 'js':
     case 'node':
       return 'javascript';
+    case 'typescript':
+    case 'ts':
+      return 'typescript';
     default:
       return undefined;
   }

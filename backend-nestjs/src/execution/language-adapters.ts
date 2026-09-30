@@ -26,7 +26,7 @@ export interface ResolvedFunctionSignature {
 }
 
 export interface LanguageAdapter {
-  readonly id: 'c' | 'cpp' | 'java' | 'python' | 'javascript';
+  readonly id: 'c' | 'cpp' | 'java' | 'python' | 'javascript' | 'typescript';
   readonly compiled: boolean;
   readonly sandboxImage: string;
   prepare(code: string, mode: ExecutionMode, signature?: FunctionSignature): PreparedSource;
@@ -296,6 +296,38 @@ class JavaScriptAdapter implements LanguageAdapter {
   }
 }
 
+class TypeScriptAdapter implements LanguageAdapter {
+  readonly id = 'typescript' as const;
+  readonly compiled = false;
+  readonly sandboxImage = process.env.JUDGE_TS_IMAGE || process.env.JUDGE_NODE_IMAGE || 'node:20-alpine';
+
+  prepare(code: string, mode: ExecutionMode, signature?: FunctionSignature): PreparedSource {
+    if (mode === 'standard') return { filename: 'solution.ts', source: code };
+    const details = functionSignatureOrThrow(signature);
+    const names = details.parameters.map((parameter) => parameter.name);
+    const target = details.className ? `new (${details.className} as any)().${details.functionName}` : details.functionName;
+    return {
+      filename: 'solution.ts',
+      source: [
+        code,
+        'const __codeskill_input = JSON.parse(require("fs").readFileSync(0, "utf8") || "null");',
+        `const __codeskill_names = ${JSON.stringify(names)};`,
+        'const __codeskill_args = Array.isArray(__codeskill_input) ? __codeskill_input : (__codeskill_input && typeof __codeskill_input === "object" ? __codeskill_names.map((name: string) => __codeskill_input[name]) : [__codeskill_input]);',
+        `const __codeskill_result = (${target})(...__codeskill_args);`,
+        'console.log(typeof __codeskill_result === "string" ? __codeskill_result : JSON.stringify(__codeskill_result));',
+      ].join('\n'),
+    };
+  }
+
+  compileCommand(): undefined {
+    return undefined;
+  }
+
+  runCommand(sourcePath: string): Command {
+    return { cmd: 'npx', args: ['--yes', 'tsx', sourcePath] };
+  }
+}
+
 class CAdapter implements LanguageAdapter {
   readonly id = 'c' as const;
   readonly compiled = true;
@@ -321,6 +353,7 @@ const ADAPTERS: Record<NonNullable<ReturnType<typeof canonicalLanguage>>, Langua
   java: new JavaAdapter(),
   python: new PythonAdapter(),
   javascript: new JavaScriptAdapter(),
+  typescript: new TypeScriptAdapter(),
 };
 
 export function getLanguageAdapter(language: string): LanguageAdapter | undefined {

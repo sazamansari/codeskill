@@ -304,8 +304,18 @@ int main() {
   });
 
   // ─── Java Tests ───────────────────────────────────────────────────────────
+  let hasJava = false;
+  try {
+    const { execSync } = require('child_process');
+    execSync('javac -version', { stdio: 'ignore' });
+    hasJava = true;
+  } catch {
+    hasJava = false;
+  }
 
-  describe('Java', () => {
+  const describeJava = hasJava ? describe : describe.skip;
+
+  describeJava('Java', () => {
     it('should compile and run Hello World', async () => {
       const code = `
 public class Main {

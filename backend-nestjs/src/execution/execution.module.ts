@@ -19,6 +19,7 @@ import {
 } from '../database/schemas/problem-testcase.schema';
 import { User, UserSchema } from '../database/schemas/user.schema';
 import { GatewayModule } from '../gateway/gateway.module';
+import { RedisModule } from '../redis/redis.module';
 
 const judgeProviders =
   process.env.PROCESS_ROLE === 'judge' ? [JudgeProcessor] : [];
@@ -35,6 +36,7 @@ const judgeProviders =
       name: 'submissions',
     }),
     GatewayModule,
+    RedisModule,
   ],
   controllers: [ExecutionController],
   providers: [ExecutionService, AzureExecutionService, ...judgeProviders],

@@ -4,6 +4,22 @@ import { User } from './user.schema';
 
 export type SubmissionDocument = HydratedDocument<Submission>;
 
+export const SubmissionStatus = {
+  QUEUED: 'queued',
+  RUNNING: 'running',
+  COMPILING: 'compiling',
+  TESTING: 'testing',
+  ACCEPTED: 'accepted',
+  WRONG_ANSWER: 'wrong_answer',
+  COMPILATION_ERROR: 'compile_error',
+  RUNTIME_ERROR: 'runtime_error',
+  TIME_LIMIT_EXCEEDED: 'time_limit',
+  MEMORY_LIMIT_EXCEEDED: 'memory_limit',
+  SYSTEM_ERROR: 'system_error',
+  CANCELLED: 'cancelled',
+  PENDING: 'pending',
+} as const;
+
 @Schema({ timestamps: true })
 export class Submission {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
@@ -21,6 +37,10 @@ export class Submission {
   @Prop({
     required: true,
     enum: [
+      'queued',
+      'running',
+      'compiling',
+      'testing',
       'pending',
       'accepted',
       'wrong_answer',
@@ -29,8 +49,10 @@ export class Submission {
       'compile_error',
       'memory_limit',
       'system_error',
+      'cancelled',
     ],
-    default: 'pending',
+    default: 'queued',
+    index: true,
   })
   status: string;
 
@@ -59,9 +81,28 @@ export class Submission {
   /** Per-test-case detailed results from the judge */
   @Prop({ type: [Object] })
   testResults?: Record<string, any>[];
+
+  @Prop({ type: Date, default: Date.now })
+  queuedAt?: Date;
+
+  @Prop({ type: Date })
+  startedAt?: Date;
+
+  @Prop({ type: Date })
+  completedAt?: Date;
+
+  @Prop()
+  runnerId?: string;
+
+  @Prop()
+  executionTimeMs?: number;
+
+  @Prop()
+  memoryUsedKb?: number;
 }
 
 export const SubmissionSchema = SchemaFactory.createForClass(Submission);
 
 SubmissionSchema.index({ user: 1, problemId: 1 });
 SubmissionSchema.index({ user: 1, createdAt: -1 });
+SubmissionSchema.index({ status: 1, createdAt: -1 });
