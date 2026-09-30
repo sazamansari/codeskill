@@ -45,6 +45,16 @@ export class StudentsController {
     return this.studentsService.findAll(query);
   }
 
+  @Get('email-status')
+  @ApiOperation({ summary: 'Get delivery metrics and log entries for credential emails' })
+  async getEmailStatus(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('status') status?: string,
+  ) {
+    return this.studentsService.getEmailStatus(Number(page) || 1, Number(limit) || 20, status);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get single student details' })
   @ApiParam({ name: 'id', description: 'Student User ID' })
@@ -187,15 +197,5 @@ export class StudentsController {
   @ApiOperation({ summary: 'Retry all failed credential email jobs' })
   async retryFailed(@Body('portalUrl') portalUrl?: string) {
     return this.studentsService.retryFailedCredentials(portalUrl);
-  }
-
-  @Get('email-status')
-  @ApiOperation({ summary: 'Get delivery metrics and log entries for credential emails' })
-  async getEmailStatus(
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-    @Query('status') status?: string,
-  ) {
-    return this.studentsService.getEmailStatus(Number(page) || 1, Number(limit) || 20, status);
   }
 }
