@@ -9,8 +9,8 @@ export function Hero() {
   return (
     <section className="relative w-full pt-28 sm:pt-32 md:pt-36 pb-16 sm:pb-20 px-4 sm:px-6 md:px-8 border-b border-border/70 overflow-hidden bg-background text-foreground">
       {/* Background architectural fine grid & subtle warmth */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(250,204,21,0.08),transparent)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(250,204,21,0.05),transparent)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.12] dark:opacity-[0.2] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(251,191,36,0.06),transparent)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(250,204,21,0.05),transparent)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.035)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
@@ -23,7 +23,7 @@ export function Hero() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-muted/60 text-xs font-semibold text-foreground shadow-xs"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-black/10 dark:border-border bg-white dark:bg-muted/60 text-xs font-semibold text-neutral-800 dark:text-foreground shadow-xs"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>Algorithmic Assessment &amp; Skill System</span>
@@ -34,12 +34,12 @@ export function Hero() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-[54px] font-extrabold tracking-tight leading-[1.12] text-foreground group/headline select-none"
+              className="text-4xl sm:text-5xl lg:text-[54px] font-extrabold tracking-tight leading-[1.12] text-neutral-950 dark:text-foreground group/headline select-none"
             >
-              <span className="hover:text-amber-400 transition-colors duration-300">Build Stronger</span> <br className="hidden sm:inline" />
-              <span className="text-foreground hover:text-amber-400 relative inline-block transition-colors duration-300 group/coding">
+              <span className="hover:text-amber-500 dark:hover:text-amber-400 transition-colors duration-300">Build Stronger</span> <br className="hidden sm:inline" />
+              <span className="text-neutral-950 dark:text-foreground hover:text-amber-500 dark:hover:text-amber-400 relative inline-block transition-colors duration-300 group/coding">
                 Coding Skills.
-                <span className="absolute bottom-1 left-0 right-0 h-2.5 bg-amber-400/30 group-hover/coding:bg-amber-400/60 group-hover/headline:bg-amber-400/60 -z-10 rounded-sm transition-all duration-300" />
+                <span className="absolute bottom-1 left-0 right-0 h-2.5 bg-[#FDE7A9]/80 group-hover/coding:bg-[#FDE7A9] group-hover/headline:bg-[#FDE7A9] dark:bg-amber-400/30 dark:group-hover/coding:bg-amber-400/60 dark:group-hover/headline:bg-amber-400/60 -z-10 rounded-xs transition-all duration-300" />
               </span>
             </motion.h1>
 
@@ -48,7 +48,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg"
+              className="text-base sm:text-lg text-neutral-600 dark:text-muted-foreground leading-relaxed max-w-lg"
             >
               Practice data structures and algorithms, take proctored assessments, and prepare for technical interviews.
             </motion.p>
@@ -62,7 +62,7 @@ export function Hero() {
             >
               <Link
                 href="/problems"
-                className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-white hover:bg-neutral-100 text-black font-bold text-sm transition-all shadow-sm hover:shadow-md hover:scale-[1.02] group active:scale-[0.98]"
+                className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-neutral-950 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-100 dark:text-black font-bold text-sm transition-all shadow-xs hover:shadow-md hover:scale-[1.02] group active:scale-[0.98]"
               >
                 <span>Start Coding</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -70,7 +70,7 @@ export function Hero() {
 
               <Link
                 href="/assessments"
-                className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-card hover:bg-muted text-foreground font-semibold text-sm border border-border transition-all shadow-xs hover:border-foreground/30"
+                className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-white hover:bg-neutral-50 text-neutral-900 border border-black/10 dark:bg-card dark:hover:bg-muted dark:text-foreground dark:border-border font-semibold text-sm transition-all shadow-xs hover:border-black/20 dark:hover:border-foreground/30"
               >
                 <span>View Assessments</span>
               </Link>

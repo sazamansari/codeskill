@@ -134,9 +134,9 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
-        className="relative bg-card h-[380px] sm:h-[420px] rounded-2xl shadow-2xl overflow-hidden border border-border"
+        className="relative bg-white dark:bg-card h-[380px] sm:h-[420px] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.08)] dark:shadow-2xl overflow-hidden border border-black/10 dark:border-border"
       >
-        <div className="px-4 py-3 flex items-center z-10 relative border-b border-border/50 bg-muted/20">
+        <div className="px-4 py-3 flex items-center z-10 relative border-b border-black/[0.08] dark:border-border/50 bg-[#FAFAFA] dark:bg-muted/20">
           <div className="flex items-center gap-1.5">
             <motion.div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
             <motion.div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
@@ -154,14 +154,14 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
               typingSpeed="slow"
               deletingSpeed="slow"
               pauseDuration={2000}
-              className="text-muted-foreground text-xs font-mono"
+              className="text-neutral-600 dark:text-muted-foreground text-xs font-mono font-medium"
             />
           </motion.div>
         </div>
 
         <div
           ref={containerRef}
-          className="relative px-5 py-4 font-mono text-sm overflow-y-hidden h-[calc(100%-48px)]"
+          className="relative px-5 py-4 font-mono text-sm overflow-y-hidden h-[calc(100%-48px)] bg-white dark:bg-transparent"
         >
           <div className="space-y-2 relative z-10">
             <AnimatePresence mode="sync">

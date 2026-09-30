@@ -87,9 +87,9 @@ export function Navbar() {
     <>
       <header className="fixed top-2.5 sm:top-3 left-0 right-0 z-50 px-3 sm:px-6 max-w-7xl mx-auto transition-all duration-200">
         <div
-          className={`w-full bg-white/80 dark:bg-[#121212]/96 backdrop-blur-md border border-black/10 dark:border-white/10 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.30)] px-3 sm:px-5 h-[56px] flex items-center justify-between transition-all duration-200 ${
+          className={`w-full bg-[#FFFFFF]/95 dark:bg-[#121212]/96 backdrop-blur-md border border-black/8 dark:border-white/10 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.30)] px-3 sm:px-5 h-[56px] flex items-center justify-between transition-all duration-200 ${
             scrolled
-              ? "bg-white/95 dark:bg-[#111111]/98 border-black/15 dark:border-white/15 shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.45)]"
+              ? "bg-[#FFFFFF] dark:bg-[#111111]/98 border-black/10 dark:border-white/15 shadow-[0_12px_36px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.45)]"
               : ""
           }`}
         >
@@ -130,14 +130,14 @@ export function Navbar() {
 
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
-                <span className="font-bold text-[18px] tracking-tight leading-none text-neutral-900 dark:text-[#F5F5F5]">
+                <span className="font-bold text-[18px] tracking-tight leading-none text-[#171717] dark:text-[#F5F5F5]">
                   CodeSkill
                 </span>
-                <span className="text-[12px] font-medium text-neutral-500 dark:text-[#A3A3A3] flex items-center gap-1">
-                  <span className="text-neutral-700 dark:text-white/80 font-semibold">by</span> Chandigarh University
+                <span className="text-[12px] font-medium text-[#525252] dark:text-[#A3A3A3] flex items-center gap-1">
+                  <span className="text-[#171717]/80 dark:text-white/80 font-semibold">by</span> Chandigarh University
                 </span>
               </div>
-              <span className="hidden sm:block text-[10.5px] text-neutral-400 dark:text-[#A3A3A3]/80 font-normal leading-none mt-0.5">
+              <span className="hidden sm:block text-[10.5px] text-[#737373] dark:text-[#A3A3A3]/80 font-normal leading-none mt-0.5">
                 Department of Skill Development &amp; Lab
               </span>
             </div>
@@ -155,15 +155,15 @@ export function Navbar() {
                   href={item.href}
                   className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-[15px] whitespace-nowrap shrink-0 transition-all duration-150 ${
                     isActive
-                      ? "text-neutral-950 bg-neutral-100 border border-neutral-200/80 dark:text-white dark:bg-white/[0.08] font-bold dark:border-white/10 shadow-xs"
-                      : "text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100/70 dark:text-[#A3A3A3] dark:hover:text-white dark:hover:bg-white/[0.04] font-medium border border-transparent"
+                      ? "text-[#111111] bg-black/[0.04] border border-black/8 dark:text-white dark:bg-white/[0.08] font-bold dark:border-white/10 shadow-xs"
+                      : "text-[#525252] hover:text-[#111111] hover:bg-black/[0.03] dark:text-[#A3A3A3] dark:hover:text-white dark:hover:bg-white/[0.04] font-medium border border-transparent"
                   }`}
                 >
                   <Icon
                     className={`w-4 h-4 shrink-0 transition-colors duration-150 ${
                       isActive
-                        ? "text-blue-600 dark:text-[#3B82F6]"
-                        : "text-neutral-400 group-hover:text-neutral-900 dark:text-[#A3A3A3] dark:group-hover:text-white"
+                        ? "text-[#2563EB] dark:text-[#3B82F6]"
+                        : "text-[#737373] group-hover:text-[#111111] dark:text-[#A3A3A3] dark:group-hover:text-white"
                     }`}
                   />
                   <span className="whitespace-nowrap">{item.name}</span>
@@ -171,7 +171,7 @@ export function Navbar() {
                   {isActive && (
                     <motion.span
                       layoutId="activeNavIndicator"
-                      className="absolute -bottom-[5px] left-3.5 right-3.5 h-[2px] bg-blue-600 dark:bg-[#2563EB] rounded-full shadow-[0_0_6px_rgba(37,99,235,0.4)]"
+                      className="absolute -bottom-[5px] left-3.5 right-3.5 h-[2px] bg-[#2563EB] rounded-full shadow-[0_0_6px_rgba(37,99,235,0.4)]"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -204,7 +204,7 @@ export function Navbar() {
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 border border-neutral-200 dark:text-[#A3A3A3] dark:hover:text-white dark:hover:bg-white/[0.06] dark:border-white/10 transition-colors duration-150 cursor-pointer shrink-0"
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-[#525252] hover:text-[#111111] hover:bg-neutral-100 border border-neutral-200 dark:text-[#A3A3A3] dark:hover:text-white dark:hover:bg-white/[0.06] dark:border-white/10 transition-colors duration-150 cursor-pointer shrink-0"
                   title="Sign Out"
                 >
                   <LogOut className="w-4 h-4 shrink-0" />
@@ -214,13 +214,13 @@ export function Navbar() {
               <div className="flex items-center gap-2.5 shrink-0">
                 <Link
                   href="/login"
-                  className="inline-flex items-center justify-center h-9 px-3.5 rounded-lg text-[15px] font-medium text-neutral-600 hover:text-neutral-950 dark:text-[#D4D4D4] dark:hover:text-white transition-colors duration-150 whitespace-nowrap shrink-0"
+                  className="inline-flex items-center justify-center h-9 px-3.5 rounded-lg text-[15px] font-medium text-[#525252] hover:text-[#111111] dark:text-[#D4D4D4] dark:hover:text-white transition-colors duration-150 whitespace-nowrap shrink-0"
                 >
                   Log In
                 </Link>
                 <Link
                   href="/register"
-                  className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-xl text-[15px] font-bold bg-neutral-900 hover:bg-neutral-800 text-white shadow-xs hover:shadow dark:bg-white dark:hover:bg-neutral-100 dark:text-[#111111] transition-all duration-150 whitespace-nowrap shrink-0"
+                  className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-xl text-[15px] font-bold bg-[#111111] hover:bg-[#262626] text-white shadow-xs hover:shadow dark:bg-white dark:hover:bg-neutral-100 dark:text-[#111111] transition-all duration-150 whitespace-nowrap shrink-0"
                 >
                   <span className="whitespace-nowrap">Get Started</span>
                   <ArrowRight className="w-4 h-4 shrink-0" />
