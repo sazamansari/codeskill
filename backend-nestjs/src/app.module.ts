@@ -39,6 +39,9 @@ import { AssessmentsModule } from './assessments/assessments.module';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -90,7 +93,9 @@ import { ConfigService } from '@nestjs/config';
     QuestionsModule,
     AssessmentsModule,
   ],
+  controllers: [AppController],
   providers: [
+    AppService,
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
