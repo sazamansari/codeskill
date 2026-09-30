@@ -32,7 +32,7 @@ export default function ContestReportPreviewPage() {
   if (!reportData) {
     return (
       <div className="flex-1 min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#FFB800] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-foreground border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -64,7 +64,7 @@ export default function ContestReportPreviewPage() {
           {/* Header Banner */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b-2 border-foreground">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-slate-950 border border-[#FFB800] flex items-center justify-center p-1 text-[#FFB800] font-mono font-bold text-sm">
+              <div className="w-10 h-10 rounded-lg bg-slate-950 border border-white/20 flex items-center justify-center p-1 text-white font-mono font-bold text-sm">
                 &lt;/&gt;
               </div>
               <div>
@@ -112,7 +112,7 @@ export default function ContestReportPreviewPage() {
           {/* 2. Student Information */}
           <div className="space-y-3">
             <h3 className="text-xs uppercase font-bold text-neutral-500 tracking-wider flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-[#FFB800]" /> Student Information
+              <User className="w-3.5 h-3.5 text-foreground" /> Student Information
             </h3>
             <div className="p-4 rounded-lg border border-border bg-neutral-50/50 dark:bg-neutral-900/30 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
               <div>
@@ -147,10 +147,10 @@ export default function ContestReportPreviewPage() {
           {/* 3. Performance Summary KPIs (6 Cards) */}
           <div className="space-y-3">
             <h3 className="text-xs uppercase font-bold text-neutral-500 tracking-wider flex items-center gap-1.5">
-              <Trophy className="w-3.5 h-3.5 text-[#FFB800]" /> Performance Summary
+              <Trophy className="w-3.5 h-3.5 text-foreground" /> Performance Summary
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              <div className="p-3.5 rounded-lg border border-border bg-card border-l-4 border-l-[#FFB800] space-y-1">
+              <div className="p-3.5 rounded-lg border border-border bg-card border-l-4 border-l-foreground/80 space-y-1">
                 <span className="text-[10px] uppercase font-bold text-neutral-400">Solved</span>
                 <div className="text-xl font-extrabold font-mono text-foreground">
                   {summary.problemsSolved} <span className="text-xs font-normal text-neutral-400">/ {summary.problemsAttempted}</span>
@@ -158,7 +158,7 @@ export default function ContestReportPreviewPage() {
                 <span className="text-[10px] text-neutral-500 block">Attempted: {summary.problemsAttempted}</span>
               </div>
 
-              <div className="p-3.5 rounded-lg border border-border bg-card border-l-4 border-l-[#FFB800] space-y-1">
+              <div className="p-3.5 rounded-lg border border-border bg-card border-l-4 border-l-foreground/80 space-y-1">
                 <span className="text-[10px] uppercase font-bold text-neutral-400">Score</span>
                 <div className="text-xl font-extrabold font-mono text-foreground">
                   {summary.totalScore} <span className="text-xs font-normal text-neutral-400">/ {summary.maxScore}</span>
@@ -166,9 +166,9 @@ export default function ContestReportPreviewPage() {
                 <span className="text-[10px] text-neutral-500 block">Max Points</span>
               </div>
 
-              <div className="p-3.5 rounded-lg border border-border bg-card border-l-4 border-l-[#FFB800] space-y-1">
+              <div className="p-3.5 rounded-lg border border-border bg-card border-l-4 border-l-foreground/80 space-y-1">
                 <span className="text-[10px] uppercase font-bold text-neutral-400">Campus Rank</span>
-                <div className="text-xl font-extrabold font-mono text-[#FFB800]">#{summary.rank}</div>
+                <div className="text-xl font-extrabold font-mono text-foreground">#{summary.rank}</div>
                 <span className="text-[10px] text-neutral-500 block">of {summary.totalParticipants} contestants</span>
               </div>
 
@@ -195,7 +195,7 @@ export default function ContestReportPreviewPage() {
           {/* 4. Problem-Wise Performance Table */}
           <div className="space-y-3">
             <h3 className="text-xs uppercase font-bold text-neutral-500 tracking-wider flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-[#FFB800]" /> Problem-Wise Performance
+              <FileText className="w-3.5 h-3.5 text-foreground" /> Problem-Wise Performance
             </h3>
             <div className="rounded-lg border border-border overflow-hidden">
               <table className="w-full text-left text-xs border-collapse">
@@ -265,7 +265,7 @@ export default function ContestReportPreviewPage() {
             {topics && topics.length > 0 && (
               <div className="p-4 rounded-lg border border-border bg-card space-y-3">
                 <h4 className="text-xs uppercase font-bold text-neutral-500 tracking-wider flex items-center gap-1.5">
-                  <Layers className="w-3.5 h-3.5 text-[#FFB800]" /> Topic Performance Breakdown
+                  <Layers className="w-3.5 h-3.5 text-foreground" /> Topic Performance Breakdown
                 </h4>
                 <div className="space-y-3">
                   {topics.map((t) => (
@@ -277,7 +277,7 @@ export default function ContestReportPreviewPage() {
                         </span>
                       </div>
                       <div className="h-1.5 w-full bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-[#FFB800] rounded-full" style={{ width: `${t.percentage}%` }} />
+                        <div className="h-full bg-foreground rounded-full" style={{ width: `${t.percentage}%` }} />
                       </div>
                     </div>
                   ))}
@@ -289,7 +289,7 @@ export default function ContestReportPreviewPage() {
             {difficulty && (
               <div className="p-4 rounded-lg border border-border bg-card space-y-3">
                 <h4 className="text-xs uppercase font-bold text-neutral-500 tracking-wider flex items-center gap-1.5">
-                  <BarChart3 className="w-3.5 h-3.5 text-[#FFB800]" /> Difficulty Tier Breakdown
+                  <BarChart3 className="w-3.5 h-3.5 text-foreground" /> Difficulty Tier Breakdown
                 </h4>
                 <div className="grid grid-cols-3 gap-2.5 pt-1">
                   <div className="p-3 rounded border border-border bg-neutral-50/50 dark:bg-neutral-900/30 text-center space-y-1">

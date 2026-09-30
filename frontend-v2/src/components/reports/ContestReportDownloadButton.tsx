@@ -75,7 +75,7 @@ export function ContestReportDownloadButton({
 
   const variantStyles = {
     primary:
-      "bg-[#FFB800] hover:bg-[#FFC400] text-black font-bold shadow-xs hover:shadow-md border border-[#FFB800]",
+      "bg-white hover:bg-neutral-100 text-black font-bold shadow-xs hover:shadow-md border border-white/20",
     secondary:
       "bg-neutral-900 hover:bg-neutral-800 text-white border border-white/10 hover:border-white/20",
     outline:

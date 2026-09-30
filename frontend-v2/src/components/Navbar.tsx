@@ -97,15 +97,15 @@ export function Navbar() {
             <div
               className={`relative w-8 h-8 rounded-lg overflow-hidden bg-slate-950 border shadow-xs flex items-center justify-center p-1 group-hover:scale-105 transition-all duration-700 z-10 ${
                 isShimmering
-                  ? "border-[#FFB800] ring-2 ring-[#FFB800]/40 shadow-[#FFB800]/20 shadow-md scale-[1.03]"
-                  : "border-[#FFB800]/40"
+                  ? "border-white ring-2 ring-white/40 shadow-white/20 shadow-md scale-[1.03]"
+                  : "border-white/20"
               }`}
             >
               <svg viewBox="0 0 160 160" className="w-full h-full" fill="none">
                 <polygon
                   points="80,10 145,45 145,115 80,150 15,115 15,45"
                   fill="#0F172A"
-                  stroke="#FFB800"
+                  stroke="#FFFFFF"
                   strokeWidth="8"
                   strokeLinejoin="round"
                 />
@@ -118,7 +118,7 @@ export function Navbar() {
                 />
                 <path
                   d="M85 55 L75 105"
-                  stroke="#FFB800"
+                  stroke="#FFFFFF"
                   strokeWidth="10"
                   strokeLinecap="round"
                 />
@@ -150,14 +150,14 @@ export function Navbar() {
                 <span
                   className={`font-extrabold text-base tracking-tight leading-none text-[#F5F5F5] transition-all duration-700 ${
                     isShimmering
-                      ? "text-transparent bg-clip-text bg-gradient-to-r from-[#F5F5F5] via-[#FFB800] to-[#F5F5F5]"
+                      ? "text-transparent bg-clip-text bg-gradient-to-r from-[#F5F5F5] via-white to-[#F5F5F5]"
                       : ""
                   }`}
                 >
                   CodeSkill
                 </span>
                 <span className="text-[11px] font-medium text-[#9A9A9A] flex items-center gap-1">
-                  <span className="text-[#FFB800] font-semibold">by</span> Chandigarh University
+                  <span className="text-white/80 font-semibold">by</span> Chandigarh University
                 </span>
               </div>
               <span className="hidden sm:block text-[9.5px] text-[#9A9A9A]/80 font-normal leading-none mt-0.5">
@@ -166,7 +166,7 @@ export function Navbar() {
             </div>
           </Link>
 
-          {/* 3. CENTER — NAVIGATION (14px, Clean Icons, Yellow Active Indicator) */}
+          {/* 3. CENTER — NAVIGATION (14px, Clean Icons, White Active Indicator) */}
           <nav className="hidden lg:flex items-center gap-1">
             {navLinks.map((item) => {
               const Icon = item.icon;
@@ -178,13 +178,13 @@ export function Navbar() {
                   href={item.href}
                   className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13.5px] font-medium transition-all duration-200 ${
                     isActive
-                      ? "text-[#F5F5F5] bg-amber-400/10 border border-amber-400/20 font-semibold"
+                      ? "text-[#F5F5F5] bg-white/[0.08] border border-white/20 font-semibold"
                       : "text-[#9A9A9A] hover:text-[#F5F5F5] hover:bg-white/[0.05] border border-transparent"
                   }`}
                 >
                   <Icon
                     className={`w-3.5 h-3.5 transition-colors duration-200 ${
-                      isActive ? "text-[#FFB800]" : "text-[#9A9A9A] group-hover:text-[#F5F5F5]"
+                      isActive ? "text-white" : "text-[#9A9A9A] group-hover:text-[#F5F5F5]"
                     }`}
                   />
                   <span>{item.name}</span>
@@ -192,7 +192,7 @@ export function Navbar() {
                   {isActive && (
                     <motion.span
                       layoutId="activeNavIndicator"
-                      className="absolute -bottom-[5px] left-3 right-3 h-[2px] bg-[#FFB800] rounded-full shadow-[0_0_8px_rgba(255,184,0,0.6)]"
+                      className="absolute -bottom-[5px] left-3 right-3 h-[2px] bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.6)]"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -210,7 +210,7 @@ export function Navbar() {
                 {user.isAdmin && (
                   <Link
                     href="/admin/dashboard"
-                    className="flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-medium bg-[#FFB800]/10 text-[#FFB800] border border-[#FFB800]/30 hover:bg-[#FFB800] hover:text-black transition-all duration-200"
+                    className="flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-medium bg-white/10 text-white border border-white/20 hover:bg-white hover:text-black transition-all duration-200"
                   >
                     <ShieldCheck className="w-3.5 h-3.5" />
                     <span>Admin</span>
@@ -235,13 +235,13 @@ export function Navbar() {
               <div className="flex items-center gap-1.5">
                 <Link
                   href="/login"
-                  className="flex items-center justify-center h-8 px-3 rounded-lg text-xs sm:text-[13px] font-medium text-[#9A9A9A] hover:text-[#FFB800] transition-colors duration-200"
+                  className="flex items-center justify-center h-8 px-3 rounded-lg text-xs sm:text-[13px] font-medium text-[#9A9A9A] hover:text-white transition-colors duration-200"
                 >
                   Log In
                 </Link>
                 <Link
                   href="/login"
-                  className="flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-lg text-xs sm:text-[13px] font-bold bg-[#FFB800] hover:bg-[#FFC400] text-black shadow-xs hover:shadow-md hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
+                  className="flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-lg text-xs sm:text-[13px] font-bold bg-white hover:bg-white/90 text-black shadow-xs hover:shadow-md hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
                 >
                   <span>Get Started</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -285,11 +285,11 @@ export function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                       isActive
-                        ? "text-[#FFB800] bg-[#FFB800]/10 border border-[#FFB800]/30 font-semibold"
+                        ? "text-white bg-white/10 border border-white/20 font-semibold"
                         : "text-[#9A9A9A] hover:text-[#F5F5F5] hover:bg-white/[0.05]"
                     }`}
                   >
-                    <Icon className={`w-4 h-4 ${isActive ? "text-[#FFB800]" : "text-[#9A9A9A]"}`} />
+                    <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-[#9A9A9A]"}`} />
                     <span>{item.name}</span>
                   </Link>
                 );
@@ -303,7 +303,7 @@ export function Navbar() {
                     <Link
                       href="/admin/dashboard"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-[#FFB800]/10 text-[#FFB800] font-semibold border border-[#FFB800]/30 text-xs"
+                      className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-white/10 text-white font-semibold border border-white/20 text-xs"
                     >
                       <ShieldCheck className="w-4 h-4" />
                       <span>Admin Portal</span>
@@ -331,7 +331,7 @@ export function Navbar() {
                   <Link
                     href="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-center gap-1.5 w-full h-10 rounded-xl bg-[#FFB800] hover:bg-[#FFC400] text-black font-bold text-xs shadow-xs"
+                    className="flex items-center justify-center gap-1.5 w-full h-10 rounded-xl bg-white hover:bg-white/90 text-black font-bold text-xs shadow-xs"
                   >
                     <span>Get Started</span>
                     <ArrowRight className="w-3.5 h-3.5" />
