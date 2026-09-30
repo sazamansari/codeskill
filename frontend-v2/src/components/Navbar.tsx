@@ -215,7 +215,7 @@ export function Navbar() {
                   Log In
                 </Link>
                 <Link
-                  href="/login"
+                  href="/register"
                   className="flex items-center justify-center gap-1.5 h-9.5 px-4.5 rounded-xl text-[16px] font-bold bg-white hover:bg-neutral-100 text-[#111111] shadow-xs hover:shadow transition-all duration-150"
                 >
                   <span>Get Started</span>
@@ -304,7 +304,7 @@ export function Navbar() {
               ) : (
                 <div className="flex flex-col gap-2">
                   <Link
-                    href="/login"
+                    href="/register"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center justify-center gap-1.5 w-full h-10.5 rounded-xl bg-white hover:bg-neutral-100 text-[#111111] font-bold text-[15px] shadow-xs"
                   >
