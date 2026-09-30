@@ -16,6 +16,43 @@ export interface ModernLoaderProps {
   className?: string;
 }
 
+const COLORS = [
+  "bg-gray-500",
+  "bg-teal-500",
+  "bg-blue-500",
+  "bg-emerald-500",
+  "bg-amber-500",
+  "bg-rose-500",
+];
+
+function seededRandom(seed: number) {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
+function generateDeterministicLines(count = 25, seedOffset = 0) {
+  return Array.from({ length: count }, (_, idx) => {
+    const lineSeed = idx + seedOffset + 1;
+    const segCount = Math.floor(seededRandom(lineSeed * 13) * 4) + 1;
+    return {
+      id: `line-${seedOffset + idx}`,
+      segments: Array.from({ length: segCount }, (__, segIdx) => {
+        const segSeed = lineSeed * 31 + segIdx * 17;
+        const colorIdx = Math.floor(seededRandom(segSeed * 7) * COLORS.length);
+        const width = Math.floor(seededRandom(segSeed * 11) * 120) + 80;
+        const isCircle = seededRandom(segSeed * 19) > 0.92;
+        const indent = seededRandom(segSeed * 23) > 0.75 ? 1 : 0;
+        return {
+          width: `${width}px`,
+          color: COLORS[colorIdx],
+          isCircle,
+          indent,
+        };
+      }),
+    };
+  });
+}
+
 export const ModernLoader: React.FC<ModernLoaderProps> = ({
   words = [
     "Setting things up...",
@@ -25,42 +62,19 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
   ],
   className,
 }) => {
+  const [mounted, setMounted] = useState(false);
   const [currentLine, setCurrentLine] = useState(0);
   const [cursorVisible, setCursorVisible] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const colors = useMemo(
-    () => [
-      "bg-gray-500",
-      "bg-teal-500",
-      "bg-blue-500",
-      "bg-emerald-500",
-      "bg-amber-500",
-      "bg-rose-500",
-    ],
-    [],
-  );
   const BUFFER = 20;
   const MAX_LINES = 100;
 
-  const generateLines = useCallback(
-    (count = 20) =>
-      Array.from({ length: count }, (_, idx) => ({
-        id: Date.now() + idx + Math.random(),
-        segments: Array.from(
-          { length: Math.floor(Math.random() * 5) + 1 },
-          () => ({
-            width: `${Math.floor(Math.random() * 140) + 70}px`,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            isCircle: Math.random() > 0.93,
-            indent: Math.random() > 0.7 ? 1 : 0,
-          }),
-        ),
-      })),
-    [colors],
-  );
+  const [lines, setLines] = useState(() => generateDeterministicLines(30, 0));
 
-  const [lines, setLines] = useState(() => generateLines());
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const getVisibleRange = () => {
     const start = Math.max(0, currentLine - BUFFER);
@@ -77,21 +91,23 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
   }, [currentLine]);
 
   useEffect(() => {
+    if (!mounted) return;
     const timer = setTimeout(() => {
       setCurrentLine((prev) => {
         const nextLine = prev + 1;
         if (nextLine >= lines.length - 10)
-          setLines((old) => [...old, ...generateLines(50)]);
+          setLines((old) => [...old, ...generateDeterministicLines(30, old.length)]);
         return nextLine;
       });
     }, 200);
     return () => clearTimeout(timer);
-  }, [currentLine, lines.length, generateLines]);
+  }, [currentLine, lines.length, mounted]);
 
   useEffect(() => {
+    if (!mounted) return;
     const interval = setInterval(() => setCursorVisible((prev) => !prev), 530);
     return () => clearInterval(interval);
-  }, []);
+  }, [mounted]);
 
   useEffect(() => {
     const cleanup = () => {
