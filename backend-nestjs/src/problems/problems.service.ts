@@ -31,7 +31,12 @@ export class ProblemsService {
       return cachedData;
     }
 
-    const filter: any = { visibility: 'Published' };
+    const filter: any = {
+      $or: [
+        { visibility: { $in: ['Published', 'published', 'Public', 'public'] } },
+        { visibility: { $exists: false } },
+      ],
+    };
 
     if (query.difficulty && query.difficulty !== 'all') {
       filter.difficulty = query.difficulty;
@@ -41,11 +46,21 @@ export class ProblemsService {
       filter.categories = { $in: [new RegExp(`^${query.category}$`, 'i')] };
     }
 
-    if (query.search) {
-      filter.$or = [
-        { title: { $regex: query.search, $options: 'i' } },
-        { slug: { $regex: query.search, $options: 'i' } },
-        { tags: { $in: [new RegExp(query.search, 'i')] } },
+    if (
+      query.search &&
+      typeof query.search === 'string' &&
+      query.search.trim() &&
+      query.search !== 'none'
+    ) {
+      const s = query.search.trim();
+      filter.$and = [
+        {
+          $or: [
+            { title: { $regex: s, $options: 'i' } },
+            { slug: { $regex: s, $options: 'i' } },
+            { tags: { $in: [new RegExp(s, 'i')] } },
+          ],
+        },
       ];
     }
 
@@ -64,8 +79,8 @@ export class ProblemsService {
       count: problems.length,
       total,
       page,
-      pages: Math.ceil(total / limit),
-      totalPages: Math.ceil(total / limit),
+      pages: Math.ceil(total / limit) || 1,
+      totalPages: Math.ceil(total / limit) || 1,
       data: problems,
     };
 
@@ -81,12 +96,28 @@ export class ProblemsService {
       return cachedData;
     }
 
-    const problem = await this.problemModel
-      .findOne({ slug, visibility: 'Published' })
+    let problem = await this.problemModel
+      .findOne({
+        slug,
+        $or: [
+          { visibility: { $in: ['Published', 'published', 'Public', 'public'] } },
+          { visibility: { $exists: false } },
+        ],
+      })
       .populate('statement')
       .populate('config')
       .populate('testCases')
       .lean();
+
+    if (!problem) {
+      // Fallback in case visibility is not strictly matched
+      problem = await this.problemModel
+        .findOne({ slug })
+        .populate('statement')
+        .populate('config')
+        .populate('testCases')
+        .lean();
+    }
 
     if (!problem) {
       throw new NotFoundException('Problem not found');
@@ -107,3 +138,4 @@ export class ProblemsService {
     return { data: problem };
   }
 }
+
