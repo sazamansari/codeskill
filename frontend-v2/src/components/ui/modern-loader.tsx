@@ -153,7 +153,7 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
               typingSpeed="slow"
               deletingSpeed="slow"
               pauseDuration={2000}
-              className="text-[#525252] dark:text-muted-foreground text-xs font-mono font-medium"
+              className="text-muted-foreground dark:text-muted-foreground text-xs font-mono font-medium"
             />
           </motion.div>
         </div>
@@ -238,7 +238,7 @@ export const ModernLoader: React.FC<ModernLoaderProps> = ({
                 <motion.div
                   animate={{ opacity: cursorVisible ? 1 : 0 }}
                   transition={{ duration: 0.1 }}
-                  className="w-0.5 h-3.5 bg-[#111111] dark:bg-primary"
+                  className="w-0.5 h-3.5 bg-foreground dark:bg-primary"
                 />
               </motion.div>
             )}

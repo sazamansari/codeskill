@@ -257,4 +257,3 @@ Please sign in and change your password before your examination starts.
     );
   }
 }
-

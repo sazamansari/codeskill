@@ -106,7 +106,7 @@ export default function CreateJobPage() {
       <form onSubmit={handleSave} className="space-y-8">
         <div className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
           <div className="flex items-center gap-3 mb-6 pb-6 border-b border-border">
-            <div className="p-3 bg-blue-500/10 rounded-lg text-blue-500">
+            <div className="p-3 bg-primary/10 rounded-lg text-primary">
               <Briefcase className="w-5 h-5" />
             </div>
             <div>
@@ -124,7 +124,7 @@ export default function CreateJobPage() {
                 placeholder="e.g. Senior Frontend Engineer"
                 value={formData.title}
                 onChange={e => setFormData({...formData, title: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-foreground"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-foreground"
               />
             </div>
 
@@ -136,7 +136,7 @@ export default function CreateJobPage() {
                 placeholder="Describe the role, responsibilities, and requirements..."
                 value={formData.description}
                 onChange={e => setFormData({...formData, description: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-foreground resize-y"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-foreground resize-y"
               />
             </div>
 
@@ -147,7 +147,7 @@ export default function CreateJobPage() {
                 placeholder="e.g. React, Node.js, TypeScript (comma separated)"
                 value={formData.skills}
                 onChange={e => setFormData({...formData, skills: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-foreground"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-foreground"
               />
             </div>
 
@@ -156,7 +156,7 @@ export default function CreateJobPage() {
               <select
                 value={formData.experienceLevel}
                 onChange={e => setFormData({...formData, experienceLevel: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-foreground"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-foreground"
               >
                 <option value="Internship">Internship</option>
                 <option value="Entry Level">Entry Level</option>
@@ -171,7 +171,7 @@ export default function CreateJobPage() {
               <select
                 value={formData.employmentType}
                 onChange={e => setFormData({...formData, employmentType: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-foreground"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-foreground"
               >
                 <option value="Full-time">Full-time</option>
                 <option value="Part-time">Part-time</option>
@@ -193,7 +193,7 @@ export default function CreateJobPage() {
               <select
                 value={formData.workplaceType}
                 onChange={e => setFormData({...formData, workplaceType: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-foreground"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-foreground"
               >
                 <option value="Remote">Remote</option>
                 <option value="Hybrid">Hybrid</option>
@@ -208,7 +208,7 @@ export default function CreateJobPage() {
                 placeholder="e.g. San Francisco, CA"
                 value={formData.location}
                 onChange={e => setFormData({...formData, location: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-foreground"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-foreground"
               />
             </div>
 
@@ -219,7 +219,7 @@ export default function CreateJobPage() {
                 placeholder="e.g. 80000"
                 value={formData.salaryMin}
                 onChange={e => setFormData({...formData, salaryMin: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-foreground"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-foreground"
               />
             </div>
 
@@ -230,7 +230,7 @@ export default function CreateJobPage() {
                 placeholder="e.g. 120000"
                 value={formData.salaryMax}
                 onChange={e => setFormData({...formData, salaryMax: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-foreground"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-foreground"
               />
             </div>
           </div>
@@ -247,7 +247,7 @@ export default function CreateJobPage() {
           <button 
             type="submit" 
             disabled={saving}
-            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg shadow-blue-500/20 transition-all"
+            className="flex items-center gap-2 bg-primary hover:bg-primary disabled:opacity-50 disabled:hover:bg-primary text-white px-6 py-2.5 rounded-lg font-medium shadow-lg shadow-primary/20 transition-all"
           >
             <Save className="w-4 h-4" />
             {saving ? "Publishing..." : "Publish Job"}

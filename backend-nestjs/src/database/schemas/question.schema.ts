@@ -6,7 +6,16 @@ export type QuestionDocument = HydratedDocument<Question>;
 
 export type QuestionDifficulty = 'easy' | 'medium' | 'hard';
 export type QuestionStatus = 'pending' | 'approved' | 'rejected' | 'archived';
-export type QuestionType = 'single_choice' | 'multiple_choice' | 'coding' | 'algorithmic';
+export type QuestionType =
+  | 'single_choice'
+  | 'multiple_choice'
+  | 'coding'
+  | 'algorithmic'
+  | 'MCQ'
+  | 'MULTIPLE_CHOICE'
+  | 'TRUE_FALSE'
+  | 'CODE_OUTPUT'
+  | 'DSA';
 
 @Schema({ timestamps: true })
 export class Question {
@@ -51,7 +60,17 @@ export class Question {
 
   @Prop({
     type: String,
-    enum: ['single_choice', 'multiple_choice', 'coding', 'algorithmic'],
+    enum: [
+      'single_choice',
+      'multiple_choice',
+      'coding',
+      'algorithmic',
+      'MCQ',
+      'MULTIPLE_CHOICE',
+      'TRUE_FALSE',
+      'CODE_OUTPUT',
+      'DSA',
+    ],
     default: 'single_choice',
   })
   questionType: QuestionType;
@@ -93,6 +112,88 @@ export class Question {
 
   @Prop({ type: Object, default: {} })
   metadata: Record<string, any>;
+
+  // --- Extended Fields for Unified Model (Phase 1) ---
+
+  @Prop({ trim: true })
+  title?: string;
+
+  @Prop({ trim: true, unique: true, sparse: true })
+  slug?: string;
+
+  @Prop({ default: '' })
+  description?: string;
+
+  // Multiple Correct Answers Support
+  @Prop({ type: [Number], default: [] })
+  correctAnswers?: number[];
+
+  // Code Output Support
+  @Prop({ default: '' })
+  code?: string;
+
+  @Prop({ default: '' })
+  expectedOutput?: string;
+
+  // DSA Support
+  @Prop({ default: '' })
+  problemStatement?: string;
+
+  @Prop({ type: [String], default: [] })
+  constraints?: string[];
+
+  @Prop({
+    type: [{ input: String, output: String, explanation: String }],
+    default: [],
+  })
+  examples?: Array<{ input: string; output: string; explanation?: string }>;
+
+  @Prop({ default: '' })
+  inputFormat?: string;
+
+  @Prop({ default: '' })
+  outputFormat?: string;
+
+  @Prop({ type: [{ language: String, code: String }], default: [] })
+  starterCode?: Array<{ language: string; code: string }>;
+
+  @Prop({ type: [String], default: [] })
+  supportedLanguages?: string[];
+
+  @Prop({ default: '' })
+  functionSignature?: string;
+
+  @Prop({ default: 1000 }) // ms
+  timeLimit?: number;
+
+  @Prop({ default: 256 }) // MB
+  memoryLimit?: number;
+
+  @Prop({
+    type: [
+      {
+        id: String,
+        input: String,
+        expectedOutput: String,
+        isHidden: Boolean,
+        weight: Number,
+      },
+    ],
+    default: [],
+  })
+  testCases?: Array<{
+    id: string;
+    input: string;
+    expectedOutput: string;
+    isHidden: boolean;
+    weight: number;
+  }>;
+
+  @Prop({ type: [{ language: String, sourceCode: String }], default: [] })
+  referenceSolutions?: Array<{ language: string; sourceCode: string }>;
+
+  @Prop({ type: [String], default: [] })
+  hints?: string[];
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(Question);

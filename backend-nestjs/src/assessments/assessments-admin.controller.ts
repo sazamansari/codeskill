@@ -13,7 +13,10 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AssessmentsService } from './assessments.service';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
-import { UpdateAssessmentDto, UpdateAssessmentStatusDto } from './dto/update-assessment.dto';
+import {
+  UpdateAssessmentDto,
+  UpdateAssessmentStatusDto,
+} from './dto/update-assessment.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { AdminGuard } from '../common/guards/admin.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -60,7 +63,10 @@ export class AssessmentsAdminController {
   }
 
   @Put(':id/status')
-  @ApiOperation({ summary: 'Toggle or update assessment status (published, draft, completed, etc.)' })
+  @ApiOperation({
+    summary:
+      'Toggle or update assessment status (published, draft, completed, etc.)',
+  })
   async updateStatus(
     @Param('id') id: string,
     @Body() dto: UpdateAssessmentStatusDto,
@@ -76,7 +82,9 @@ export class AssessmentsAdminController {
   }
 
   @Get(':id/results')
-  @ApiOperation({ summary: 'Get student attempt results and summary analytics' })
+  @ApiOperation({
+    summary: 'Get student attempt results and summary analytics',
+  })
   async getResults(@Param('id') id: string) {
     return this.assessmentsService.getAssessmentResults(id);
   }

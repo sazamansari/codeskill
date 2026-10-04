@@ -142,7 +142,7 @@ export default function AssessmentResultsPage({
       case "shortcut_attempt":
         return <Key className="w-3.5 h-3.5 text-rose-400" />;
       case "fullscreen_exit":
-        return <Maximize2 className="w-3.5 h-3.5 text-blue-400" />;
+        return <Maximize2 className="w-3.5 h-3.5 text-primary" />;
       default:
         return <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />;
     }
@@ -174,7 +174,7 @@ export default function AssessmentResultsPage({
               <h1 className="text-xl font-bold tracking-tight text-slate-900">
                 {data?.assessment?.title || "Assessment Results"}
               </h1>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-red-50 text-[#c8102e] border border-red-200">
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-red-50 text-primary border border-red-200">
                 Chandigarh University
               </span>
               {data?.assessment?.code && (
@@ -183,19 +183,25 @@ export default function AssessmentResultsPage({
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               Candidate performance scores, pass rates, and proctoring telemetry audit logs.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            href={`/admin/assessments/${id}/analytics`}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary text-white text-xs font-bold rounded-md hover:bg-primary/90 transition-colors shadow-sm"
+          >
+            <BarChart3 className="w-3.5 h-3.5" /> Analytics Dashboard
+          </Link>
           <button
             onClick={handleExportCSV}
             disabled={!data?.attempts || data.attempts.length === 0}
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-md border border-slate-200 transition-colors disabled:opacity-50"
           >
-            <Download className="w-3.5 h-3.5 text-[#c8102e]" /> Export Results (.CSV)
+            <Download className="w-3.5 h-3.5 text-primary" /> Export Results (.CSV)
           </button>
         </div>
       </div>
@@ -204,8 +210,8 @@ export default function AssessmentResultsPage({
       {data?.stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="bg-white border border-slate-200 p-5 rounded-lg shadow-xs">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-[#c8102e]" /> Candidates
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-primary" /> Candidates
             </span>
             <div className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2 font-mono">
               {data.stats.totalCandidates}
@@ -219,28 +225,28 @@ export default function AssessmentResultsPage({
             <div className="text-2xl sm:text-3xl font-bold text-emerald-700 mt-2 font-mono">
               {data.stats.passPercentage}%
             </div>
-            <span className="text-[11px] text-slate-500 mt-0.5 block">
+            <span className="text-[11px] text-muted-foreground mt-0.5 block">
               {data.stats.passedCount} of {data.stats.totalCandidates} passed
             </span>
           </div>
 
           <div className="bg-white border border-slate-200 p-5 rounded-lg shadow-xs">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5 text-[#c8102e]" /> Avg Score
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Award className="w-3.5 h-3.5 text-primary" /> Avg Score
             </span>
             <div className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2 font-mono">
-              {data.stats.avgScore} <span className="text-xs text-slate-500">/ {data?.assessment?.totalMarks ?? 100}</span>
+              {data.stats.avgScore} <span className="text-xs text-muted-foreground">/ {data?.assessment?.totalMarks ?? 100}</span>
             </div>
           </div>
 
           <div className="bg-white border border-slate-200 p-5 rounded-lg shadow-xs">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-[#c8102e]" /> Submissions
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-primary" /> Submissions
             </span>
             <div className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2 font-mono">
               {data.stats.submittedCount}
             </div>
-            <span className="text-[11px] text-slate-500 mt-0.5 block">
+            <span className="text-[11px] text-muted-foreground mt-0.5 block">
               Completed attempts
             </span>
           </div>
@@ -323,6 +329,7 @@ export default function AssessmentResultsPage({
                   <th className="p-3.5 text-center">Result</th>
                   <th className="p-3.5 text-center">Time Spent</th>
                   <th className="p-3.5 text-center">Proctoring Telemetry</th>
+                  <th className="p-3.5 text-center">Report</th>
                   <th className="p-3.5 text-right">Submitted At</th>
                 </tr>
               </thead>
@@ -414,6 +421,17 @@ export default function AssessmentResultsPage({
                           </span>
                         </button>
                       </td>
+                      <td className="p-3.5 text-center">
+                        <a
+                          href={`http://localhost:3001/reports/assessment-attempt/${att._id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary text-white hover:bg-primary/90 text-[11px] font-semibold rounded-lg shadow-sm transition-colors"
+                          title="Download PDF Report"
+                        >
+                          <Download className="w-3 h-3" /> PDF
+                        </a>
+                      </td>
                       <td className="p-3.5 text-right font-mono text-[11px]">
                         {att.submittedAt ? new Date(att.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "In Progress"}
                       </td>
@@ -437,6 +455,7 @@ export default function AssessmentResultsPage({
                   <th className="p-3.5 text-center">Result</th>
                   <th className="p-3.5 text-center">Time Spent</th>
                   <th className="p-3.5 text-center">Proctoring Telemetry</th>
+                  <th className="p-3.5 text-center">Report</th>
                   <th className="p-3.5 text-right">Timestamp</th>
                 </tr>
               </thead>
@@ -501,6 +520,17 @@ export default function AssessmentResultsPage({
                             {totalV === 0 ? "Clean (0 Flags)" : `${totalV} Flags`}
                           </span>
                         </button>
+                      </td>
+                      <td className="p-3.5 text-center">
+                        <a
+                          href={`http://localhost:3001/reports/assessment-attempt/${att._id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary text-white hover:bg-primary/90 text-[11px] font-semibold rounded-lg shadow-sm transition-colors"
+                          title="Download PDF Report"
+                        >
+                          <Download className="w-3 h-3" /> PDF
+                        </a>
                       </td>
                       <td className="p-3.5 text-right font-mono text-[11px]">
                         {att.submittedAt ? new Date(att.submittedAt).toLocaleString([], { dateStyle: "short", timeStyle: "short" }) : "In Progress"}

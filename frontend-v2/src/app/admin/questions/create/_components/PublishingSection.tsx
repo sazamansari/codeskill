@@ -66,19 +66,19 @@ export default function PublishingSection() {
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl border text-center transition-all ${
                     isActive
                       ? "bg-indigo-50 border-indigo-200 dark:bg-indigo-500/10 dark:border-indigo-500/20"
-                      : "bg-gray-50 border-gray-200 dark:bg-slate-800 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600"
+                      : "bg-muted/50 border-border dark:bg-card dark:border-border hover:border-gray-300 dark:hover:border-slate-600"
                   }`}
                 >
                   <option.icon
                     className={`w-5 h-5 ${
-                      isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-slate-500"
+                      isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-muted-foreground"
                     }`}
                   />
                   <div>
-                    <p className={`text-sm font-medium ${isActive ? "text-gray-900 dark:text-white" : "text-gray-600 dark:text-slate-400"}`}>
+                    <p className={`text-sm font-medium ${isActive ? "text-foreground dark:text-white" : "text-muted-foreground dark:text-muted-foreground"}`}>
                       {option.label}
                     </p>
-                    <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5">{option.desc}</p>
+                    <p className="text-[11px] text-gray-400 dark:text-muted-foreground mt-0.5">{option.desc}</p>
                   </div>
                 </button>
               );
@@ -94,7 +94,7 @@ export default function PublishingSection() {
               type="datetime-local"
               value={publishing.scheduledDate}
               onChange={(e) => updatePublishing({ scheduledDate: e.target.value })}
-              className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+              className="w-full px-3.5 py-2.5 bg-muted/50 dark:bg-card border border-border dark:border-border rounded-xl text-sm text-foreground dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
             />
           </div>
         )}
@@ -113,7 +113,7 @@ export default function PublishingSection() {
                 className={`flex flex-col items-center gap-2 p-3 rounded-xl border cursor-pointer text-center transition-all ${
                   publishing[toggle.key]
                     ? "bg-indigo-50 border-indigo-200 dark:bg-indigo-500/10 dark:border-indigo-500/20"
-                    : "bg-gray-50 border-gray-200 dark:bg-slate-800 dark:border-slate-700"
+                    : "bg-muted/50 border-border dark:bg-card dark:border-border"
                 }`}
               >
                 <input
@@ -124,11 +124,11 @@ export default function PublishingSection() {
                 />
                 <toggle.icon
                   className={`w-5 h-5 ${
-                    publishing[toggle.key] ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-slate-500"
+                    publishing[toggle.key] ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-muted-foreground"
                   }`}
                 />
                 <div>
-                  <p className={`text-xs font-medium ${publishing[toggle.key] ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-slate-400"}`}>
+                  <p className={`text-xs font-medium ${publishing[toggle.key] ? "text-foreground dark:text-white" : "text-gray-500 dark:text-muted-foreground"}`}>
                     {toggle.label}
                   </p>
                 </div>

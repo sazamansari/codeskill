@@ -7,11 +7,7 @@ import { Question } from './question.schema';
 export type AssessmentAttemptDocument = HydratedDocument<AssessmentAttempt>;
 
 export type AttemptStatus =
-  | 'in_progress'
-  | 'submitted'
-  | 'auto_submitted'
-  | 'timed_out'
-  | 'disqualified';
+  'in_progress' | 'submitted' | 'auto_submitted' | 'timed_out' | 'disqualified';
 
 @Schema({ _id: false })
 export class QuestionResponse {
@@ -65,7 +61,12 @@ export class ProctoringViolation {
 
 @Schema({ timestamps: true })
 export class AssessmentAttempt {
-  @Prop({ type: Types.ObjectId, ref: 'Assessment', required: true, index: true })
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Assessment',
+    required: true,
+    index: true,
+  })
   assessmentId: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
@@ -82,7 +83,13 @@ export class AssessmentAttempt {
 
   @Prop({
     type: String,
-    enum: ['in_progress', 'submitted', 'auto_submitted', 'timed_out', 'disqualified'],
+    enum: [
+      'in_progress',
+      'submitted',
+      'auto_submitted',
+      'timed_out',
+      'disqualified',
+    ],
     default: 'in_progress',
     index: true,
   })
@@ -152,7 +159,8 @@ export class AssessmentAttempt {
   disqualifiedReason?: string;
 }
 
-export const AssessmentAttemptSchema = SchemaFactory.createForClass(AssessmentAttempt);
+export const AssessmentAttemptSchema =
+  SchemaFactory.createForClass(AssessmentAttempt);
 
 AssessmentAttemptSchema.index({ assessmentId: 1, studentId: 1 });
 AssessmentAttemptSchema.index({ assessmentId: 1, score: -1 });

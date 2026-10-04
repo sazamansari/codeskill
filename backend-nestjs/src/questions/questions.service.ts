@@ -113,10 +113,24 @@ export class QuestionsService {
       throw new NotFoundException('Question not found');
     }
 
-    // Question Leakage Prevention: NEVER send correctAnswer or explanation to students
+    // Question Leakage Prevention: NEVER send answers or hidden data to students
     if (isStudent) {
-      const { correctAnswer, explanation, metadata, ...studentSafeQuestion } =
-        question as any;
+      const {
+        correctAnswer,
+        correctAnswers,
+        explanation,
+        expectedOutput,
+        referenceSolutions,
+        metadata,
+        ...studentSafeQuestion
+      } = question as any;
+
+      if (studentSafeQuestion.testCases) {
+        studentSafeQuestion.testCases = studentSafeQuestion.testCases.filter(
+          (tc: any) => !tc.isHidden,
+        );
+      }
+
       return studentSafeQuestion;
     }
 
@@ -129,12 +143,9 @@ export class QuestionsService {
     ip = '',
     userAgent = '',
   ) {
-    if (
-      dto.correctAnswer < 0 ||
-      dto.correctAnswer >= dto.options.length
-    ) {
+    if (dto.correctAnswer! < 0 || dto.correctAnswer! >= dto.options!.length) {
       throw new BadRequestException(
-        `correctAnswer must be a valid zero-based index between 0 and ${dto.options.length - 1}`,
+        `correctAnswer must be a valid zero-based index between 0 and ${dto.options!.length - 1}`,
       );
     }
 
@@ -179,7 +190,9 @@ export class QuestionsService {
 
     const options = dto.options || question.options;
     const correctAnswer =
-      dto.correctAnswer !== undefined ? dto.correctAnswer : question.correctAnswer;
+      dto.correctAnswer !== undefined
+        ? dto.correctAnswer
+        : question.correctAnswer;
 
     if (correctAnswer < 0 || correctAnswer >= options.length) {
       throw new BadRequestException(
@@ -242,7 +255,8 @@ export class QuestionsService {
       question.approvedAt = new Date();
       question.rejectedReason = undefined;
     } else {
-      question.rejectedReason = reason || 'Declined during administrative review';
+      question.rejectedReason =
+        reason || 'Declined during administrative review';
     }
 
     await question.save();
@@ -317,7 +331,8 @@ export class QuestionsService {
   }
 
   async findBankById(id: string) {
-    if (!Types.ObjectId.isValid(id)) throw new BadRequestException('Invalid ID');
+    if (!Types.ObjectId.isValid(id))
+      throw new BadRequestException('Invalid ID');
     const bank = await this.questionBankModel
       .findById(id)
       .populate('createdBy', 'name email')
@@ -363,14 +378,18 @@ export class QuestionsService {
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
     const firstSheetName = workbook.SheetNames[0];
     if (!firstSheetName) {
-      throw new BadRequestException('The uploaded spreadsheet contains no sheets.');
+      throw new BadRequestException(
+        'The uploaded spreadsheet contains no sheets.',
+      );
     }
 
     const worksheet = workbook.Sheets[firstSheetName];
     const rawRows: any[] = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
 
     if (!rawRows || rawRows.length === 0) {
-      throw new BadRequestException('The uploaded spreadsheet contains no data rows.');
+      throw new BadRequestException(
+        'The uploaded spreadsheet contains no data rows.',
+      );
     }
 
     const normalizeHeader = (str: string) =>
@@ -401,42 +420,136 @@ export class QuestionsService {
         'problem',
         'title',
       ]);
-      const rawQuestionType = findField(row, ['question_type', 'type', 'qtype']) || 'single_choice';
-      const topic = findField(row, ['topic', 'subject', 'category']) || 'General';
+      const rawQuestionType =
+        findField(row, ['question_type', 'type', 'qtype']) || 'single_choice';
+      const topic =
+        findField(row, ['topic', 'subject', 'category']) || 'General';
       const subtopic = findField(row, ['subtopic', 'sub_topic', 'chapter']);
-      const difficulty = (findField(row, ['difficulty', 'level']) || 'medium').toLowerCase();
+      const difficulty = (
+        findField(row, ['difficulty', 'level']) || 'medium'
+      ).toLowerCase();
 
       const rawMarks = findField(row, ['marks', 'mark', 'score', 'points']);
       const marks = rawMarks && !isNaN(Number(rawMarks)) ? Number(rawMarks) : 1;
 
-      const rawNeg = findField(row, ['negative_marks', 'negative_mark', 'negative', 'penalty']);
-      const negativeMarks = rawNeg && !isNaN(Number(rawNeg)) ? Number(rawNeg) : 0;
+      const rawNeg = findField(row, [
+        'negative_marks',
+        'negative_mark',
+        'negative',
+        'penalty',
+      ]);
+      const negativeMarks =
+        rawNeg && !isNaN(Number(rawNeg)) ? Number(rawNeg) : 0;
 
-      const optA = findField(row, ['option_a', 'optiona', 'option_1', 'opt_a', 'a']);
-      const optB = findField(row, ['option_b', 'optionb', 'option_2', 'opt_b', 'b']);
-      const optC = findField(row, ['option_c', 'optionc', 'option_3', 'opt_c', 'c']);
-      const optD = findField(row, ['option_d', 'optiond', 'option_4', 'opt_d', 'd']);
-      const optE = findField(row, ['option_e', 'optione', 'option_5', 'opt_e', 'e']);
+      const optA = findField(row, [
+        'option_a',
+        'optiona',
+        'option_1',
+        'opt_a',
+        'a',
+      ]);
+      const optB = findField(row, [
+        'option_b',
+        'optionb',
+        'option_2',
+        'opt_b',
+        'b',
+      ]);
+      const optC = findField(row, [
+        'option_c',
+        'optionc',
+        'option_3',
+        'opt_c',
+        'c',
+      ]);
+      const optD = findField(row, [
+        'option_d',
+        'optiond',
+        'option_4',
+        'opt_d',
+        'd',
+      ]);
+      const optE = findField(row, [
+        'option_e',
+        'optione',
+        'option_5',
+        'opt_e',
+        'e',
+      ]);
 
-      const correctAnswerRaw = findField(row, ['correct_answer', 'correct', 'answer', 'key', 'ans']);
-      const explanation = findField(row, ['explanation', 'solution', 'rationale']);
-      const codeSnippet = findField(row, ['code_snippet', 'code', 'snippet', 'starter_code', 'startercode']);
+      const correctAnswerRaw = findField(row, [
+        'correct_answer',
+        'correct',
+        'answer',
+        'key',
+        'ans',
+      ]);
+      const explanation = findField(row, [
+        'explanation',
+        'solution',
+        'rationale',
+      ]);
+      const codeSnippet = findField(row, [
+        'code_snippet',
+        'code',
+        'snippet',
+        'starter_code',
+        'startercode',
+      ]);
       const language = findField(row, ['language', 'lang']) || 'general';
       const rawTags = findField(row, ['tags', 'tag']);
-      const tags = rawTags ? rawTags.split(',').map((t) => t.trim()).filter(Boolean) : [];
+      const tags = rawTags
+        ? rawTags
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean)
+        : [];
 
       // Algorithmic / Coding specific columns
-      const constraints = findField(row, ['constraints', 'constraint', 'limits']);
-      const timeLimitRaw = findField(row, ['time_limit', 'timelimit', 'time_limit_ms']);
-      const timeLimit = timeLimitRaw && !isNaN(Number(timeLimitRaw)) ? Number(timeLimitRaw) : 2000;
-      const memoryLimitRaw = findField(row, ['memory_limit', 'memorylimit', 'memory_limit_mb']);
-      const memoryLimit = memoryLimitRaw && !isNaN(Number(memoryLimitRaw)) ? Number(memoryLimitRaw) : 256;
+      const constraints = findField(row, [
+        'constraints',
+        'constraint',
+        'limits',
+      ]);
+      const timeLimitRaw = findField(row, [
+        'time_limit',
+        'timelimit',
+        'time_limit_ms',
+      ]);
+      const timeLimit =
+        timeLimitRaw && !isNaN(Number(timeLimitRaw))
+          ? Number(timeLimitRaw)
+          : 2000;
+      const memoryLimitRaw = findField(row, [
+        'memory_limit',
+        'memorylimit',
+        'memory_limit_mb',
+      ]);
+      const memoryLimit =
+        memoryLimitRaw && !isNaN(Number(memoryLimitRaw))
+          ? Number(memoryLimitRaw)
+          : 256;
 
       // Extract test cases
-      const testCases: Array<{ input: string; output: string; isHidden?: boolean; explanation?: string }> = [];
+      const testCases: Array<{
+        input: string;
+        output: string;
+        isHidden?: boolean;
+        explanation?: string;
+      }> = [];
       for (let tcIdx = 1; tcIdx <= 10; tcIdx++) {
-        const inp = findField(row, [`test_input_${tcIdx}`, `testinput${tcIdx}`, `input_${tcIdx}`, `in_${tcIdx}`]);
-        const out = findField(row, [`test_output_${tcIdx}`, `testoutput${tcIdx}`, `output_${tcIdx}`, `out_${tcIdx}`]);
+        const inp = findField(row, [
+          `test_input_${tcIdx}`,
+          `testinput${tcIdx}`,
+          `input_${tcIdx}`,
+          `in_${tcIdx}`,
+        ]);
+        const out = findField(row, [
+          `test_output_${tcIdx}`,
+          `testoutput${tcIdx}`,
+          `output_${tcIdx}`,
+          `out_${tcIdx}`,
+        ]);
         if (inp || out) {
           testCases.push({
             input: inp,
@@ -445,7 +558,12 @@ export class QuestionsService {
           });
         }
       }
-      const rawTestCasesJson = findField(row, ['test_cases', 'testcases', 'testcase', 'tests']);
+      const rawTestCasesJson = findField(row, [
+        'test_cases',
+        'testcases',
+        'testcase',
+        'tests',
+      ]);
       if (rawTestCasesJson) {
         try {
           const parsedTc = JSON.parse(rawTestCasesJson);
@@ -457,7 +575,10 @@ export class QuestionsService {
         }
       }
 
-      const isCoding = ['coding', 'algorithmic', 'algorithm', 'code', 'dsa'].includes(rawQuestionType.toLowerCase()) || testCases.length > 0;
+      const isCoding =
+        ['coding', 'algorithmic', 'algorithm', 'code', 'dsa'].includes(
+          rawQuestionType.toLowerCase(),
+        ) || testCases.length > 0;
       const questionType = isCoding ? 'coding' : rawQuestionType.toLowerCase();
 
       parsedRows.push({
@@ -466,7 +587,9 @@ export class QuestionsService {
         questionType,
         topic,
         subtopic,
-        difficulty: ['easy', 'medium', 'hard'].includes(difficulty) ? difficulty : 'medium',
+        difficulty: ['easy', 'medium', 'hard'].includes(difficulty)
+          ? difficulty
+          : 'medium',
         marks,
         negativeMarks,
         optA,
@@ -489,12 +612,17 @@ export class QuestionsService {
 
     const allFileQuestions = parsedRows.map((r) => r.question).filter(Boolean);
     const existingDbQuestions = await this.questionModel
-      .find({ question: { $in: allFileQuestions }, status: { $ne: 'archived' } })
+      .find({
+        question: { $in: allFileQuestions },
+        status: { $ne: 'archived' },
+      })
       .select('question topic')
       .lean();
 
     const dbQuestionMap = new Set(
-      existingDbQuestions.map((q) => `${q.topic.toLowerCase()}:::${q.question.toLowerCase().trim()}`)
+      existingDbQuestions.map(
+        (q) => `${q.topic.toLowerCase()}:::${q.question.toLowerCase().trim()}`,
+      ),
     );
 
     const errors: { row: number; question?: string; error: string }[] = [];
@@ -512,7 +640,9 @@ export class QuestionsService {
       } else {
         const questionKey = `${row.topic.toLowerCase()}:::${row.question.toLowerCase().trim()}`;
         if (fileQuestionSet.has(questionKey)) {
-          rowErrors.push('Duplicate question statement within the uploaded file');
+          rowErrors.push(
+            'Duplicate question statement within the uploaded file',
+          );
           duplicatesInFile++;
         } else {
           fileQuestionSet.add(questionKey);
@@ -530,8 +660,14 @@ export class QuestionsService {
         rowErrors.push('Topic is required');
       }
 
-      const isChoice = ['single_choice', 'multiple_choice'].includes(row.questionType);
-      let formattedOptions: Array<{ text: string; isCorrect: boolean; explanation?: string }> = [];
+      const isChoice = ['single_choice', 'multiple_choice'].includes(
+        row.questionType,
+      );
+      let formattedOptions: Array<{
+        text: string;
+        isCorrect: boolean;
+        explanation?: string;
+      }> = [];
 
       if (isChoice) {
         // Enforce min 2 options
@@ -544,7 +680,9 @@ export class QuestionsService {
         ].filter((o) => o.text && o.text.trim());
 
         if (rawOptions.length < 2) {
-          rowErrors.push('Multiple choice questions require at least 2 populated options');
+          rowErrors.push(
+            'Multiple choice questions require at least 2 populated options',
+          );
         }
 
         if (!row.correctAnswerRaw) {
@@ -559,7 +697,7 @@ export class QuestionsService {
             const matchesKey = rawAnswerParts.includes(opt.key);
             const matchesNumeric = rawAnswerParts.includes(String(idx + 1));
             const matchesText = rawAnswerParts.some(
-              (ans: string) => ans.toLowerCase() === opt.text.toLowerCase()
+              (ans: string) => ans.toLowerCase() === opt.text.toLowerCase(),
             );
             return {
               text: opt.text,
@@ -567,13 +705,17 @@ export class QuestionsService {
             };
           });
 
-          const correctCount = formattedOptions.filter((o) => o.isCorrect).length;
+          const correctCount = formattedOptions.filter(
+            (o) => o.isCorrect,
+          ).length;
           if (correctCount === 0) {
             rowErrors.push(
-              `Correct answer '${row.correctAnswerRaw}' did not match any of options (A, B, C, D)`
+              `Correct answer '${row.correctAnswerRaw}' did not match any of options (A, B, C, D)`,
             );
           } else if (row.questionType === 'single_choice' && correctCount > 1) {
-            rowErrors.push('Single choice question cannot have multiple correct answers');
+            rowErrors.push(
+              'Single choice question cannot have multiple correct answers',
+            );
           }
         }
       }
@@ -702,7 +844,9 @@ export class QuestionsService {
 
     for (let i = 0; i < operations.length; i += chunkSize) {
       const chunk = operations.slice(i, i + chunkSize);
-      const res = await this.questionModel.bulkWrite(chunk as any, { ordered: false });
+      const res = await this.questionModel.bulkWrite(chunk as any, {
+        ordered: false,
+      });
       totalUpserted += res.upsertedCount || 0;
       totalModified += res.modifiedCount || 0;
     }
@@ -743,10 +887,15 @@ export class QuestionsService {
     const preview = await this.parseAndValidateQuestionsImport(fileBuffer);
     if (!preview.validRows || preview.validRows.length === 0) {
       throw new BadRequestException(
-        preview.errors?.[0]?.error || 'No valid question rows found in file.'
+        preview.errors?.[0]?.error || 'No valid question rows found in file.',
       );
     }
-    const commit = await this.confirmQuestionsImport(preview.validRows, adminUser, ip, userAgent);
+    const commit = await this.confirmQuestionsImport(
+      preview.validRows,
+      adminUser,
+      ip,
+      userAgent,
+    );
     return {
       success: true,
       message: commit.message,
@@ -761,5 +910,3 @@ export class QuestionsService {
     };
   }
 }
-
-

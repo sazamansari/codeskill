@@ -17,7 +17,6 @@ import {
   Layers,
   Award,
   Check,
-  Loader2,
   Camera,
   Mic,
   MicOff,
@@ -29,6 +28,7 @@ import {
 } from "lucide-react";
 import { studentAssessmentsAPI } from "@/config/api";
 import DSAAssessmentEditor from "@/components/assessment/DSAAssessmentEditor";
+import { Spinner } from "@/components/ui/spinner";
 
 interface TestCase {
   id?: string;
@@ -703,7 +703,7 @@ export default function TakeAssessmentPage({
     return (
       <div className="flex-1 min-h-screen bg-background flex items-center justify-center font-sans">
         <div className="text-center space-y-3">
-          <Loader2 className="w-9 h-9 animate-spin text-primary mx-auto" />
+          <Spinner className="w-9 h-9 animate-spin text-primary mx-auto" />
           <h2 className="text-sm font-semibold text-foreground">Preparing Secure Assessment Environment</h2>
           <p className="text-xs text-muted-foreground">Initializing question set, proctoring sensors, and anti-cheat monitors...</p>
         </div>
@@ -762,7 +762,7 @@ export default function TakeAssessmentPage({
                 : "bg-slate-50 text-slate-800 border-slate-200"
             }`}
           >
-            <Clock className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isTimeCritical ? "text-rose-600" : "text-[#c8102e]"}`} />
+            <Clock className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isTimeCritical ? "text-rose-600" : "text-primary"}`} />
             <span>{formatTime(timeLeftSeconds)}</span>
           </div>
 
@@ -786,7 +786,7 @@ export default function TakeAssessmentPage({
           {/* Permanent Top Submit Test Button */}
           <button
             onClick={() => setShowSubmitModal(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-md bg-[#c8102e] hover:bg-[#a90c25] active:bg-[#910b20] text-white text-xs font-semibold uppercase tracking-wider transition-all shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-md bg-primary hover:bg-primary/90 active:bg-primary/80 text-white text-xs font-semibold uppercase tracking-wider transition-all shadow-xs"
           >
             <Send className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Submit Test</span>
@@ -1249,7 +1249,7 @@ export default function TakeAssessmentPage({
                 onClick={() => submitExam(false)}
                 className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold rounded-xl transition-all shadow-md shadow-primary/20 disabled:opacity-50"
               >
-                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                {isSubmitting ? <Spinner className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 Yes, Submit Now
               </button>
             </div>

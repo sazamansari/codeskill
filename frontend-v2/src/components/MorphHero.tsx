@@ -105,7 +105,7 @@ export default function MorphHero() {
 
           {/* Code Window */}
           <div className="font-mono text-left text-xs sm:text-sm leading-relaxed text-foreground/90 space-y-1 overflow-x-auto p-2">
-            <div><span className="text-primary font-semibold">function</span> <span className="text-blue-400 font-semibold">twoSum</span>(nums: <span className="text-amber-400">number[]</span>, target: <span className="text-amber-400">number</span>) {'{'}</div>
+            <div><span className="text-primary font-semibold">function</span> <span className="text-primary font-semibold">twoSum</span>(nums: <span className="text-amber-400">number[]</span>, target: <span className="text-amber-400">number</span>) {'{'}</div>
             <div className="pl-6"><span className="text-primary">const</span> map = <span className="text-primary">new</span> <span className="text-emerald-400">Map</span>&lt;<span className="text-amber-400">number</span>, <span className="text-amber-400">number</span>&gt;();</div>
             <div className="pl-6"><span className="text-primary">for</span> (<span className="text-primary">let</span> i = 0; i &lt; nums.length; i++) {'{'}</div>
             <div className="pl-12"><span className="text-primary">const</span> diff = target - nums[i];</div>

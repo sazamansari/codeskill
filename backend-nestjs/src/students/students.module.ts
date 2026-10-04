@@ -19,4 +19,3 @@ import { CredentialEmailProcessor } from './credential-email.processor';
   exports: [StudentsService],
 })
 export class StudentsModule {}
-

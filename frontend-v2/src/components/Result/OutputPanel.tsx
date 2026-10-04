@@ -57,7 +57,7 @@ function OutputSection({ title, content, icon: Icon = Terminal }: OutputSectionP
           {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
         </button>
       </div>
-      <div className="w-full rounded-xl bg-[#0D0D12] border border-[#27272A] p-4">
+      <div className="w-full rounded-xl bg-muted/50 border border-border p-4">
         <pre className="font-mono text-sm text-zinc-300 whitespace-pre-wrap break-words">
           {content || <span className="text-zinc-600 italic">No output</span>}
         </pre>
@@ -106,14 +106,14 @@ export default function OutputPanel({
           {(executionTime !== undefined || memory !== undefined) && (
             <div className="flex flex-wrap items-center gap-4 mt-2">
               {executionTime !== undefined && (
-                <div className="flex items-center gap-2 bg-[#18181B] border border-[#27272A] rounded-lg px-4 py-2">
+                <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-4 py-2">
                   <span className="text-xs font-medium text-zinc-400">Execution Time</span>
                   <span className="text-sm font-semibold text-zinc-200">{executionTime} sec</span>
                 </div>
               )}
               
               {memory !== undefined && (
-                <div className="flex items-center gap-2 bg-[#18181B] border border-[#27272A] rounded-lg px-4 py-2">
+                <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-4 py-2">
                   <span className="text-xs font-medium text-zinc-400">Memory</span>
                   <span className="text-sm font-semibold text-zinc-200">{memory} MB</span>
                 </div>

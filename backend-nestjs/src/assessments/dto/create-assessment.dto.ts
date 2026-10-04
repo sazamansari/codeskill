@@ -7,8 +7,54 @@ import {
   IsArray,
   IsEnum,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+
+export class AssessmentQuestionConfigDto {
+  @IsString()
+  @IsNotEmpty()
+  questionId: string;
+
+  @IsNumber()
+  @Type(() => Number)
+  marks: number;
+
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  negativeMarks?: number;
+
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  order?: number;
+}
+
+export class AssessmentSectionDto {
+  @IsString()
+  @IsNotEmpty()
+  title: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  order?: number;
+
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  timeLimit?: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AssessmentQuestionConfigDto)
+  questions: AssessmentQuestionConfigDto[];
+}
 
 export class CreateAssessmentDto {
   @IsString()
@@ -49,8 +95,19 @@ export class CreateAssessmentDto {
 
   @IsArray()
   @IsString({ each: true })
-  @IsNotEmpty()
-  questionIds: string[];
+  @IsOptional()
+  questionIds?: string[]; // Backwards compatibility
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AssessmentSectionDto)
+  @IsOptional()
+  sections?: AssessmentSectionDto[];
+
+  @IsString()
+  @IsEnum(['draft', 'published', 'ongoing', 'completed', 'archived'])
+  @IsOptional()
+  status?: string;
 
   @IsArray()
   @IsString({ each: true })

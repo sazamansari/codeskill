@@ -113,7 +113,7 @@ export default function CandidatesAdminPage() {
                           <ShieldCheck className="w-3.5 h-3.5" /> Admin
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-500">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
                           Candidate
                         </span>
                       )}
@@ -132,7 +132,7 @@ export default function CandidatesAdminPage() {
                         </button>
                         <Link 
                           href={`/admin/candidates/${user._id}`}
-                          className="px-3 py-1.5 text-xs font-medium bg-muted text-muted-foreground hover:bg-blue-500/10 hover:text-blue-500 rounded-md transition-colors flex items-center gap-1"
+                          className="px-3 py-1.5 text-xs font-medium bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary rounded-md transition-colors flex items-center gap-1"
                           title="View Assessment Report"
                         >
                           <FileText className="w-3.5 h-3.5" /> Report

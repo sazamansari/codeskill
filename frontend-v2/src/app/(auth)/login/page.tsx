@@ -6,32 +6,14 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {
-  GraduationCap,
-  KeyRound,
-  ShieldCheck,
-  AlertCircle,
-  Loader2,
-  Lock,
-  ArrowRight,
-  Info,
-  CheckCircle2,
-  HelpCircle,
-  X,
-  Building,
-} from "lucide-react";
+import { KeyRound, AlertCircle, CheckCircle2 } from "lucide-react";
+
 import { useAuth } from "@/context/AuthContext";
+import { Spinner } from "@/components/ui/spinner";
+import { LoginForm, LoginFormValues } from "@/components/auth/LoginForm";
+import { Building2, ShieldCheck, Quote } from "lucide-react";
 
-const studentLoginSchema = z.object({
-  uid: z
-    .string()
-    .min(3, { message: "University UID or Email is required." })
-    .transform((val) => val.trim()),
-  password: z
-    .string()
-    .min(1, { message: "Password is required." }),
-});
-
+// Modal specific schemas
 const forcePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, "Temporary password is required."),
@@ -48,44 +30,37 @@ const forcePasswordSchema = z
     path: ["confirmPassword"],
   });
 
-type StudentLoginFormValues = z.infer<typeof studentLoginSchema>;
 type ForcePasswordFormValues = z.infer<typeof forcePasswordSchema>;
 
-export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showSupportModal, setShowSupportModal] = useState(false);
+export default function AppLoginPage() {
+  const [loading, setLoading] = useState(false);
   const [showForcePasswordModal, setShowForcePasswordModal] = useState(false);
-  const [enteredPassword, setEnteredPassword] = useState("");
   const [passwordChangeSuccess, setPasswordChangeSuccess] = useState(false);
-  const { studentLogin, adminLogin, forceChangePassword, user } = useAuth();
-  const router = useRouter();
 
-  const form = useForm<StudentLoginFormValues>({
-    resolver: zodResolver(studentLoginSchema),
-    defaultValues: { uid: "", password: "" },
-  });
+  const { studentLogin, adminLogin, forceChangePassword } = useAuth();
+  const router = useRouter();
 
   const forceForm = useForm<ForcePasswordFormValues>({
     resolver: zodResolver(forcePasswordSchema),
     defaultValues: { currentPassword: "", newPassword: "", confirmPassword: "" },
   });
 
-  const onSubmit = async (data: StudentLoginFormValues) => {
-    setIsLoading(true);
-    setEnteredPassword(data.password);
-    form.clearErrors("root");
+  const handleLogin = async (data: LoginFormValues) => {
+    setLoading(true);
     try {
-      if (data.uid.includes("@")) {
-        // Administrator or Faculty email login
-        const res = await adminLogin({ email: data.uid.toLowerCase().trim(), password: data.password });
+      const emailLower = data.email.toLowerCase().trim();
+
+      if (emailLower.includes("@")) {
+        const res = await adminLogin({ email: emailLower, password: data.password });
         if (res?.requireOTP) {
-          router.push(`/admin/login?email=${encodeURIComponent(data.uid)}`);
+          router.push(`/admin/login?email=${encodeURIComponent(data.email)}`);
         } else {
           window.location.href = "/admin/dashboard";
         }
         return;
       }
-      const res = await studentLogin({ uid: data.uid.toUpperCase(), password: data.password });
+
+      const res = await studentLogin({ uid: data.email.toUpperCase().trim(), password: data.password });
       if (res?.user?.forcePasswordChange) {
         forceForm.setValue("currentPassword", data.password);
         setShowForcePasswordModal(true);
@@ -94,20 +69,13 @@ export default function LoginPage() {
       } else {
         window.location.href = "/dashboard";
       }
-    } catch (err: any) {
-      form.setError("root", {
-        type: "manual",
-        message:
-          err.message ||
-          "Invalid credentials. Please verify your UID/Email and password.",
-      });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   const onForcePasswordSubmit = async (data: ForcePasswordFormValues) => {
-    setIsLoading(true);
+    setLoading(true);
     try {
       await forceChangePassword({
         currentPassword: data.currentPassword,
@@ -117,241 +85,99 @@ export default function LoginPage() {
       setTimeout(() => {
         router.push("/dashboard");
       }, 1500);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to update password. Please try again.";
       forceForm.setError("root", {
         type: "manual",
-        message: err.message || "Failed to update password. Please try again.",
+        message: errorMessage,
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
     <div className="flex min-h-screen bg-background text-foreground font-sans">
-      {/* Left Column - University Branding (Hidden on mobile) */}
-      {/* Left Column - Institutional Overview */}
-      <div className="hidden lg:flex flex-1 relative bg-muted/30 border-r border-border items-center justify-center overflow-hidden flex-col p-12 text-foreground text-center">
-        {/* Clean subtle architectural grid */}
+      {/* Left Column - Visual Section */}
+      <div className="hidden lg:flex flex-1 relative bg-muted/20 border-r border-border items-center justify-center overflow-hidden flex-col p-12 lg:p-20">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:32px_32px] opacity-[0.03] dark:opacity-[0.05]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="relative z-10 max-w-md flex flex-col items-center">
-          <div className="w-24 h-24 bg-card border border-border rounded-xl p-2 flex items-center justify-center mb-6 shadow-xs">
-            <img
-              src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
-              alt="Chandigarh University"
-              className="w-full h-full object-contain"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = "/cu-logo.png";
-              }}
-            />
-          </div>
-
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/50 text-[#c8102e] dark:text-rose-400 text-xs font-semibold tracking-wide uppercase mb-3">
-            <ShieldCheck className="w-3.5 h-3.5" /> Official Assessment Portal
-          </div>
-
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3 text-foreground">
-            Chandigarh University
-          </h1>
-          <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-            Official Examination & Academic Assessment System. Sign in using your registered University Identification Number (UID) to access scheduled evaluations.
-          </p>
-
-          <div className="w-full bg-card rounded-lg p-5 border border-border text-left text-xs space-y-2 text-muted-foreground shadow-xs">
-            <div className="font-semibold text-foreground flex items-center gap-1.5 text-xs">
-              <Info className="w-4 h-4 text-primary" /> Candidate Instructions:
+        <div className="relative z-10 w-full max-w-lg flex flex-col justify-between h-full">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wide mb-8">
+              <ShieldCheck className="w-4 h-4" /> Secure Authentication
             </div>
-            <p>• Assessment sessions are monitored with anti-cheating audit telemetry.</p>
-            <p>• Ensure a stable internet connection before launching your exam attempt.</p>
-            <p>• Do not switch tabs or exit fullscreen mode during an active examination.</p>
+            <h1 className="text-5xl font-extrabold tracking-tight mb-6 text-foreground leading-tight">
+              Build your technical <br />
+              foundation.
+            </h1>
+            <p className="text-xl text-foreground/90 font-medium leading-relaxed max-w-md">
+              Access your personalized learning environment, track your progress, and master your technical skills securely.
+            </p>
           </div>
+
+          <div className="space-y-6 mt-12">
+            <div>
+              <h2 className="text-2xl font-bold text-foreground">CodeSkill</h2>
+              <p className="text-sm font-semibold text-primary mt-1">by Chandigarh University</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Department of Skill Development & Lab</p>
+            </div>
+            
+            <p className="text-sm text-foreground/80 leading-relaxed max-w-md border-l-2 border-primary/30 pl-4 py-1">
+              Standardized examination portal and algorithmic skill-building platform engineered for developers, students, and technical evaluations.
+            </p>
+
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-background/50 border border-border/50 text-foreground/80 text-xs font-medium backdrop-blur-sm">
+              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+              Proctored & Verified Examination Infrastructure
+            </div>
+          </div>
+
         </div>
       </div>
 
-      {/* Right Column - UID Login Form */}
+      {/* Right Column - Login Form */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 relative bg-background">
-        <div className="w-full max-w-sm flex flex-col gap-6">
-          {/* Header */}
-          <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-card border border-border rounded-xl p-1.5 flex items-center justify-center mb-3 shadow-xs">
+        <div className="w-full max-w-[400px] flex flex-col gap-8">
+
+          <div className="flex flex-col">
+            <div className="w-24 h-24 bg-card border border-border rounded-2xl p-2.5 flex items-center justify-center mb-6 shadow-sm">
               <img
                 src="https://images.seeklogo.com/logo-png/43/1/chandigarh-university-cu-logo-png_seeklogo-432515.png"
-                alt="Chandigarh University"
+                alt="Logo"
                 className="w-full h-full object-contain"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = "/cu-logo.png";
                 }}
               />
             </div>
-            <h2 className="text-xl font-bold tracking-tight text-foreground">
-              Student Sign In
+            <h2 className="text-2xl font-bold tracking-tight text-foreground mb-2">
+              Welcome back
             </h2>
-            <p className="text-xs text-muted-foreground mt-1">
-              Chandigarh University Examination Portal
+            <p className="text-sm text-muted-foreground">
+              Please enter your credentials to access your account.
             </p>
           </div>
 
-          {/* Form Error Banner */}
-          {form.formState.errors.root && (
-            <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-md flex items-start gap-2.5 text-rose-600 dark:text-rose-400 text-xs">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
-              <span>{form.formState.errors.root.message}</span>
-            </div>
-          )}
+          <LoginForm onSubmit={handleLogin} loading={loading} />
 
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* UID / Email Field */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="uid-input"
-                className="text-xs font-semibold text-foreground flex items-center justify-between"
-              >
-                <span>University UID or Admin Email</span>
-              </label>
-              <div className="relative">
-                <input
-                  id="uid-input"
-                  type="text"
-                  placeholder="e.g. 22BCS1001 or admin@cuchd.in"
-                  className="w-full h-10 px-3.5 pl-10 rounded-md border border-input bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary font-mono text-sm transition-all shadow-xs"
-                  {...form.register("uid")}
-                />
-                <Building className="w-4 h-4 text-muted-foreground absolute left-3 top-3" />
-              </div>
-              {form.formState.errors.uid && (
-                <p className="text-xs text-rose-600 dark:text-rose-400 mt-1">
-                  {form.formState.errors.uid.message}
-                </p>
-              )}
-            </div>
+          <p className="text-center text-xs text-muted-foreground">
+            By signing in, you agree to our{" "}
+            <a href="#" className="underline hover:text-foreground transition-colors">Terms of Service</a>{" "}
+            and{" "}
+            <a href="#" className="underline hover:text-foreground transition-colors">Privacy Policy</a>.
+          </p>
 
-            {/* Password Field */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="password-input"
-                  className="text-xs font-semibold text-foreground"
-                >
-                  Password
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setShowSupportModal(true)}
-                  className="text-xs text-primary hover:underline font-medium inline-flex items-center gap-1"
-                >
-                  <HelpCircle className="w-3 h-3" /> Help
-                </button>
-              </div>
-              <div className="relative">
-                <input
-                  id="password-input"
-                  type="password"
-                  placeholder="••••••••••••"
-                  className="w-full h-10 px-3.5 pl-10 rounded-md border border-input bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm transition-all shadow-xs"
-                  {...form.register("password")}
-                />
-                <Lock className="w-4 h-4 text-muted-foreground absolute left-3 top-3" />
-              </div>
-              {form.formState.errors.password && (
-                <p className="text-xs text-rose-600 dark:text-rose-400 mt-1">
-                  {form.formState.errors.password.message}
-                </p>
-              )}
-            </div>
-
-            {/* Submit Button */}
-            <button
-              id="student-login-submit"
-              type="submit"
-              disabled={isLoading}
-              className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-md transition-all shadow-xs flex items-center justify-center gap-2 text-xs uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Verifying Credentials...
-                </>
-              ) : (
-                <>
-                  Sign In <ArrowRight className="w-3.5 h-3.5" />
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Institutional Admin Link */}
-          <div className="pt-3 border-t border-border flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Faculty or Controller?</span>
-            <Link
-              href="/admin/login"
-              className="font-semibold text-primary hover:underline flex items-center gap-1"
-            >
-              <span>Admin Console</span>
-              <ArrowRight className="w-3 h-3" />
+          <div className="mt-4 pt-4 border-t border-border/50 text-center">
+            <Link href="/" className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors">
+              &larr; Return to Home
             </Link>
-          </div>
-          <div className="pt-4 border-t border-border text-center">
-            <p className="text-xs text-muted-foreground">
-              Student accounts are managed by Chandigarh University. Public self-registration is restricted.
-            </p>
           </div>
         </div>
       </div>
 
-      {/* Modal 1: Contact Administrator / Forgot Password info */}
-      {showSupportModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <div className="flex items-center gap-2 text-foreground font-bold text-base">
-                <Building className="w-5 h-5 text-primary" />
-                <span>Institution Administration</span>
-              </div>
-              <button
-                onClick={() => setShowSupportModal(false)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-3 text-xs text-muted-foreground leading-relaxed">
-              <p>
-                To maintain assessment integrity, candidate accounts cannot be
-                reset through public online links.
-              </p>
-              <div className="p-3.5 bg-muted/40 border border-border rounded-xl space-y-1.5 text-foreground">
-                <span className="font-semibold block text-primary">Need your UID or Password?</span>
-                <p>
-                  1. Contact your department examination coordinator or lab proctor.
-                </p>
-                <p>
-                  2. Present your valid student ID card for identity verification.
-                </p>
-                <p>
-                  3. The administrator will issue a temporary one-time password and log
-                  the security event.
-                </p>
-              </div>
-              <p className="text-muted-foreground">
-                For platform support emergencies during an active contest, alert your proctor immediately.
-              </p>
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setShowSupportModal(false)}
-                className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-xs font-semibold shadow-md shadow-primary/20"
-              >
-                Understood
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal 2: First-Time Mandatory Password Change */}
+      {/* Modal: First-Time Mandatory Password Change */}
       {showForcePasswordModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5">
@@ -446,12 +272,12 @@ export default function LoginPage() {
 
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={loading}
                   className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl text-xs transition-colors flex items-center justify-center gap-2 shadow-md shadow-primary/20 disabled:opacity-50"
                 >
-                  {isLoading ? (
+                  {loading ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" /> Saving Password...
+                      <Spinner className="w-4 h-4 animate-spin" /> Saving Password...
                     </>
                   ) : (
                     "Save Password & Enter Dashboard"

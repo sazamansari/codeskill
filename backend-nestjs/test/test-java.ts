@@ -8,7 +8,9 @@ public class Main {
         System.out.println("Hello World");
     }
 }`;
-  const results = await service.executeCode('java', code, [{ id: 1, input: '', expected: 'Hello World' }]);
+  const results = await service.executeCode('java', code, [
+    { id: 1, input: '', expected: 'Hello World' },
+  ]);
   console.log(JSON.stringify(results, null, 2));
 }
 

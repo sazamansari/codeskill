@@ -7,8 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { Loader2, AlertCircle } from "lucide-react";
+import {  AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
+import { Spinner } from "@/components/ui/spinner";
 
 const emailSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -70,23 +71,26 @@ export default function ForgotPasswordPage() {
     <div className="flex min-h-screen bg-background text-foreground font-sans">
       
       {/* Left Column - Brand/Graphic (Hidden on smaller screens) */}
-      <div className="hidden lg:flex flex-1 relative bg-black items-center justify-center overflow-hidden flex-col p-12 text-white text-center">
-        {/* Abstract Globe / Grid Background */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:32px_32px] opacity-20" />
-        <div className="absolute left-1/2 top-1/2 -z-10 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-[120px]" />
+      <div className="hidden lg:flex flex-1 relative bg-muted/20 border-r border-border items-center justify-center overflow-hidden flex-col p-12 lg:p-20 text-center">
+        {/* Abstract Grid Background */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:32px_32px] opacity-[0.03] dark:opacity-[0.05]" />
+        <div className="absolute left-1/2 top-1/2 -z-10 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
         
         {/* Brand Content */}
-        <div className="relative z-10 max-w-md flex flex-col items-center">
-          <Link href="/" className="w-16 h-16 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center mb-8 shadow-2xl hover:bg-white/20 transition-colors">
-            <img src="/logo-dark.svg" alt="CodeSkill" className="w-10 h-10 object-contain" />
-          </Link>
-          <h1 className="text-4xl font-bold tracking-tight mb-4">
-            Reset Your<br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Password</span>
-          </h1>
-          <p className="text-lg text-gray-400">
-            Securely regain access to your CodeSkill account and continue building your dream projects.
-          </p>
+        <div className="relative z-10 w-full max-w-lg flex flex-col justify-between h-full">
+          <div className="text-left mt-auto mb-auto">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wide mb-8">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-shield-check w-4 h-4"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2-1 4-2 7-2 2.5 0 4.5 1.2 7 2a1 1 0 0 1 1 1v7z"/><path d="m9 12 2 2 4-4"/></svg> 
+              Account Recovery
+            </div>
+            <h1 className="text-5xl font-extrabold tracking-tight mb-6 text-foreground leading-tight">
+              Reset your <br />
+              password.
+            </h1>
+            <p className="text-xl text-foreground/90 font-medium leading-relaxed max-w-md">
+              Securely regain access to your CodeSkill account and continue building your dream projects.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -139,7 +143,7 @@ export default function ForgotPasswordPage() {
                 type="submit"
                 className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm transition-all flex items-center justify-center mt-2 disabled:opacity-70 shadow-md shadow-primary/20"
               >
-                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Send Reset Code"}
+                {isLoading ? <Spinner className="w-5 h-5 animate-spin" /> : "Send Reset Code"}
               </button>
             </form>
           ) : (
@@ -183,7 +187,7 @@ export default function ForgotPasswordPage() {
                 type="submit"
                 className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm transition-all flex items-center justify-center mt-2 disabled:opacity-70 shadow-md shadow-primary/20"
               >
-                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Reset Password"}
+                {isLoading ? <Spinner className="w-5 h-5 animate-spin" /> : "Reset Password"}
               </button>
               
               <button

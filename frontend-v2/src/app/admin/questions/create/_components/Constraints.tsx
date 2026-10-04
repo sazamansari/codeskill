@@ -17,7 +17,7 @@ export default function Constraints() {
       delay={0.2}
     >
       <div className="space-y-3">
-        <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
+        <div className="border border-border dark:border-border rounded-xl overflow-hidden focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
           <Editor
             height="180px"
             language="markdown"
@@ -52,7 +52,7 @@ export default function Constraints() {
                   constraints: current ? `${current}\n${hint}` : hint,
                 });
               }}
-              className="px-3 py-1.5 text-xs font-mono bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-600 dark:text-slate-400 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 dark:hover:bg-indigo-500/10 dark:hover:border-indigo-500/30 dark:hover:text-indigo-400 transition-all cursor-pointer"
+              className="px-3 py-1.5 text-xs font-mono bg-muted/50 dark:bg-card border border-border dark:border-border rounded-lg text-muted-foreground dark:text-muted-foreground hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 dark:hover:bg-indigo-500/10 dark:hover:border-indigo-500/30 dark:hover:text-indigo-400 transition-all cursor-pointer"
             >
               + {hint}
             </button>

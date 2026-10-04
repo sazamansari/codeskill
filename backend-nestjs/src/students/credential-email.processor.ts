@@ -3,7 +3,10 @@ import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { EmailJob, EmailJobDocument } from '../database/schemas/email-job.schema';
+import {
+  EmailJob,
+  EmailJobDocument,
+} from '../database/schemas/email-job.schema';
 import { EmailService } from '../emails/email.service';
 
 @Processor('credential-email')
@@ -18,7 +21,9 @@ export class CredentialEmailProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<{ emailJobId: string; portalUrl?: string }>): Promise<any> {
+  async process(
+    job: Job<{ emailJobId: string; portalUrl?: string }>,
+  ): Promise<any> {
     const { emailJobId, portalUrl } = job.data;
     this.logger.log(`[BullMQ] Processing credential email job: ${emailJobId}`);
 

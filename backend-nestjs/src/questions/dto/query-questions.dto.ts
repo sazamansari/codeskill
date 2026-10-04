@@ -15,7 +15,9 @@ export class QueryQuestionsDto {
   @IsNumber()
   limit?: number = 20;
 
-  @ApiPropertyOptional({ description: 'Text search within question, topic, or subtopic' })
+  @ApiPropertyOptional({
+    description: 'Text search within question, topic, or subtopic',
+  })
   @IsOptional()
   @IsString()
   search?: string;
@@ -35,12 +37,16 @@ export class QueryQuestionsDto {
   @IsString()
   difficulty?: string;
 
-  @ApiPropertyOptional({ enum: ['pending', 'approved', 'rejected', 'archived'] })
+  @ApiPropertyOptional({
+    enum: ['pending', 'approved', 'rejected', 'archived'],
+  })
   @IsOptional()
   @IsString()
   status?: string;
 
-  @ApiPropertyOptional({ description: 'Filter AI generated questions ("true" or "false")' })
+  @ApiPropertyOptional({
+    description: 'Filter AI generated questions ("true" or "false")',
+  })
   @IsOptional()
   @IsString()
   aiGenerated?: string;

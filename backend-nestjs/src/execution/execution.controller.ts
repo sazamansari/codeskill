@@ -30,7 +30,9 @@ export class ExecutionController {
 
   @Post('run')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Execute code against test cases without saving a submission' })
+  @ApiOperation({
+    summary: 'Execute code against test cases without saving a submission',
+  })
   @ApiBody({
     schema: {
       type: 'object',
@@ -39,7 +41,18 @@ export class ExecutionController {
         code: { type: 'string', description: 'Source code to execute' },
         language: {
           type: 'string',
-          enum: ['c', 'cpp', 'c++', 'java', 'python', 'python3', 'py', 'javascript', 'js', 'node'],
+          enum: [
+            'c',
+            'cpp',
+            'c++',
+            'java',
+            'python',
+            'python3',
+            'py',
+            'javascript',
+            'js',
+            'node',
+          ],
           description: 'Programming language',
         },
         testCases: {
@@ -49,13 +62,17 @@ export class ExecutionController {
             properties: {
               id: { type: 'number' },
               input: { type: 'string', description: 'Stdin input' },
-              expected: { type: 'string', description: 'Expected stdout output' },
+              expected: {
+                type: 'string',
+                description: 'Expected stdout output',
+              },
             },
           },
         },
         config: {
           type: 'object',
-          description: 'Optional execution configuration (timeLimit, memoryLimit, etc.)',
+          description:
+            'Optional execution configuration (timeLimit, memoryLimit, etc.)',
         },
       },
     },
@@ -134,7 +151,10 @@ export class ExecutionController {
     @Param('jobId') jobId: string,
   ) {
     const job = await this.submissionQueue.getJob(jobId);
-    if (!job || (job.data.userId && String(job.data.userId) !== String(userId))) {
+    if (
+      !job ||
+      (job.data.userId && String(job.data.userId) !== String(userId))
+    ) {
       throw new NotFoundException('Execution job not found');
     }
     const state = await job.getState();
@@ -147,7 +167,9 @@ export class ExecutionController {
         results: [],
         runtime: 0,
         passedCount: 0,
-        totalCount: Array.isArray(job.data.testCases) ? job.data.testCases.length : 0,
+        totalCount: Array.isArray(job.data.testCases)
+          ? job.data.testCases.length
+          : 0,
       };
     }
     return { success: true, status: state, jobId };
@@ -160,7 +182,10 @@ export class ExecutionController {
    */
   @Post('azure-run')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Execute code via Azure Container Instances (Microsoft-powered, high scale)' })
+  @ApiOperation({
+    summary:
+      'Execute code via Azure Container Instances (Microsoft-powered, high scale)',
+  })
   async azureRun(
     @CurrentUser('_id') userId: string,
     @Body()

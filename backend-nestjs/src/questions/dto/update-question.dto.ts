@@ -68,7 +68,9 @@ export class UpdateQuestionDto {
   @IsIn(['single_choice', 'multiple_choice'])
   questionType?: 'single_choice' | 'multiple_choice';
 
-  @ApiPropertyOptional({ enum: ['pending', 'approved', 'rejected', 'archived'] })
+  @ApiPropertyOptional({
+    enum: ['pending', 'approved', 'rejected', 'archived'],
+  })
   @IsOptional()
   @IsIn(['pending', 'approved', 'rejected', 'archived'])
   status?: 'pending' | 'approved' | 'rejected' | 'archived';

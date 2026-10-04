@@ -11,7 +11,6 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  Loader2,
   Copy,
   Check,
   RefreshCw,
@@ -26,6 +25,7 @@ import {
   Mail,
 } from "lucide-react";
 import { adminStudentsAPI } from "@/config/api";
+import { Spinner } from "@/components/ui/spinner";
 
 interface StudentProfile {
   university?: string;
@@ -333,7 +333,7 @@ export default function AdminStudentsPage() {
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-5 rounded-2xl bg-card border border-border flex items-center gap-4 shadow-sm">
-          <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0">
             <Users className="w-6 h-6" />
           </div>
           <div>
@@ -433,7 +433,7 @@ export default function AdminStudentsPage() {
       <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
         {isLoading ? (
           <div className="p-16 flex flex-col items-center justify-center gap-3 text-muted-foreground">
-            <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+            <Spinner className="w-8 h-8 animate-spin text-amber-500" />
             <p className="text-sm">Loading student directory...</p>
           </div>
         ) : error ? (
@@ -809,7 +809,7 @@ export default function AdminStudentsPage() {
                   disabled={formSubmitting}
                   className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold shadow-sm flex items-center gap-2 disabled:opacity-50"
                 >
-                  {formSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {formSubmitting && <Spinner className="w-4 h-4 animate-spin" />}
                   {editingStudent ? "Save Changes" : "Create Student"}
                 </button>
               </div>
@@ -896,7 +896,7 @@ export default function AdminStudentsPage() {
                     className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold shadow-sm flex items-center gap-2 disabled:opacity-50"
                   >
                     {resetModalData.loading && (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Spinner className="w-4 h-4 animate-spin" />
                     )}
                     Generate New Password
                   </button>

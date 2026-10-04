@@ -64,7 +64,7 @@ export function LeaderboardPreview() {
                         1
                       </span>
                     ) : student.rank === 2 ? (
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-400/10 text-slate-400 font-bold text-xs border border-slate-400/20">
+                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-400/10 text-muted-foreground font-bold text-xs border border-slate-400/20">
                         2
                       </span>
                     ) : student.rank === 3 ? (

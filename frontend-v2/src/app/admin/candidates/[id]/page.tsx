@@ -5,6 +5,7 @@ import { adminUsersAPI } from "@/config/api";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, CheckCircle2, XCircle, Code2, Trophy, Clock, User, ShieldCheck, Printer } from "lucide-react";
 import Link from "next/link";
+import { PDFDownloadButton } from "@/components/reports/pdf/PDFDownloadButton";
 
 function CandidateReportContent() {
   const params = useParams();
@@ -69,15 +70,36 @@ function CandidateReportContent() {
                 </span>
               )}
             </h1>
-            <p className="text-muted-foreground text-sm mt-1 print:text-gray-600">Detailed performance analytics and submission history.</p>
+            <p className="text-muted-foreground text-sm mt-1 print:text-muted-foreground">Detailed performance analytics and submission history.</p>
           </div>
         </div>
-        <button 
-          onClick={() => window.print()}
-          className="print:hidden flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        >
-          <Printer className="w-4 h-4" /> Print PDF
-        </button>
+        <PDFDownloadButton 
+          data={{
+            reportId: `CS-${new Date().getFullYear()}-${user._id.slice(-6).toUpperCase()}`,
+            generatedAt: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }),
+            assessmentName: 'DSA Assessment - Round 1',
+            student: {
+              name: user.name,
+              email: user.email,
+              role: user.isAdmin ? 'Admin' : 'Candidate',
+              joinedAt: new Date(user.createdAt).toLocaleDateString('en-GB'),
+              lastActiveAt: user.lastActive ? new Date(user.lastActive).toLocaleDateString('en-GB') : 'Unknown'
+            },
+            performance: {
+              totalSolved: user.solvedProblems?.length || 0,
+              score: user.stats?.score || 0,
+              acceptanceRate: stats.acceptanceRate || 0,
+              streak: user.stats?.streak || 0
+            },
+            submissions: recentSubmissions.map((s: any) => ({
+              _id: s._id,
+              problemTitle: s.problem?.title || 'Unknown Problem',
+              language: s.language,
+              status: s.status,
+              submittedAt: new Date(s.createdAt).toLocaleString('en-GB')
+            }))
+          }}
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -124,10 +146,10 @@ function CandidateReportContent() {
             <div className="text-4xl font-bold text-foreground">{user.stats?.score || 0}</div>
           </div>
 
-          <div className="bg-card border border-border rounded-xl p-6 flex flex-col justify-between group hover:border-blue-500/30 transition-colors">
+          <div className="bg-card border border-border rounded-xl p-6 flex flex-col justify-between group hover:border-primary/30 transition-colors">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium text-muted-foreground">Acceptance Rate</h3>
-              <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+              <div className="p-2 bg-primary/10 rounded-lg text-primary">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
             </div>
@@ -184,7 +206,7 @@ function CandidateReportContent() {
                         {sub.status === "Accepted" ? (
                           <span className="text-green-500 flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4" /> Accepted</span>
                         ) : sub.status === "Pending" ? (
-                          <span className="text-blue-500 flex items-center gap-1.5"><Clock className="w-4 h-4" /> Evaluating</span>
+                          <span className="text-primary flex items-center gap-1.5"><Clock className="w-4 h-4" /> Evaluating</span>
                         ) : (
                           <span className="text-red-500 flex items-center gap-1.5"><XCircle className="w-4 h-4" /> {sub.status}</span>
                         )}

@@ -6,7 +6,7 @@ import SectionCard from "./SectionCard";
 import { Search, X } from "lucide-react";
 
 const inputClass =
-  "w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all";
+  "w-full px-3.5 py-2.5 bg-muted/50 dark:bg-card border border-border dark:border-border rounded-xl text-sm text-foreground dark:text-white placeholder:text-gray-400 dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all";
 
 const labelClass = "text-[13px] font-medium text-gray-700 dark:text-slate-300";
 
@@ -47,7 +47,7 @@ export default function SEOSection() {
               placeholder="SEO title for search engines"
               className={inputClass}
             />
-            <p className="text-[11px] text-gray-400 dark:text-slate-500">
+            <p className="text-[11px] text-gray-400 dark:text-muted-foreground">
               {seo.metaTitle.length}/60 characters
             </p>
           </div>
@@ -72,7 +72,7 @@ export default function SEOSection() {
             placeholder="Brief description for search engine results..."
             className={inputClass}
           />
-          <p className="text-[11px] text-gray-400 dark:text-slate-500">
+          <p className="text-[11px] text-gray-400 dark:text-muted-foreground">
             {seo.metaDescription.length}/160 characters
           </p>
         </div>
@@ -83,7 +83,7 @@ export default function SEOSection() {
             {seo.keywords.map((kw) => (
               <span
                 key={kw}
-                className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 text-xs font-medium rounded-lg"
+                className="inline-flex items-center gap-1 px-2.5 py-1 bg-muted dark:bg-slate-700 text-gray-700 dark:text-slate-300 text-xs font-medium rounded-lg"
               >
                 {kw}
                 <button
@@ -101,7 +101,7 @@ export default function SEOSection() {
               onChange={(e) => setKeywordInput(e.target.value)}
               onKeyDown={handleKeywordKeyDown}
               placeholder={seo.keywords.length === 0 ? "Type and press Enter..." : ""}
-              className="flex-1 min-w-[120px] bg-transparent text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 outline-none"
+              className="flex-1 min-w-[120px] bg-transparent text-sm text-foreground dark:text-white placeholder:text-gray-400 dark:placeholder:text-muted-foreground outline-none"
             />
           </div>
         </div>

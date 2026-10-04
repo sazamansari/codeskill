@@ -34,10 +34,10 @@ export function Hero() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-[54px] font-extrabold tracking-tight leading-[1.12] text-[#111111] dark:text-foreground group/headline select-none"
+              className="text-4xl sm:text-5xl lg:text-[54px] font-extrabold tracking-tight leading-[1.12] text-foreground dark:text-foreground group/headline select-none"
             >
               <span className="hover:text-amber-500 dark:hover:text-amber-400 transition-colors duration-300">Build Stronger</span> <br className="hidden sm:inline" />
-              <span className="text-[#111111] dark:text-foreground hover:text-amber-500 dark:hover:text-amber-400 relative inline-block transition-colors duration-300 group/coding">
+              <span className="text-foreground dark:text-foreground hover:text-amber-500 dark:hover:text-amber-400 relative inline-block transition-colors duration-300 group/coding">
                 Coding Skills.
                 <span className="absolute bottom-1 left-0 right-0 h-2.5 bg-[rgba(245,158,11,0.25)] group-hover/coding:bg-[rgba(245,158,11,0.45)] group-hover/headline:bg-[rgba(245,158,11,0.45)] dark:bg-amber-400/30 dark:group-hover/coding:bg-amber-400/60 dark:group-hover/headline:bg-amber-400/60 -z-10 rounded-xs transition-all duration-300" />
               </span>
@@ -48,7 +48,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-base sm:text-lg text-[#525252] dark:text-muted-foreground leading-relaxed max-w-lg"
+              className="text-base sm:text-lg text-muted-foreground dark:text-muted-foreground leading-relaxed max-w-lg"
             >
               Practice data structures and algorithms, take proctored assessments, and prepare for technical interviews.
             </motion.p>
@@ -61,16 +61,16 @@ export function Hero() {
               className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 w-full sm:w-auto pt-1"
             >
               <Link
-                href="/problems"
-                className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-[#111111] hover:bg-[#262626] text-white dark:bg-white dark:hover:bg-neutral-100 dark:text-black font-bold text-sm transition-all shadow-xs hover:shadow-md hover:scale-[1.02] group active:scale-[0.98]"
+                href="/login"
+                className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-foreground hover:bg-[#262626] text-background dark:bg-white dark:hover:bg-neutral-100 dark:text-black font-bold text-sm transition-all shadow-xs hover:shadow-md hover:scale-[1.02] group active:scale-[0.98]"
               >
-                <span>Start Coding</span>
+                <span>Log In</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
 
               <Link
                 href="/assessments"
-                className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-[#FFFFFF] hover:bg-[#F5F5F5] text-[#171717] border border-black/10 dark:bg-card dark:hover:bg-muted dark:text-foreground dark:border-border font-semibold text-sm transition-all shadow-xs hover:border-black/20 dark:hover:border-foreground/30"
+                className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-background hover:bg-[#F5F5F5] text-foreground border border-black/10 dark:bg-card dark:hover:bg-muted dark:text-foreground dark:border-border font-semibold text-sm transition-all shadow-xs hover:border-black/20 dark:hover:border-foreground/30"
               >
                 <span>View Assessments</span>
               </Link>

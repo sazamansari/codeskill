@@ -362,4 +362,11 @@ export const studentAssessmentsAPI = {
   retakeAttempt: (id: string) => api.post(`/assessments/${id}/retake`),
 };
 
+
+export const analyticsAPI = {
+  getOverview: (assessmentId: string) => api.get(`/admin/analytics/assessment/${assessmentId}/overview`),
+  getLeaderboard: (assessmentId: string, params?: { page?: number; limit?: number }) => api.get(`/admin/analytics/assessment/${assessmentId}/leaderboard`, { params }),
+  getQuestionAnalytics: (assessmentId: string) => api.get(`/admin/analytics/assessment/${assessmentId}/questions`),
+};
+
 export default api;

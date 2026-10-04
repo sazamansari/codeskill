@@ -41,14 +41,20 @@ export class QuestionsController {
   constructor(private readonly questionsService: QuestionsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get paginated list of assessment questions with topic/difficulty filters' })
+  @ApiOperation({
+    summary:
+      'Get paginated list of assessment questions with topic/difficulty filters',
+  })
   async findAll(@Query() query: QueryQuestionsDto) {
     return this.questionsService.findAll(query);
   }
 
   @Post('import')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Upload and validate spreadsheet (XLSX/CSV) for bulk question import' })
+  @ApiOperation({
+    summary:
+      'Upload and validate spreadsheet (XLSX/CSV) for bulk question import',
+  })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -65,7 +71,9 @@ export class QuestionsController {
 
   @Post('import/auto')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: '1-Attempt upload, convert, and push (upsert) questions into bank' })
+  @ApiOperation({
+    summary: '1-Attempt upload, convert, and push (upsert) questions into bank',
+  })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -83,12 +91,19 @@ export class QuestionsController {
     }
     const ip = req.ip || req.connection?.remoteAddress || '';
     const userAgent = req.headers['user-agent'] || '';
-    return this.questionsService.autoImportQuestions(file.buffer, adminUser, ip, userAgent);
+    return this.questionsService.autoImportQuestions(
+      file.buffer,
+      adminUser,
+      ip,
+      userAgent,
+    );
   }
 
   @Post('import/confirm')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Commit validated assessment questions into question bank' })
+  @ApiOperation({
+    summary: 'Commit validated assessment questions into question bank',
+  })
   async confirmImport(
     @Body('validRows') validRows: any[],
     @CurrentUser() adminUser: any,
@@ -96,11 +111,18 @@ export class QuestionsController {
   ) {
     const ip = req.ip || req.connection?.remoteAddress || '';
     const userAgent = req.headers['user-agent'] || '';
-    return this.questionsService.confirmQuestionsImport(validRows, adminUser, ip, userAgent);
+    return this.questionsService.confirmQuestionsImport(
+      validRows,
+      adminUser,
+      ip,
+      userAgent,
+    );
   }
 
   @Get('topics')
-  @ApiOperation({ summary: 'Get aggregated topic distribution and difficulty breakdowns' })
+  @ApiOperation({
+    summary: 'Get aggregated topic distribution and difficulty breakdowns',
+  })
   async getTopics() {
     const topics = await this.questionsService.getTopicsDistribution();
     return { success: true, topics, data: topics };
@@ -153,7 +175,9 @@ export class QuestionsController {
   }
 
   @Put(':id/approve')
-  @ApiOperation({ summary: 'Approve a pending or AI-generated question into question bank' })
+  @ApiOperation({
+    summary: 'Approve a pending or AI-generated question into question bank',
+  })
   @ApiParam({ name: 'id', description: 'Question ID' })
   async approve(
     @Param('id') id: string,
@@ -162,11 +186,20 @@ export class QuestionsController {
   ) {
     const ip = req.ip || req.connection?.remoteAddress || '';
     const userAgent = req.headers['user-agent'] || '';
-    return this.questionsService.review(id, 'approved', '', adminUser, ip, userAgent);
+    return this.questionsService.review(
+      id,
+      'approved',
+      '',
+      adminUser,
+      ip,
+      userAgent,
+    );
   }
 
   @Put(':id/reject')
-  @ApiOperation({ summary: 'Reject a pending or AI-generated question with reason' })
+  @ApiOperation({
+    summary: 'Reject a pending or AI-generated question with reason',
+  })
   @ApiParam({ name: 'id', description: 'Question ID' })
   async reject(
     @Param('id') id: string,
@@ -176,7 +209,14 @@ export class QuestionsController {
   ) {
     const ip = req.ip || req.connection?.remoteAddress || '';
     const userAgent = req.headers['user-agent'] || '';
-    return this.questionsService.review(id, 'rejected', reason, adminUser, ip, userAgent);
+    return this.questionsService.review(
+      id,
+      'rejected',
+      reason,
+      adminUser,
+      ip,
+      userAgent,
+    );
   }
 }
 
@@ -195,7 +235,9 @@ export class QuestionBanksController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get single question bank with populated questions' })
+  @ApiOperation({
+    summary: 'Get single question bank with populated questions',
+  })
   async findById(@Param('id') id: string) {
     return this.questionsService.findBankById(id);
   }

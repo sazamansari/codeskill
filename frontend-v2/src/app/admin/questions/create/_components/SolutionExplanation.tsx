@@ -6,7 +6,7 @@ import Editor from "@monaco-editor/react";
 import { BookOpen } from "lucide-react";
 
 const inputClass =
-  "w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all";
+  "w-full px-3.5 py-2.5 bg-muted/50 dark:bg-card border border-border dark:border-border rounded-xl text-sm text-foreground dark:text-white placeholder:text-gray-400 dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all";
 
 export default function SolutionExplanation() {
   const { solutionExplanation, updateSolutionExplanation, isDarkMode } = useQuestionStore();
@@ -23,7 +23,7 @@ export default function SolutionExplanation() {
         {/* Markdown editor */}
         <div className="space-y-2">
           <label className="text-[13px] font-medium text-gray-700 dark:text-slate-300">Editorial (Markdown)</label>
-          <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
+          <div className="border border-border dark:border-border rounded-xl overflow-hidden focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
             <Editor
               height="300px"
               language="markdown"

@@ -4,18 +4,22 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { 
   Play, Send, Settings, BookOpen, Terminal, Clock, ChevronLeft, ChevronRight, ChevronDown, 
-  Maximize2, Minimize2, CheckCircle2, Loader2, XCircle, AlertTriangle, 
+  Maximize2, Minimize2, CheckCircle2, XCircle, AlertTriangle, 
   List, MessageSquare, Lightbulb, Sparkles, StickyNote, Tag, BarChart3,
   Trophy, Flame, Copy, RotateCcw, History, Eye, EyeOff, Plus, Trash2,
   ThumbsUp, ThumbsDown, ArrowLeft, Hash, Zap, Target, Award, TrendingUp,
-  Code2, FileText, Brain, User, SendHorizontal, Bot
+  Code2, FileText, Brain, User, SendHorizontal, Bot, Check, ArrowRight
 } from "lucide-react";
+import { ProgrammingLanguageIcon } from "@/components/ui/ProgrammingLanguageIcon";
 import Link from "next/link";
 import { useState, useEffect, useCallback, use, useRef } from "react";
 import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from "react-resizable-panels";
 import Editor from "@monaco-editor/react";
 import { submissionAPI, runAPI, problemsAPI, discussionsAPI } from "@/config/api";
 import { useTheme } from "@/context/ThemeContext";
+import { Spinner } from "@/components/ui/spinner";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const LANGUAGES = [
   { id: "c", name: "C", ext: "main.c", defaultCode: "#include <stdio.h>\n\nint main() {\n    // Read input\n    // Write your solution here\n    return 0;\n}" },
@@ -70,12 +74,23 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
   
   const [problem, setProblem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    gsap.from(".coding-action-bar", {
+      opacity: 0,
+      y: 20,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+  }, { scope: containerRef });
   
   // Tab State
   const [activeSidebarTab, setActiveSidebarTab] = useState("description");
   
   // Editor State
   const [language, setLanguage] = useState<string>("javascript");
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const [code, setCode] = useState<string>("");
 
   const [vimMode, setVimMode] = useState(false);
@@ -354,6 +369,10 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
   };
 
   const handleRun = useCallback(async () => {
+    if (typeof window !== "undefined" && !localStorage.getItem("codeskill_token")) {
+      setShowLoginModal(true);
+      return;
+    }
     setIsRunning(true);
     setRunResult(null);
     try {
@@ -362,14 +381,26 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
       setActiveResultCase(0);
       setActiveBottomTab("console");
     } catch (err: any) {
-      setRunResult({
-        status: "error",
-        results: [],
-        runtime: 0,
-        logs: [err.response?.data?.message || err.message || "Failed to connect to the backend."],
-        passedCount: 0,
-        totalCount: 0,
-      });
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setRunResult({
+          status: "error",
+          results: [],
+          runtime: 0,
+          logs: ["Authentication required.\nYour session is no longer authorized to execute code.\nPlease sign in again."],
+          passedCount: 0,
+          totalCount: 0,
+        });
+        setShowLoginModal(true);
+      } else {
+        setRunResult({
+          status: "error",
+          results: [],
+          runtime: 0,
+          logs: [err.response?.data?.message || err.message || "Failed to connect to the backend."],
+          passedCount: 0,
+          totalCount: 0,
+        });
+      }
       setActiveBottomTab("console");
     } finally {
       setIsRunning(false);
@@ -377,6 +408,10 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
   }, [code, language, problem]);
 
   const handleSubmit = useCallback(async () => {
+    if (typeof window !== "undefined" && !localStorage.getItem("codeskill_token")) {
+      setShowLoginModal(true);
+      return;
+    }
     setIsSubmitting(true);
     setRunResult(null);
     try {
@@ -406,14 +441,26 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
         setShowLoginModal(true);
       }
     } catch (err: any) {
-      setRunResult({
-        status: "error",
-        results: [],
-        runtime: 0,
-        logs: [err.response?.data?.message || err.message || "Failed to connect to the backend."],
-        passedCount: 0,
-        totalCount: 0,
-      });
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setRunResult({
+          status: "error",
+          results: [],
+          runtime: 0,
+          logs: ["Authentication required.\nYour session is no longer authorized to execute code.\nPlease sign in again."],
+          passedCount: 0,
+          totalCount: 0,
+        });
+        setShowLoginModal(true);
+      } else {
+        setRunResult({
+          status: "error",
+          results: [],
+          runtime: 0,
+          logs: [err.response?.data?.message || err.message || "Failed to connect to the backend."],
+          passedCount: 0,
+          totalCount: 0,
+        });
+      }
       setActiveBottomTab("console");
     } finally {
       setIsSubmitting(false);
@@ -463,7 +510,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+          <Spinner className="w-8 h-8 text-indigo-500 animate-spin" />
           <p className="text-sm text-muted-foreground animate-pulse">Loading problem...</p>
         </div>
       </div>
@@ -491,18 +538,12 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
     : "N/A";
 
   return (
-    <div className="flex h-screen bg-[#0B1220] overflow-hidden font-sans text-[#F8FAFC]">
+    <div ref={containerRef} className="flex h-dvh bg-background overflow-hidden font-sans text-foreground relative">
       
       {/* ═══════════════════════════════════════════════════════════════════════
           1. SLIM LEFT SIDEBAR (Activity Bar) — Modern Developer icon rail
          ═══════════════════════════════════════════════════════════════════════ */}
-      <div className="w-12 border-r border-white/[0.08] bg-[#0F172A] flex flex-col items-center py-3 gap-1 z-10 shrink-0">
-        <Link href="/problems" title="Back to Problems">
-          <div className="p-2 rounded-lg text-[#94A3B8] hover:bg-white/[0.06] hover:text-[#F8FAFC] transition-all cursor-pointer mb-2">
-            <ArrowLeft className="w-4.5 h-4.5" />
-          </div>
-        </Link>
-        <div className="w-7 h-px bg-white/[0.08] mb-1" />
+      <div className="w-12 border-r border-[#1F2937] bg-[#0A0A0A] flex flex-col items-center py-3 gap-1 z-10 shrink-0">
         
         {SIDEBAR_TABS.map(tab => (
           <SidebarIcon
@@ -525,22 +566,30 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
       <div className="flex-1 flex flex-col min-w-0">
         
         {/* ─── TOP NAVBAR ─────────────────────────────────────────────────── */}
-        <header className="h-13 border-b border-white/[0.08] bg-[#0F172A] flex items-center justify-between px-4 shrink-0 gap-3">
+        <header className="h-13 border-b border-[#1F2937] bg-[#0A0A0A] flex items-center justify-between px-4 shrink-0 gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <Link href="/problems" className="flex items-center gap-1 text-xs font-semibold text-[#94A3B8] hover:text-[#F8FAFC] px-2 py-1 rounded-md hover:bg-white/[0.04] transition-all shrink-0">
-              <ChevronLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">Back</span>
+            <Link 
+              href="/problems" 
+              title="Back to Problems" 
+              className="inline-flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-medium text-[#D1D5DB] transition-colors hover:bg-[#1F2937] hover:text-[#FFFFFF] shrink-0"
+              onMouseEnter={(e) => gsap.to(e.currentTarget, { scale: 1.02, duration: 0.15 })}
+              onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.15 })}
+              onMouseDown={(e) => gsap.to(e.currentTarget, { scale: 0.98, duration: 0.15 })}
+              onMouseUp={(e) => gsap.to(e.currentTarget, { scale: 1.02, duration: 0.15 })}
+            >
+              <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>Back</span>
             </Link>
             
-            <div className="w-px h-5 bg-white/[0.08] shrink-0" />
+            <div className="w-px h-5 bg-[#374151] shrink-0" />
             
             <div className="flex items-center gap-2 min-w-0">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#172033] border border-white/[0.08] text-[11px] font-bold text-[#CBD5E1] shrink-0">
-                <Code2 className="w-3.5 h-3.5 text-[#2563EB]" />
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-secondary border border-border text-[11px] font-bold text-foreground/80 shrink-0">
+                <ProgrammingLanguageIcon language={language} className="w-3.5 h-3.5" />
                 <span>{LANGUAGES.find(l => l.id === language)?.name || "Language"}</span>
               </div>
               
-              <h1 className="text-[15px] sm:text-[16px] font-bold text-[#F8FAFC] truncate max-w-[280px] md:max-w-[420px] whitespace-nowrap">
+              <h1 className="text-[15px] sm:text-[16px] font-bold text-foreground truncate max-w-[280px] md:max-w-[420px] whitespace-nowrap">
                 {problem.title}
               </h1>
               
@@ -550,11 +599,11 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
             </div>
             
             {/* Progress Indicator */}
-            <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#172033] border border-white/[0.08] text-[11px] text-[#94A3B8] shrink-0 ml-1">
-              <span className="font-medium text-[#CBD5E1]">Lesson Progress</span>
+            <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 rounded-md bg-secondary border border-border text-[11px] text-muted-foreground shrink-0 ml-1">
+              <span className="font-medium text-foreground/80">Lesson Progress</span>
               <div className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-[#10B981]" title="Completed" />
-                <span className="w-2 h-2 rounded-full bg-[#2563EB]" title="Current Lesson" />
+                <span className="w-2 h-2 rounded-full bg-primary" title="Current Lesson" />
                 <span className="w-2 h-2 rounded-full bg-white/20" title="Upcoming" />
               </div>
             </div>
@@ -562,64 +611,89 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
             {lastSaved && (
               <motion.span 
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className="hidden xl:flex text-[11px] text-[#94A3B8] ml-1 items-center gap-1.5 shrink-0"
+                className="hidden xl:flex text-[11px] text-muted-foreground ml-1 items-center gap-1.5 shrink-0"
               >
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" /> Saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </motion.span>
             )}
           </div>
           
-          <div className="flex items-center gap-2 shrink-0">
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="appearance-none bg-[#172033] border border-white/[0.08] text-[#F8FAFC] text-xs font-semibold rounded-lg h-8 px-3 cursor-pointer outline-none focus:border-[#2563EB]/60 transition-all hover:bg-[#1E293B]"
+          <div className="relative flex items-center shrink-0 ml-auto z-50">
+            <button
+              type="button"
+              onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
+              className="inline-flex h-9 min-w-[120px] items-center justify-between gap-2 rounded-[8px] border border-[#3F3F46] bg-[#18181B] px-3 text-sm font-medium text-[#F3F4F6] hover:bg-[#27272A] focus:outline-none focus:ring-1 focus:ring-[#F5B800] transition-colors"
+              aria-expanded={showLanguageDropdown}
+              aria-haspopup="listbox"
+              aria-label="Select programming language"
             >
-              {LANGUAGES.map(lang => (
-                <option key={lang.id} value={lang.id}>{lang.name}</option>
-              ))}
-            </select>
+              <span>{LANGUAGES.find(l => l.id === language)?.name || "Language"}</span>
+              <ChevronDown className={`h-4 w-4 text-[#9CA3AF] transition-transform duration-200 ${showLanguageDropdown ? 'rotate-180' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+              {showLanguageDropdown && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setShowLanguageDropdown(false)} 
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className="absolute top-full right-0 mt-1.5 w-[140px] rounded-[10px] border border-[#3F3F46] bg-[#18181B] py-1.5 shadow-xl origin-top-right z-50"
+                    role="listbox"
+                  >
+                  {LANGUAGES.map(lang => (
+                    <button
+                      key={lang.id}
+                      role="option"
+                      aria-selected={language === lang.id}
+                      onClick={() => {
+                        setLanguage(lang.id);
+                        setShowLanguageDropdown(false);
+                      }}
+                      className="flex w-full items-center justify-between px-3 py-2 text-sm text-[#E5E7EB] hover:bg-[#27272A] transition-colors text-left"
+                    >
+                      <span className={language === lang.id ? "text-[#F5B800] font-semibold" : "font-medium"}>{lang.name}</span>
+                      {language === lang.id && <Check className="h-3.5 w-3.5 text-[#F5B800]" />}
+                    </button>
+                  ))}
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
             
-            <div className="w-px h-5 bg-white/[0.08]" />
-            
-            <Button variant="outline" size="sm" onClick={handleRun} disabled={isRunning || isSubmitting} className="h-8 px-3.5 text-xs font-bold gap-1.5 bg-[#172033] hover:bg-[#1E293B] text-[#F8FAFC] border-white/[0.08]">
-              {isRunning ? <Loader2 className="w-3.5 h-3.5 text-[#2563EB] animate-spin" /> : <Play className="w-3.5 h-3.5 text-[#2563EB]" />}
-              <span>Run</span>
-              <kbd className="hidden sm:inline-flex text-[9px] font-mono text-[#94A3B8] bg-[#0F172A] px-1 rounded ml-1">⌘↵</kbd>
-            </Button>
-            <Button size="sm" onClick={handleSubmit} disabled={isRunning || isSubmitting} className="bg-[#2563EB] hover:bg-[#3B82F6] text-white h-8 px-4 text-xs font-bold gap-1.5 shadow-sm shadow-blue-500/20 border-0">
-              {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-              <span>Submit</span>
-              <kbd className="hidden sm:inline-flex text-[9px] font-mono text-white/70 bg-white/15 px-1 rounded ml-1">⇧⌘↵</kbd>
-            </Button>
           </div>
         </header>
 
         {/* ─── PANELS ──────────────────────────────────────────────────────── */}
-        <div className="flex-1 overflow-hidden p-1.5">
+        <div className="flex-1 min-h-0 overflow-hidden p-1.5 relative z-0">
           <PanelGroup orientation="horizontal" className="gap-1.5">
             
             {/* ═══════════════════════════════════════════════════════════════
                 CENTER PANEL — Problem Description / Editorial / Hints / etc.
                ═══════════════════════════════════════════════════════════════ */}
-            <Panel defaultSize={40} minSize={20} className="bg-[#0F172A] border border-white/[0.08] rounded-xl overflow-hidden flex flex-col shadow-sm">
+            <Panel defaultSize={40} minSize={20} className="bg-card border border-border rounded-xl overflow-hidden flex flex-col shadow-sm">
               
               {/* Panel Header */}
-              <div className="px-3.5 py-2 border-b border-white/[0.08] bg-[#131E32] flex items-center justify-between shrink-0">
+              <div className="px-3.5 py-2 border-b border-border bg-muted/50 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
                   {(() => {
                     const tab = SIDEBAR_TABS.find(t => t.id === activeSidebarTab);
                     const TabIcon = tab?.icon || FileText;
-                    return <TabIcon className="w-3.5 h-3.5 text-[#3B82F6]" />;
+                    return <TabIcon className="w-3.5 h-3.5 text-primary" />;
                   })()}
-                  <span className="text-xs font-bold text-[#F8FAFC] capitalize">
+                  <span className="text-xs font-bold text-foreground capitalize">
                     {activeSidebarTab.replace('_', ' ')}
                   </span>
                 </div>
               </div>
               
               {/* Panel Body (Scrolls Independently) */}
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 min-h-0 overflow-y-auto">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeSidebarTab}
@@ -635,47 +709,47 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                         {/* Problem Metadata Bar */}
                         <div className="flex flex-wrap gap-2 mb-5">
                           <MetaBadge icon={Target} label={problem.difficulty} className={difficultyClass} />
-                          <MetaBadge icon={BarChart3} label={`${acceptanceRate}% acceptance`} className="bg-[#172033] border-white/[0.08] text-[#CBD5E1] text-[11px]" />
-                          <MetaBadge icon={Zap} label={`${problem.stats?.totalSubmissions || 0} submissions`} className="bg-[#172033] border-white/[0.08] text-[#CBD5E1] text-[11px]" />
-                          {problem.config?.timeLimit && <MetaBadge icon={Clock} label={`${problem.config.timeLimit}ms`} className="bg-[#172033] border-white/[0.08] text-[#CBD5E1] text-[11px]" />}
-                          {problem.config?.memoryLimit && <MetaBadge icon={Code2} label={`${problem.config.memoryLimit}MB`} className="bg-[#172033] border-white/[0.08] text-[#CBD5E1] text-[11px]" />}
+                          <MetaBadge icon={BarChart3} label={`${acceptanceRate}% acceptance`} className="bg-secondary border-border text-foreground/80 text-[11px]" />
+                          <MetaBadge icon={Zap} label={`${problem.stats?.totalSubmissions || 0} submissions`} className="bg-secondary border-border text-foreground/80 text-[11px]" />
+                          {problem.config?.timeLimit && <MetaBadge icon={Clock} label={`${problem.config.timeLimit}ms`} className="bg-secondary border-border text-foreground/80 text-[11px]" />}
+                          {problem.config?.memoryLimit && <MetaBadge icon={Code2} label={`${problem.config.memoryLimit}MB`} className="bg-secondary border-border text-foreground/80 text-[11px]" />}
                         </div>
                         
                         {/* Tags */}
                         {(problem.tags?.length > 0 || problem.categories?.length > 0) && (
                           <div className="flex flex-wrap gap-1.5 mb-5">
                             {(problem.categories || []).map((cat: string) => (
-                              <span key={cat} className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-[#2563EB]/15 text-[#93C5FD] border border-[#2563EB]/30">
+                              <span key={cat} className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/30">
                                 {cat}
                               </span>
                             ))}
                             {(problem.tags || []).map((tag: string) => (
-                              <span key={tag} className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-[#172033] text-[#CBD5E1] border border-white/[0.08]">
-                                <Hash className="w-2.5 h-2.5 inline mr-0.5 text-[#94A3B8]" />{tag}
+                              <span key={tag} className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-secondary text-foreground/80 border border-border">
+                                <Hash className="w-2.5 h-2.5 inline mr-0.5 text-muted-foreground" />{tag}
                               </span>
                             ))}
                           </div>
                         )}
                         
                         {/* Description Content */}
-                        <div className="prose dark:prose-invert prose-sm max-w-none text-[#CBD5E1] text-[15px] leading-[1.6]
-                          prose-headings:text-[#F8FAFC] prose-headings:font-bold prose-headings:text-[18px]
-                          prose-p:text-[#CBD5E1] prose-p:leading-[1.6] prose-p:text-[15px]
-                          prose-strong:text-[#F8FAFC]
-                          prose-code:text-[#CBD5E1] prose-code:bg-white/[0.07] prose-code:border prose-code:border-white/[0.08] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[0.9em] prose-code:font-mono
-                          prose-pre:bg-[#172033] prose-pre:border prose-pre:border-white/[0.08] prose-pre:rounded-xl
-                          prose-ul:text-[#CBD5E1] prose-ol:text-[#CBD5E1]
+                        <div className="prose dark:prose-invert prose-sm max-w-none text-foreground/80 text-[15px] leading-[1.6]
+                          prose-headings:text-foreground prose-headings:font-bold prose-headings:text-[18px]
+                          prose-p:text-foreground/80 prose-p:leading-[1.6] prose-p:text-[15px]
+                          prose-strong:text-foreground
+                          prose-code:text-foreground/80 prose-code:bg-muted prose-code:border prose-code:border-border prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[0.9em] prose-code:font-mono
+                          prose-pre:bg-secondary prose-pre:border prose-pre:border-border prose-pre:rounded-xl
+                          prose-ul:text-foreground/80 prose-ol:text-foreground/80
                         ">
                           <div dangerouslySetInnerHTML={{ __html: problem.statement?.description || problem.description || "" }} />
                         </div>
                         
                         {/* Constraints */}
                         {(problem.statement?.constraints || problem.constraints) && (
-                          <div className="mt-6 p-4 bg-[#172033] border border-amber-500/20 rounded-xl">
+                          <div className="mt-6 p-4 bg-secondary border border-amber-500/20 rounded-xl">
                             <h3 className="text-xs font-bold text-[#F59E0B] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                               <AlertTriangle className="w-3.5 h-3.5" /> Constraints
                             </h3>
-                            <div className="text-xs text-[#CBD5E1] leading-relaxed prose dark:prose-invert prose-sm max-w-none"
+                            <div className="text-xs text-foreground/80 leading-relaxed prose dark:prose-invert prose-sm max-w-none"
                               dangerouslySetInnerHTML={{ __html: problem.statement?.constraints || problem.constraints || "" }}
                             />
                           </div>
@@ -684,28 +758,28 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                         {/* Sample Test Cases in Description */}
                         {problem.statement?.samples?.length > 0 && (
                           <div className="mt-6 space-y-3">
-                            <h3 className="text-xs font-bold text-[#F8FAFC] uppercase tracking-wider">Examples</h3>
+                            <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Examples</h3>
                             {problem.statement.samples.map((sample: any, i: number) => (
-                              <div key={i} className="border border-white/[0.08] bg-[#172033] rounded-xl overflow-hidden">
-                                <div className="bg-[#131E32] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#94A3B8]">
+                              <div key={i} className="border border-border bg-secondary rounded-xl overflow-hidden">
+                                <div className="bg-muted/50 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                                   Example {i + 1}
                                 </div>
-                                <div className="p-3.5 space-y-2.5 font-mono text-xs text-[#CBD5E1]">
+                                <div className="p-3.5 space-y-2.5 font-mono text-xs text-foreground/80">
                                   {sample.input && (
                                     <div>
-                                      <span className="text-[#94A3B8] text-[10px] font-sans font-semibold uppercase">Input: </span>
-                                      <pre className="bg-[#0F172A] border border-white/[0.06] rounded-lg p-2.5 mt-1 text-[#F8FAFC] whitespace-pre-wrap">{sample.input}</pre>
+                                      <span className="text-muted-foreground text-[10px] font-sans font-semibold uppercase">Input: </span>
+                                      <pre className="bg-card border border-border/50 rounded-lg p-2.5 mt-1 text-foreground whitespace-pre-wrap">{sample.input}</pre>
                                     </div>
                                   )}
                                   {sample.output && (
                                     <div>
-                                      <span className="text-[#94A3B8] text-[10px] font-sans font-semibold uppercase">Output: </span>
-                                      <pre className="bg-[#0F172A] border border-white/[0.06] rounded-lg p-2.5 mt-1 text-[#F8FAFC] whitespace-pre-wrap">{sample.output}</pre>
+                                      <span className="text-muted-foreground text-[10px] font-sans font-semibold uppercase">Output: </span>
+                                      <pre className="bg-card border border-border/50 rounded-lg p-2.5 mt-1 text-foreground whitespace-pre-wrap">{sample.output}</pre>
                                     </div>
                                   )}
                                   {sample.explanation && (
-                                    <div className="text-[#CBD5E1] font-sans text-xs mt-2 leading-relaxed">
-                                      <span className="font-semibold text-[#F8FAFC]">Explanation: </span>
+                                    <div className="text-foreground/80 font-sans text-xs mt-2 leading-relaxed">
+                                      <span className="font-semibold text-foreground">Explanation: </span>
                                       {sample.explanation}
                                     </div>
                                   )}
@@ -721,10 +795,10 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                     {activeSidebarTab === "editorial" && (
                       <div className="p-5">
                         {problem.editorial ? (
-                          <div className="prose dark:prose-invert prose-sm max-w-none text-[#CBD5E1] text-[15px] leading-[1.6]
-                            prose-headings:text-[#F8FAFC]
-                            prose-code:text-[#CBD5E1] prose-code:bg-white/[0.07] prose-code:border prose-code:border-white/[0.08] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[0.9em]
-                            prose-pre:bg-[#172033] prose-pre:border prose-pre:border-white/[0.08] prose-pre:rounded-xl
+                          <div className="prose dark:prose-invert prose-sm max-w-none text-foreground/80 text-[15px] leading-[1.6]
+                            prose-headings:text-foreground
+                            prose-code:text-foreground/80 prose-code:bg-muted prose-code:border prose-code:border-border prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[0.9em]
+                            prose-pre:bg-secondary prose-pre:border prose-pre:border-border prose-pre:rounded-xl
                           ">
                             <div dangerouslySetInnerHTML={{ __html: problem.editorial }} />
                           </div>
@@ -742,12 +816,12 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                       <div className="p-4">
                         {submissionsLoading ? (
                           <div className="flex items-center justify-center py-12">
-                            <Loader2 className="w-5 h-5 animate-spin text-[#94A3B8]" />
+                            <Spinner className="w-5 h-5 animate-spin text-muted-foreground" />
                           </div>
                         ) : submissions.length > 0 ? (
                           <div className="space-y-2">
                             {submissions.map((sub: any, i: number) => (
-                              <div key={i} className="p-3 rounded-xl border border-white/[0.08] bg-[#172033] hover:bg-[#1E293B] transition-colors cursor-pointer group">
+                              <div key={i} className="p-3 rounded-xl border border-border bg-secondary hover:bg-accent transition-colors cursor-pointer group">
                                 <div className="flex items-center justify-between mb-1.5">
                                   <span className={`text-xs font-bold ${
                                     sub.status === "accepted" ? "text-emerald-400" :
@@ -756,12 +830,12 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                     {sub.status === "accepted" ? "✓ Accepted" :
                                      sub.status === "wrong_answer" ? "✗ Wrong Answer" : "⚠ Error"}
                                   </span>
-                                  <span className="text-[10px] text-[#94A3B8]">
+                                  <span className="text-[10px] text-muted-foreground">
                                     {new Date(sub.createdAt).toLocaleDateString()}
                                   </span>
                                 </div>
-                                <div className="flex items-center gap-3 text-[10px] text-[#CBD5E1]">
-                                  <span className="flex items-center gap-1"><Code2 className="w-3 h-3 text-[#2563EB]" />{sub.language}</span>
+                                <div className="flex items-center gap-3 text-[10px] text-foreground/80">
+                                  <span className="flex items-center gap-1"><Code2 className="w-3 h-3 text-primary" />{sub.language}</span>
                                   {sub.runtime && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{sub.runtime}ms</span>}
                                   <span className="flex items-center gap-1"><Target className="w-3 h-3" />{sub.testCasesPassed}/{sub.totalTestCases}</span>
                                 </div>
@@ -784,7 +858,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                         {problem.hints?.length > 0 ? (
                           <div className="space-y-3">
                             {problem.hints.map((hint: string, i: number) => (
-                              <div key={i} className="border border-white/[0.08] bg-[#172033] rounded-xl overflow-hidden">
+                              <div key={i} className="border border-border bg-secondary rounded-xl overflow-hidden">
                                 <button
                                   onClick={() => {
                                     const newSet = new Set(revealedHints);
@@ -792,13 +866,13 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                     else newSet.add(i);
                                     setRevealedHints(newSet);
                                   }}
-                                  className="w-full flex items-center justify-between p-3.5 text-left hover:bg-white/[0.04] transition-colors"
+                                  className="w-full flex items-center justify-between p-3.5 text-left hover:bg-accent/50 transition-colors"
                                 >
-                                  <span className="text-xs font-semibold text-[#F8FAFC] flex items-center gap-2">
+                                  <span className="text-xs font-semibold text-foreground flex items-center gap-2">
                                     <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
                                     Hint {i + 1}
                                   </span>
-                                  <span className="text-[10px] text-[#94A3B8]">
+                                  <span className="text-[10px] text-muted-foreground">
                                     {revealedHints.has(i) ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                                   </span>
                                 </button>
@@ -811,7 +885,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                       transition={{ duration: 0.2 }}
                                       className="overflow-hidden"
                                     >
-                                      <div className="px-3.5 pb-3.5 text-xs text-[#CBD5E1] leading-relaxed border-t border-white/[0.08] pt-2.5"
+                                      <div className="px-3.5 pb-3.5 text-xs text-foreground/80 leading-relaxed border-t border-border pt-2.5"
                                         dangerouslySetInnerHTML={{ __html: hint }}
                                       />
                                     </motion.div>
@@ -837,12 +911,12 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                           value={noteContent}
                           onChange={(e) => setNoteContent(e.target.value)}
                           placeholder="Write your notes here... Markdown is supported."
-                          className="flex-1 min-h-[200px] w-full bg-[#172033] border border-white/[0.08] rounded-xl p-4 text-sm text-[#F8FAFC] placeholder:text-[#94A3B8] resize-none outline-none focus:border-[#2563EB]/60 transition-all font-mono"
+                          className="flex-1 min-h-[200px] w-full bg-secondary border border-border rounded-xl p-4 text-sm text-foreground placeholder:text-muted-foreground resize-none outline-none focus:border-primary/60 transition-all font-mono"
                         />
                         <div className="flex items-center justify-between mt-3">
-                          <span className="text-[10px] text-[#94A3B8]">{noteContent.length} characters</span>
-                          <Button size="sm" onClick={handleSaveNote} disabled={noteSaving} className="h-7 px-3 text-xs bg-[#2563EB] hover:bg-[#3B82F6] text-white">
-                            {noteSaving ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <CheckCircle2 className="w-3 h-3 mr-1" />}
+                          <span className="text-[10px] text-muted-foreground">{noteContent.length} characters</span>
+                          <Button size="sm" onClick={handleSaveNote} disabled={noteSaving} className="h-7 px-3 text-xs bg-primary hover:bg-primary/90 text-white">
+                            {noteSaving ? <Spinner className="w-3 h-3 animate-spin mr-1" /> : <CheckCircle2 className="w-3 h-3 mr-1" />}
                             {noteSaving ? "Saving..." : "Save Note"}
                           </Button>
                         </div>
@@ -851,70 +925,70 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
 
                     {/* ──────────── DISCUSSION TAB ──────────── */}
                     {activeSidebarTab === "discussion" && (
-                      <div className="flex flex-col h-full bg-[#0F172A] relative">
+                      <div className="flex flex-col h-full bg-card relative">
                         {discussionLoading ? (
                           <div className="flex items-center justify-center py-12">
-                            <Loader2 className="w-5 h-5 animate-spin text-[#94A3B8]" />
+                            <Spinner className="w-5 h-5 animate-spin text-muted-foreground" />
                           </div>
                         ) : activeThread ? (
                           /* Thread Detail View */
-                          <div className="flex flex-col h-full absolute inset-0 bg-[#0F172A] overflow-y-auto z-10">
-                            <div className="p-4 border-b border-white/[0.08] sticky top-0 bg-[#131E32]/95 backdrop-blur-sm flex items-center gap-2">
-                              <button onClick={() => setActiveThread(null)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#94A3B8] hover:text-[#F8FAFC] transition-all">
+                          <div className="flex flex-col h-full absolute inset-0 bg-card overflow-y-auto z-10">
+                            <div className="p-4 border-b border-border sticky top-0 bg-muted/50/95 backdrop-blur-sm flex items-center gap-2">
+                              <button onClick={() => setActiveThread(null)} className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-all">
                                 <ArrowLeft className="w-4 h-4" />
                               </button>
-                              <div className="flex-1 truncate font-semibold text-sm text-[#F8FAFC]">{activeThread.title}</div>
+                              <div className="flex-1 truncate font-semibold text-sm text-foreground">{activeThread.title}</div>
                             </div>
                             
                             <div className="p-5">
                               {/* Main Post */}
                               <div className="flex gap-4">
                                 <div className="flex flex-col items-center gap-1">
-                                  <button onClick={() => handleVoteThread(activeThread._id, 'up')} className={`p-1.5 rounded-lg ${activeThread.upvotedBy?.includes('me') ? 'text-[#3B82F6] bg-[#2563EB]/15' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-white/[0.04]'}`}>
+                                  <button onClick={() => handleVoteThread(activeThread._id, 'up')} className={`p-1.5 rounded-lg ${activeThread.upvotedBy?.includes('me') ? 'text-primary bg-primary/15' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'}`}>
                                     <ThumbsUp className="w-4 h-4" />
                                   </button>
-                                  <span className="text-xs font-bold font-mono text-[#F8FAFC]">{activeThread.upvotes - activeThread.downvotes}</span>
-                                  <button onClick={() => handleVoteThread(activeThread._id, 'down')} className={`p-1.5 rounded-lg ${activeThread.downvotedBy?.includes('me') ? 'text-rose-400 bg-rose-500/10' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-white/[0.04]'}`}>
+                                  <span className="text-xs font-bold font-mono text-foreground">{activeThread.upvotes - activeThread.downvotes}</span>
+                                  <button onClick={() => handleVoteThread(activeThread._id, 'down')} className={`p-1.5 rounded-lg ${activeThread.downvotedBy?.includes('me') ? 'text-rose-400 bg-rose-500/10' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'}`}>
                                     <ThumbsDown className="w-4 h-4" />
                                   </button>
                                 </div>
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-3">
-                                    <div className="w-6 h-6 rounded-full bg-[#2563EB]/20 text-[#60A5FA] flex items-center justify-center text-[10px] font-bold">
+                                    <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-bold">
                                       {activeThread.author?.name?.[0] || 'U'}
                                     </div>
-                                    <span className="text-xs font-semibold text-[#F8FAFC]">{activeThread.author?.name || 'User'}</span>
-                                    <span className="text-[10px] text-[#94A3B8]">{new Date(activeThread.createdAt).toLocaleDateString()}</span>
+                                    <span className="text-xs font-semibold text-foreground">{activeThread.author?.name || 'User'}</span>
+                                    <span className="text-[10px] text-muted-foreground">{new Date(activeThread.createdAt).toLocaleDateString()}</span>
                                     {activeThread.tags?.map((t: string) => (
-                                      <span key={t} className="ml-auto text-[9px] font-semibold px-2 py-0.5 rounded-full bg-[#172033] text-[#CBD5E1] border border-white/[0.08] uppercase tracking-wider">{t}</span>
+                                      <span key={t} className="ml-auto text-[9px] font-semibold px-2 py-0.5 rounded-full bg-secondary text-foreground/80 border border-border uppercase tracking-wider">{t}</span>
                                     ))}
                                   </div>
-                                  <div className="text-sm text-[#CBD5E1] leading-relaxed whitespace-pre-wrap">{activeThread.body}</div>
+                                  <div className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{activeThread.body}</div>
                                 </div>
                               </div>
                               
-                              <div className="w-full h-px bg-white/[0.08] my-6" />
+                              <div className="w-full h-px bg-muted my-6" />
                               
-                              <h3 className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-4">Replies ({replies.length})</h3>
+                              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Replies ({replies.length})</h3>
                               
                               {/* Replies */}
                               <div className="space-y-4">
                                 {replies.map((reply: any) => (
-                                  <div key={reply._id} className="flex gap-3 p-3 bg-[#172033] border border-white/[0.08] rounded-xl">
-                                    <div className="w-6 h-6 rounded-full bg-[#0F172A] border border-white/[0.08] flex shrink-0 items-center justify-center text-[10px] font-bold text-[#CBD5E1] mt-1">
+                                  <div key={reply._id} className="flex gap-3 p-3 bg-secondary border border-border rounded-xl">
+                                    <div className="w-6 h-6 rounded-full bg-card border border-border flex shrink-0 items-center justify-center text-[10px] font-bold text-foreground/80 mt-1">
                                       {reply.author?.name?.[0] || 'U'}
                                     </div>
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2 mb-1.5">
-                                        <span className="text-xs font-semibold text-[#F8FAFC]">{reply.author?.name || 'User'}</span>
-                                        <span className="text-[10px] text-[#94A3B8]">{new Date(reply.createdAt).toLocaleDateString()}</span>
+                                        <span className="text-xs font-semibold text-foreground">{reply.author?.name || 'User'}</span>
+                                        <span className="text-[10px] text-muted-foreground">{new Date(reply.createdAt).toLocaleDateString()}</span>
                                       </div>
-                                      <div className="text-sm text-[#CBD5E1] leading-relaxed whitespace-pre-wrap mb-2">{reply.body}</div>
+                                      <div className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap mb-2">{reply.body}</div>
                                       <div className="flex items-center gap-3">
-                                        <button onClick={() => handleVoteReply(reply._id, 'up')} className="flex items-center gap-1.5 text-[10px] font-semibold text-[#94A3B8] hover:text-[#3B82F6] transition-colors">
+                                        <button onClick={() => handleVoteReply(reply._id, 'up')} className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground hover:text-primary transition-colors">
                                           <ThumbsUp className="w-3.5 h-3.5" /> {reply.upvotes}
                                         </button>
-                                        <button onClick={() => handleVoteReply(reply._id, 'down')} className="flex items-center gap-1.5 text-[10px] font-semibold text-[#94A3B8] hover:text-rose-400 transition-colors">
+                                        <button onClick={() => handleVoteReply(reply._id, 'down')} className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground hover:text-rose-400 transition-colors">
                                           <ThumbsDown className="w-3.5 h-3.5" />
                                         </button>
                                       </div>
@@ -925,17 +999,17 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                               
                               {/* Reply Input */}
                               <div className="mt-8 flex gap-3">
-                                <div className="w-6 h-6 rounded-full bg-[#2563EB]/20 text-[#60A5FA] flex shrink-0 items-center justify-center text-[10px] font-bold">You</div>
+                                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex shrink-0 items-center justify-center text-[10px] font-bold">You</div>
                                 <div className="flex-1 flex flex-col gap-2">
                                   <textarea 
                                     value={replyContent}
                                     onChange={(e) => setReplyContent(e.target.value)}
                                     placeholder="Write a reply..."
-                                    className="w-full bg-[#172033] border border-white/[0.08] rounded-xl p-3 text-sm text-[#F8FAFC] placeholder:text-[#94A3B8] resize-none outline-none focus:border-[#2563EB]/60 min-h-[80px]"
+                                    className="w-full bg-secondary border border-border rounded-xl p-3 text-sm text-foreground placeholder:text-muted-foreground resize-none outline-none focus:border-primary/60 min-h-[80px]"
                                   />
                                   <div className="flex justify-end">
-                                    <Button size="sm" disabled={!replyContent.trim() || replySubmitting} onClick={handleSubmitReply} className="h-7 text-xs px-3 bg-[#2563EB] hover:bg-[#3B82F6] text-white">
-                                      {replySubmitting ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : <Send className="w-3 h-3 mr-1.5" />} Post Reply
+                                    <Button size="sm" disabled={!replyContent.trim() || replySubmitting} onClick={handleSubmitReply} className="h-7 text-xs px-3 bg-primary hover:bg-primary/90 text-white">
+                                      {replySubmitting ? <Spinner className="w-3 h-3 animate-spin mr-1.5" /> : <Send className="w-3 h-3 mr-1.5" />} Post Reply
                                     </Button>
                                   </div>
                                 </div>
@@ -944,30 +1018,30 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                           </div>
                         ) : showCreateThread ? (
                           /* Create Thread View */
-                          <div className="p-5 flex flex-col h-full bg-[#0F172A]">
-                            <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/[0.08]">
-                              <button onClick={() => setShowCreateThread(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#94A3B8] hover:text-[#F8FAFC] transition-all">
+                          <div className="p-5 flex flex-col h-full bg-card">
+                            <div className="flex items-center gap-2 mb-4 pb-4 border-b border-border">
+                              <button onClick={() => setShowCreateThread(false)} className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-all">
                                 <ArrowLeft className="w-4 h-4" />
                               </button>
-                              <div className="font-semibold text-sm text-[#F8FAFC]">New Discussion</div>
+                              <div className="font-semibold text-sm text-foreground">New Discussion</div>
                             </div>
                             
                             <div className="space-y-4 flex-1">
                               <div>
-                                <label className="text-[10px] uppercase tracking-wider font-semibold text-[#94A3B8] mb-1 block">Title</label>
+                                <label className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1 block">Title</label>
                                 <input 
                                   value={newThread.title}
                                   onChange={(e) => setNewThread({...newThread, title: e.target.value})}
                                   placeholder="What's on your mind?"
-                                  className="w-full bg-[#172033] border border-white/[0.08] rounded-lg h-9 px-3 text-sm text-[#F8FAFC] outline-none focus:border-[#2563EB]/60"
+                                  className="w-full bg-secondary border border-border rounded-lg h-9 px-3 text-sm text-foreground outline-none focus:border-primary/60"
                                 />
                               </div>
                               <div>
-                                <label className="text-[10px] uppercase tracking-wider font-semibold text-[#94A3B8] mb-1 block">Category</label>
+                                <label className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1 block">Category</label>
                                 <select 
                                   value={newThread.tag}
                                   onChange={(e) => setNewThread({...newThread, tag: e.target.value})}
-                                  className="w-full bg-[#172033] border border-white/[0.08] rounded-lg h-9 px-3 text-sm text-[#F8FAFC] outline-none focus:border-[#2563EB]/60 appearance-none"
+                                  className="w-full bg-secondary border border-border rounded-lg h-9 px-3 text-sm text-foreground outline-none focus:border-primary/60 appearance-none"
                                 >
                                   <option value="general">General</option>
                                   <option value="approach">Approach</option>
@@ -976,31 +1050,31 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                 </select>
                               </div>
                               <div className="flex-1 flex flex-col">
-                                <label className="text-[10px] uppercase tracking-wider font-semibold text-[#94A3B8] mb-1 block">Body</label>
+                                <label className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1 block">Body</label>
                                 <textarea 
                                   value={newThread.body}
                                   onChange={(e) => setNewThread({...newThread, body: e.target.value})}
                                   placeholder="Describe your question, approach, or solution in detail..."
-                                  className="w-full flex-1 bg-[#172033] border border-white/[0.08] rounded-lg p-3 text-sm text-[#F8FAFC] resize-none outline-none focus:border-[#2563EB]/60 min-h-[200px]"
+                                  className="w-full flex-1 bg-secondary border border-border rounded-lg p-3 text-sm text-foreground resize-none outline-none focus:border-primary/60 min-h-[200px]"
                                 />
                               </div>
                             </div>
                             
-                            <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-white/[0.08]">
-                              <Button variant="outline" size="sm" onClick={() => setShowCreateThread(false)} className="h-8 text-xs bg-[#172033] border-white/[0.08] text-[#F8FAFC] hover:bg-[#1E293B]">Cancel</Button>
-                              <Button size="sm" onClick={handleCreateThread} disabled={!newThread.title.trim() || !newThread.body.trim() || threadSubmitting} className="h-8 text-xs bg-[#2563EB] hover:bg-[#3B82F6] text-white">
-                                {threadSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : null} Post Discussion
+                            <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-border">
+                              <Button variant="outline" size="sm" onClick={() => setShowCreateThread(false)} className="h-8 text-xs bg-secondary border-border text-foreground hover:bg-accent">Cancel</Button>
+                              <Button size="sm" onClick={handleCreateThread} disabled={!newThread.title.trim() || !newThread.body.trim() || threadSubmitting} className="h-8 text-xs bg-primary hover:bg-primary/90 text-white">
+                                {threadSubmitting ? <Spinner className="w-3.5 h-3.5 animate-spin mr-1.5" /> : null} Post Discussion
                               </Button>
                             </div>
                           </div>
                         ) : (
                           /* Thread List View */
                           <>
-                            <div className="p-3 border-b border-white/[0.08] flex justify-between items-center sticky top-0 bg-[#131E32]/95 backdrop-blur-sm z-10">
+                            <div className="p-3 border-b border-border flex justify-between items-center sticky top-0 bg-muted/50/95 backdrop-blur-sm z-10">
                               <select 
                                 value={discussionFilter}
                                 onChange={(e) => setDiscussionFilter(e.target.value)}
-                                className="bg-[#172033] border border-white/[0.08] text-xs font-semibold text-[#F8FAFC] outline-none cursor-pointer px-2.5 py-1 rounded-md"
+                                className="bg-secondary border border-border text-xs font-semibold text-foreground outline-none cursor-pointer px-2.5 py-1 rounded-md"
                               >
                                 <option value="all">All Topics</option>
                                 <option value="approach">Approaches</option>
@@ -1008,23 +1082,23 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                 <option value="solution">Solutions</option>
                               </select>
                               
-                              <Button size="sm" onClick={() => setShowCreateThread(true)} className="h-7 text-xs px-3 bg-[#2563EB]/15 hover:bg-[#2563EB]/25 text-[#60A5FA] border border-[#2563EB]/30">
+                              <Button size="sm" onClick={() => setShowCreateThread(true)} className="h-7 text-xs px-3 bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30">
                                 <Plus className="w-3 h-3 mr-1" /> New Post
                               </Button>
                             </div>
                             
                             <div className="flex-1 overflow-y-auto p-3 space-y-2">
                               {threads.length > 0 ? threads.map((thread: any) => (
-                                <div key={thread._id} onClick={() => loadThread(thread)} className="p-3 rounded-xl border border-white/[0.08] bg-[#172033] hover:bg-[#1E293B] transition-colors cursor-pointer group flex gap-3 items-start">
+                                <div key={thread._id} onClick={() => loadThread(thread)} className="p-3 rounded-xl border border-border bg-secondary hover:bg-accent transition-colors cursor-pointer group flex gap-3 items-start">
                                   <div className="flex flex-col items-center gap-1 min-w-[40px]">
-                                    <div className="w-8 h-8 rounded-full bg-[#0F172A] border border-white/[0.08] flex items-center justify-center text-xs font-bold text-[#CBD5E1] group-hover:bg-[#2563EB]/20 group-hover:text-[#60A5FA] transition-colors">
+                                    <div className="w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center text-xs font-bold text-foreground/80 group-hover:bg-primary/20 group-hover:text-primary transition-colors">
                                       {thread.author?.name?.[0] || 'U'}
                                     </div>
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <h4 className="text-sm font-semibold text-[#F8FAFC] truncate mb-1 group-hover:text-[#3B82F6] transition-colors">{thread.title}</h4>
-                                    <div className="flex items-center gap-3 text-[10px] text-[#94A3B8]">
-                                      <span className="truncate max-w-[100px] text-[#CBD5E1]">{thread.author?.name || 'User'}</span>
+                                    <h4 className="text-sm font-semibold text-foreground truncate mb-1 group-hover:text-primary transition-colors">{thread.title}</h4>
+                                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                                      <span className="truncate max-w-[100px] text-foreground/80">{thread.author?.name || 'User'}</span>
                                       <span className="w-1 h-1 rounded-full bg-white/[0.12]" />
                                       <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
                                       <span className="w-1 h-1 rounded-full bg-white/[0.12]" />
@@ -1032,7 +1106,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                       <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" /> {thread.replyCount}</span>
                                       
                                       {thread.tags?.map((t: string) => (
-                                        <span key={t} className="ml-auto px-1.5 py-0.5 rounded bg-[#0F172A] border border-white/[0.07] uppercase tracking-wider text-[9px] font-semibold text-[#CBD5E1]">{t}</span>
+                                        <span key={t} className="ml-auto px-1.5 py-0.5 rounded bg-card border border-white/[0.07] uppercase tracking-wider text-[9px] font-semibold text-foreground/80">{t}</span>
                                       ))}
                                     </div>
                                   </div>
@@ -1053,23 +1127,23 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                     {/* ──────────── AI TUTOR TAB ──────────── */}
                     {activeSidebarTab === "ai_tutor" && (
                       <div className="p-5">
-                        <div className="rounded-xl border border-[#2563EB]/30 bg-[#172033] p-5 shadow-sm">
+                        <div className="rounded-xl border border-primary/30 bg-secondary p-5 shadow-sm">
                           <div className="flex items-center gap-2.5 mb-3">
-                            <div className="w-8 h-8 rounded-lg bg-[#2563EB] flex items-center justify-center shadow-md shadow-blue-500/20 text-white">
+                            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-md shadow-primary/20 text-white">
                               <Brain className="w-4 h-4" />
                             </div>
                             <div>
-                              <h3 className="text-sm font-bold text-[#F8FAFC]">AI Learning Tutor</h3>
-                              <p className="text-[10px] text-[#94A3B8]">Personalized guided assistance</p>
+                              <h3 className="text-sm font-bold text-foreground">AI Learning Tutor</h3>
+                              <p className="text-[10px] text-muted-foreground">Personalized guided assistance</p>
                             </div>
                           </div>
-                          <p className="text-xs text-[#CBD5E1] leading-relaxed mb-4">
+                          <p className="text-xs text-foreground/80 leading-relaxed mb-4">
                             Get guidance on algorithms and edge cases without spoilers. Ask questions directly or pick a starter prompt below:
                           </p>
                           <div className="space-y-2">
                             {["Explain this problem in simpler terms", "What data structure should I consider?", "Give me a hint about the time complexity", "Help me debug my approach"].map((prompt, i) => (
-                              <button key={i} onClick={() => setAskQuery(prompt)} className="w-full text-left px-3 py-2 rounded-lg border border-white/[0.08] bg-[#0F172A] text-xs text-[#CBD5E1] hover:bg-[#1E293B] hover:border-[#2563EB]/40 transition-all group">
-                                <span className="text-[#3B82F6] mr-1.5 group-hover:text-[#60A5FA]">→</span> {prompt}
+                              <button key={i} onClick={() => setAskQuery(prompt)} className="w-full text-left px-3 py-2 rounded-lg border border-border bg-card text-xs text-foreground/80 hover:bg-accent hover:border-[#111111]/40 transition-all group">
+                                <span className="text-primary mr-1.5 group-hover:text-primary">→</span> {prompt}
                               </button>
                             ))}
                           </div>
@@ -1081,27 +1155,27 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
               </div>
 
               {/* Sticky Ask Me Anything Assistant Bar */}
-              <div className="p-3 border-t border-white/[0.08] bg-[#0F172A]/95 backdrop-blur-sm shrink-0">
+              <div className="p-3 border-t border-border bg-card/95 backdrop-blur-sm shrink-0">
                 <form 
                   onSubmit={(e) => {
                     e.preventDefault();
                     if (!askQuery.trim()) return;
                     setActiveSidebarTab("ai_tutor");
                   }}
-                  className="flex items-center gap-2 bg-[#172033] border border-white/[0.15] rounded-xl px-3 py-1.5 focus-within:border-[#2563EB]/70 focus-within:ring-1 focus-within:ring-[#2563EB]/40 transition-all"
+                  className="flex items-center gap-2 bg-secondary border border-white/[0.15] rounded-xl px-3 py-1.5 focus-within:border-[#111111]/70 focus-within:ring-1 focus-within:ring-[#111111]/40 transition-all"
                 >
-                  <Bot className="w-4 h-4 text-[#94A3B8] shrink-0" />
+                  <Bot className="w-4 h-4 text-muted-foreground shrink-0" />
                   <input
                     type="text"
                     value={askQuery}
                     onChange={(e) => setAskQuery(e.target.value)}
                     placeholder="Ask me anything about this lesson..."
-                    className="bg-transparent text-xs text-[#E5E7EB] placeholder:text-[#94A3B8] outline-none flex-1 min-w-0"
+                    className="bg-transparent text-xs text-foreground/90 placeholder:text-muted-foreground outline-none flex-1 min-w-0"
                   />
                   <button
                     type="submit"
                     disabled={!askQuery.trim()}
-                    className="p-1.5 rounded-lg bg-[#2563EB] hover:bg-[#3B82F6] disabled:opacity-40 disabled:hover:bg-[#2563EB] text-white transition-all shrink-0"
+                    className="p-1.5 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:hover:bg-primary text-white transition-all shrink-0"
                     title="Ask AI Tutor"
                   >
                     <SendHorizontal className="w-3.5 h-3.5" />
@@ -1110,7 +1184,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
               </div>
             </Panel>
 
-            <PanelResizeHandle className="w-1.5 rounded-full bg-white/[0.06] hover:bg-indigo-500/50 transition-colors cursor-col-resize" />
+            <PanelResizeHandle className="w-1.5 rounded-full bg-accent hover:bg-indigo-500/50 transition-colors cursor-col-resize" />
 
             {/* ═══════════════════════════════════════════════════════════════
                 RIGHT PANEL — Editor + Console
@@ -1119,42 +1193,42 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
               <PanelGroup orientation="vertical" className="gap-1.5">
                 
                 {/* ─── Editor ──────────────────────────────────────────── */}
-                <Panel defaultSize={65} className="bg-[#1E1E1E] border border-white/[0.08] rounded-xl overflow-hidden flex flex-col shadow-sm">
-                  <div className="px-3.5 py-1.5 border-b border-white/[0.08] bg-[#181818] flex justify-between items-center h-9 shrink-0">
+                <Panel defaultSize={65} className="bg-card border border-border rounded-xl overflow-hidden flex flex-col shadow-sm">
+                  <div className="px-3.5 py-1.5 border-b border-border bg-muted flex justify-between items-center h-9 shrink-0">
                     <div className="flex items-center gap-2">
-                      <List className="w-3.5 h-3.5 text-[#94A3B8]" />
-                      <span className="text-xs font-semibold text-[#F8FAFC] bg-[#121212] px-2.5 py-0.5 rounded border border-white/[0.08] font-mono">
+                      <List className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-xs font-semibold text-foreground bg-background px-2.5 py-0.5 rounded border border-border font-mono">
                         {LANGUAGES.find(l => l.id === language)?.ext}
                       </span>
                       {lastSaved && (
-                        <span className="hidden sm:inline-flex items-center gap-1 text-[10px] text-[#94A3B8] ml-1 font-mono">
+                        <span className="hidden sm:inline-flex items-center gap-1 text-[10px] text-muted-foreground ml-1 font-mono">
                           <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" /> Saved
                         </span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-semibold text-[#94A3B8] hidden md:inline">
+                      <span className="text-[11px] font-semibold text-muted-foreground hidden md:inline">
                         {LANGUAGES.find(l => l.id === language)?.name}
                       </span>
-                      <div className="w-px h-3.5 bg-white/[0.08] hidden md:inline" />
-                      <button onClick={handleCopyCode} title="Copy code" className="p-1 rounded text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-white/[0.06] transition-all">
+                      <div className="w-px h-3.5 bg-muted hidden md:inline" />
+                      <button onClick={handleCopyCode} title="Copy code" className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-all">
                         <Copy className="w-3.5 h-3.5" />
                       </button>
-                      <button onClick={handleResetCode} title="Reset to default" className="p-1 rounded text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-white/[0.06] transition-all">
+                      <button onClick={handleResetCode} title="Reset to default" className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-all">
                         <RotateCcw className="w-3.5 h-3.5" />
                       </button>
-                      <div className="w-px h-3.5 bg-white/[0.08]" />
-                      <label className="flex items-center gap-1.5 text-[11px] text-[#94A3B8] cursor-pointer hover:text-[#F8FAFC] transition-colors select-none">
-                        <input type="checkbox" checked={vimMode} onChange={(e) => setVimMode(e.target.checked)} className="rounded border-white/[0.12] bg-[#121212] w-3 h-3 accent-[#2563EB]" />
+                      <div className="w-px h-3.5 bg-muted" />
+                      <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors select-none">
+                        <input type="checkbox" checked={vimMode} onChange={(e) => setVimMode(e.target.checked)} className="rounded border-white/[0.12] bg-background w-3 h-3 accent-primary" />
                         Vim
                       </label>
                     </div>
                   </div>
                   
                   {/* Vim Status Bar */}
-                  <div id="vim-status" className={`text-[10px] px-3 bg-[#141414] text-[#F8FAFC] border-b border-white/[0.08] flex items-center font-mono transition-all ${vimMode ? 'h-5 opacity-100' : 'h-0 opacity-0 overflow-hidden border-none'}`}></div>
+                  <div id="vim-status" className={`text-[10px] px-3 bg-background text-foreground border-b border-border flex items-center font-mono transition-all ${vimMode ? 'h-5 opacity-100' : 'h-0 opacity-0 overflow-hidden border-none'}`}></div>
 
-                  <div className="flex-1 relative bg-[#1E1E1E]">
+                  <div className="flex-1 min-h-0 relative bg-card">
                     <Editor
                       height="100%"
                       language={language}
@@ -1188,11 +1262,11 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                   </div>
                 </Panel>
 
-                <PanelResizeHandle className="h-1.5 rounded-full bg-white/[0.06] hover:bg-[#2563EB]/50 transition-colors cursor-row-resize" />
+                <PanelResizeHandle className="h-1.5 rounded-full bg-accent hover:bg-primary/50 transition-colors cursor-row-resize" />
 
                 {/* ─── Console / Testcases ─────────────────────────────── */}
-                <Panel defaultSize={35} className="bg-[#0F172A] border border-white/[0.08] rounded-xl overflow-hidden flex flex-col shadow-sm">
-                  <div className="flex items-center border-b border-white/[0.08] bg-[#131E32] px-2 py-1 gap-1 shrink-0">
+                <Panel defaultSize={35} className="bg-card border border-border rounded-xl overflow-hidden flex flex-col shadow-sm">
+                  <div className="flex items-center border-b border-border bg-muted/50 px-2 py-1 gap-1 shrink-0">
                     <TabButton active={activeBottomTab === "testcases"} onClick={() => setActiveBottomTab("testcases")} icon={Terminal}>Output</TabButton>
                     <TabButton active={activeBottomTab === "console"} onClick={() => setActiveBottomTab("console")}>
                       Terminal
@@ -1206,8 +1280,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                       )}
                     </TabButton>
                   </div>
-                  
-                  <div className="flex-1 p-3.5 overflow-auto bg-[#0B1220]/60">
+                  <div className="flex-1 min-h-0 p-3.5 overflow-auto bg-background/60">
                     {activeBottomTab === "testcases" ? (
                       <>
                         <div className="flex gap-1.5 mb-3">
@@ -1217,8 +1290,8 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                               onClick={() => setActiveTestCase(index)}
                               className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all flex items-center gap-1.5 ${
                                 activeTestCase === index 
-                                  ? "bg-[#172033] text-[#F8FAFC] border border-white/[0.12] shadow-xs" 
-                                  : "text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-white/[0.04] border border-transparent"
+                                  ? "bg-secondary text-foreground border border-white/[0.12] shadow-xs" 
+                                  : "text-muted-foreground hover:text-foreground hover:bg-accent/50 border border-transparent"
                               }`}
                             >
                               Case {tc.id}
@@ -1228,27 +1301,27 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                         
                         <div className="space-y-3 font-mono text-xs">
                           <div>
-                            <div className="text-[10px] text-[#94A3B8] mb-1 uppercase tracking-wider font-sans font-semibold">Input</div>
-                            <div className="bg-[#0F172A] border border-white/[0.08] rounded-lg p-2.5 text-[#CBD5E1] whitespace-pre-wrap">{testCases[activeTestCase]?.input}</div>
+                            <div className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-sans font-semibold">Input</div>
+                            <div className="bg-card border border-border rounded-lg p-2.5 text-foreground/80 whitespace-pre-wrap">{testCases[activeTestCase]?.input}</div>
                           </div>
                           <div>
-                            <div className="text-[10px] text-[#94A3B8] mb-1 uppercase tracking-wider font-sans font-semibold">Expected Output</div>
-                            <div className="bg-[#0F172A] border border-white/[0.08] rounded-lg p-2.5 text-[#CBD5E1] whitespace-pre-wrap">{testCases[activeTestCase]?.expected}</div>
+                            <div className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-sans font-semibold">Expected Output</div>
+                            <div className="bg-card border border-border rounded-lg p-2.5 text-foreground/80 whitespace-pre-wrap">{testCases[activeTestCase]?.expected}</div>
                           </div>
                         </div>
                       </>
                     ) : (
                       <div className="font-mono text-xs">
                         {!runResult && !isRunning && !isSubmitting && (
-                          <div className="text-[#94A3B8] text-xs flex flex-col h-full items-center justify-center py-8 gap-2">
-                            <Terminal className="w-6 h-6 text-[#94A3B8]/40" />
-                            <span>Click <kbd className="font-sans text-[10px] bg-[#172033] text-[#CBD5E1] px-1.5 py-0.5 rounded border border-white/[0.08]">Run</kbd> or <kbd className="font-sans text-[10px] bg-[#172033] text-[#CBD5E1] px-1.5 py-0.5 rounded border border-white/[0.08]">Submit</kbd> to execute your code.</span>
+                          <div className="text-muted-foreground text-xs flex flex-col h-full items-center justify-center py-8 gap-2">
+                            <Terminal className="w-6 h-6 text-muted-foreground/40" />
+                            <span>Click <kbd className="font-sans text-[10px] bg-secondary text-foreground/80 px-1.5 py-0.5 rounded border border-border">Run</kbd> or <kbd className="font-sans text-[10px] bg-secondary text-foreground/80 px-1.5 py-0.5 rounded border border-border">Submit</kbd> to execute your code.</span>
                           </div>
                         )}
                         
                         {(isRunning || isSubmitting) && (
-                           <div className="text-[#CBD5E1] text-xs flex h-full items-center justify-center py-8 gap-2">
-                             <Loader2 className="w-4 h-4 animate-spin text-[#2563EB]" /> 
+                           <div className="text-foreground/80 text-xs flex h-full items-center justify-center py-8 gap-2">
+                             <Spinner className="w-4 h-4 animate-spin text-primary" /> 
                              <span>{isSubmitting ? "Submitting solution..." : "Running code tests..."}</span>
                            </div>
                         )}
@@ -1264,21 +1337,21 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                               runResult.status === "runtime_error" ? "text-amber-400" : "text-rose-400"
                             }`}>
                               {runResult.status === "accepted" ? (
-                                <><CheckCircle2 className="w-4.5 h-4.5" /> Accepted</>
+                                <><CheckCircle2 className="w-5 h-5" /> Accepted</>
                               ) : runResult.status === "wrong_answer" ? (
-                                <><XCircle className="w-4.5 h-4.5" /> Wrong Answer</>
+                                <><XCircle className="w-5 h-5" /> Wrong Answer</>
                               ) : runResult.status === "compile_error" ? (
-                                <><AlertTriangle className="w-4.5 h-4.5" /> Compilation Error</>
+                                <><AlertTriangle className="w-5 h-5" /> Compilation Error</>
                               ) : runResult.status === "time_limit" ? (
-                                <><Clock className="w-4.5 h-4.5" /> Time Limit Exceeded</>
+                                <><Clock className="w-5 h-5" /> Time Limit Exceeded</>
                               ) : runResult.status === "runtime_error" ? (
-                                <><AlertTriangle className="w-4.5 h-4.5" /> Runtime Error</>
+                                <><AlertTriangle className="w-5 h-5" /> Runtime Error</>
                               ) : runResult.status === "system_error" ? (
-                                <><AlertTriangle className="w-4.5 h-4.5" /> System Error</>
+                                <><AlertTriangle className="w-5 h-5" /> System Error</>
                               ) : (
-                                <><AlertTriangle className="w-4.5 h-4.5" /> Error</>
+                                <><AlertTriangle className="w-5 h-5" /> Error</>
                               )}
-                              <span className="text-[#CBD5E1] ml-auto text-[10px] font-sans font-medium bg-[#172033] px-2.5 py-0.5 rounded-full border border-white/[0.08]">
+                              <span className="text-foreground/80 ml-auto text-[10px] font-sans font-medium bg-secondary px-2.5 py-0.5 rounded-full border border-border">
                                 {runResult.passedCount}/{runResult.totalCount} passed
                               </span>
                             </div>
@@ -1293,8 +1366,8 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                       onClick={() => setActiveResultCase(i)}
                                       className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all flex items-center gap-1.5 ${
                                         activeResultCase === i
-                                          ? "bg-[#172033] text-[#F8FAFC] border border-white/[0.12] shadow-xs"
-                                          : "text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-white/[0.04] border border-transparent"
+                                          ? "bg-secondary text-foreground border border-white/[0.12] shadow-xs"
+                                          : "text-muted-foreground hover:text-foreground hover:bg-accent/50 border border-transparent"
                                       }`}
                                     >
                                       <span className={`w-1.5 h-1.5 rounded-full ${r.passed ? "bg-emerald-500" : "bg-rose-500"}`} />
@@ -1306,14 +1379,14 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                                 {runResult.results[activeResultCase] && (
                                   <div className="space-y-2.5">
                                     <div>
-                                      <div className="text-[10px] text-[#94A3B8] mb-1 uppercase tracking-wider font-sans font-semibold">Your Output</div>
+                                      <div className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-sans font-semibold">Your Output</div>
                                       <div className={`border rounded-lg p-2.5 whitespace-pre-wrap ${runResult.results[activeResultCase].passed ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400" : "bg-rose-500/10 border-rose-500/25 text-rose-400"}`}>
                                         {runResult.results[activeResultCase].output || "No output"}
                                       </div>
                                     </div>
                                     <div>
-                                      <div className="text-[10px] text-[#94A3B8] mb-1 uppercase tracking-wider font-sans font-semibold">Expected</div>
-                                      <div className="bg-[#0F172A] border border-white/[0.08] rounded-lg p-2.5 text-[#CBD5E1] whitespace-pre-wrap">
+                                      <div className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-sans font-semibold">Expected</div>
+                                      <div className="bg-card border border-border rounded-lg p-2.5 text-foreground/80 whitespace-pre-wrap">
                                         {runResult.results[activeResultCase].expected}
                                       </div>
                                     </div>
@@ -1333,8 +1406,8 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                             {/* Logs */}
                             {runResult.logs.length > 0 && (
                               <div className="mt-4 pt-3 border-t border-white/[0.07]">
-                                <div className="text-[10px] text-[#94A3B8] mb-1.5 uppercase tracking-wider font-sans font-semibold">Stdout</div>
-                                <div className="bg-[#0F172A] border border-white/[0.08] rounded-lg p-2.5 space-y-0.5 font-mono text-[11px] text-[#CBD5E1] max-h-32 overflow-auto">
+                                <div className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-wider font-sans font-semibold">Stdout</div>
+                                <div className="bg-card border border-border rounded-lg p-2.5 space-y-0.5 font-mono text-[11px] text-foreground/80 max-h-32 overflow-auto">
                                   {runResult.logs.map((log, i) => (
                                     <div key={i}>{log}</div>
                                   ))}
@@ -1343,8 +1416,8 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
                             )}
 
                             {/* Runtime Stats */}
-                            <div className="mt-4 pt-3 border-t border-white/[0.07] flex gap-4 text-[#94A3B8] font-sans text-[11px]">
-                              <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Runtime: <span className="text-[#F8FAFC] font-semibold">{runResult.runtime} ms</span></span>
+                            <div className="mt-4 pt-3 border-t border-white/[0.07] flex gap-4 text-muted-foreground font-sans text-[11px]">
+                              <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Runtime: <span className="text-foreground font-semibold">{runResult.runtime} ms</span></span>
                             </div>
                           </motion.div>
                         )}
@@ -1359,29 +1432,29 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
           </PanelGroup>
         </div>
 
-        {/* ─── BOTTOM NAVIGATION BAR ────────────────────────────────────── */}
-        <footer className="h-12 border-t border-white/[0.08] bg-[#0F172A] flex items-center justify-between px-4 shrink-0">
+        {/* ─── BOTTOM NAVIGATION BAR (STICKY ACTION BAR) ───────────────────── */}
+        <footer className="coding-action-bar sticky bottom-0 z-40 h-[64px] border-t border-[#1F2937] bg-[#0A0A0A] flex items-center justify-between px-6 shrink-0 shadow-[0_-4px_24px_rgba(0,0,0,0.04)] pb-[env(safe-area-inset-bottom)]">
           <div className="flex items-center gap-2">
             <Link href="/problems">
-              <Button variant="outline" size="sm" className="h-8 px-3 text-xs font-semibold gap-1.5 bg-[#172033] hover:bg-[#1E293B] text-[#CBD5E1] border-white/[0.08]">
-                <ChevronLeft className="w-4 h-4" />
-                <span>Back</span>
+              <Button variant="ghost" className="h-[42px] px-4 text-[14px] font-semibold gap-2 text-[#9CA3AF] hover:text-[#F3F4F6] hover:bg-[#1F2937] rounded-[8px] btn-interactive">
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Back</span>
               </Button>
             </Link>
           </div>
-          <div className="flex items-center gap-2.5">
-            <Button variant="outline" size="sm" onClick={handleRun} disabled={isRunning || isSubmitting} className="h-8 px-3.5 text-xs font-bold gap-1.5 bg-[#172033] hover:bg-[#1E293B] text-[#F8FAFC] border-white/[0.08]">
-              {isRunning ? <Loader2 className="w-3.5 h-3.5 text-[#2563EB] animate-spin" /> : <Play className="w-3.5 h-3.5 text-[#2563EB]" />}
+          <div className="flex items-center gap-3">
+            <Button onClick={handleRun} disabled={isRunning || isSubmitting} className="h-[42px] px-5 text-[14px] font-bold gap-2 bg-[#1F2937] hover:bg-[#374151] text-[#E5E7EB] border border-[#374151] rounded-[8px] btn-interactive disabled:opacity-45 disabled:cursor-not-allowed">
+              {isRunning ? <Spinner className="w-4 h-4 text-[#F5B800] animate-spin" /> : <Play className="w-4 h-4 text-[#F5B800]" />}
               <span>Run</span>
             </Button>
-            <Button size="sm" onClick={handleSubmit} disabled={isRunning || isSubmitting} className="bg-[#2563EB] hover:bg-[#3B82F6] text-white h-8 px-4 text-xs font-bold gap-1.5 shadow-sm shadow-blue-500/20 border-0">
-              {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+            <Button onClick={handleSubmit} disabled={isRunning || isSubmitting} className="bg-[#F5B800] hover:bg-[#D99F00] text-[#111111] h-[42px] px-6 text-[14px] font-bold gap-2 shadow-sm border-0 rounded-[8px] btn-interactive disabled:opacity-45 disabled:cursor-not-allowed">
+              {isSubmitting ? <Spinner className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
               <span>Submit</span>
             </Button>
             <Link href="/problems">
-              <Button variant="outline" size="sm" className="h-8 px-3.5 text-xs font-semibold gap-1.5 bg-[#172033] hover:bg-[#1E293B] text-[#CBD5E1] border-white/[0.08]">
-                <span>Next</span>
-                <ChevronRight className="w-4 h-4" />
+              <Button variant="outline" className="h-[42px] px-5 text-[14px] font-semibold gap-2 bg-transparent hover:bg-[#1F2937] text-[#D1D5DB] border border-[#4B5563] rounded-[8px] btn-interactive">
+                <span className="hidden sm:inline">Next</span>
+                <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
           </div>
@@ -1403,26 +1476,26 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
               onClick={(e: any) => e.stopPropagation()}
-              className="bg-[#0F172A] border border-white/[0.12] rounded-2xl p-8 max-w-sm w-full shadow-2xl relative overflow-hidden"
+              className="bg-card border border-white/[0.12] rounded-2xl p-8 max-w-sm w-full shadow-2xl relative overflow-hidden"
             >
               <div className="relative z-10 text-center">
-                <div className="w-16 h-16 bg-[#2563EB]/15 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-[#2563EB]/30">
-                  <User className="w-8 h-8 text-[#3B82F6]" />
+                <div className="w-16 h-16 bg-primary/15 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-primary/30">
+                  <User className="w-8 h-8 text-primary" />
                 </div>
                 
-                <h3 className="text-xl font-bold text-[#F8FAFC] mb-2">Login Required</h3>
-                <p className="text-sm text-[#94A3B8] mb-8 leading-relaxed">
+                <h3 className="text-xl font-bold text-foreground mb-2">Login Required</h3>
+                <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
                   You need to be logged in to save your code submissions and track your progress.
                 </p>
                 
                 <div className="flex flex-col gap-3">
                   <Link href="/login" className="w-full block">
-                    <Button className="w-full bg-[#2563EB] hover:bg-[#3B82F6] text-white transition-all border-0 font-semibold">
+                    <Button className="w-full bg-primary hover:bg-primary/90 text-white transition-all border-0 font-semibold">
                       Log In to Account
                     </Button>
                   </Link>
                   <Link href="/register" className="w-full block">
-                    <Button variant="outline" className="w-full bg-[#172033] border-white/[0.08] text-[#F8FAFC] hover:bg-[#1E293B] transition-all">
+                    <Button variant="outline" className="w-full bg-secondary border-border text-foreground hover:bg-accent transition-all">
                       Create an Account
                     </Button>
                   </Link>
@@ -1431,7 +1504,7 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
               
               <button 
                 onClick={() => setShowLoginModal(false)}
-                className="absolute top-4 right-4 text-[#94A3B8] hover:text-[#F8FAFC] transition-colors p-1 rounded-md"
+                className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md"
               >
                 <XCircle className="w-5 h-5" />
               </button>
@@ -1450,20 +1523,15 @@ function SidebarIcon({ icon: Icon, label, shortcut, active = false, onClick }: a
     <button 
       onClick={onClick}
       title={`${label}${shortcut ? ` (${shortcut})` : ''}`}
+      aria-label={label}
       className={`p-2 rounded-lg transition-all relative group ${
         active 
-          ? 'bg-[#2563EB]/15 text-[#3B82F6]' 
-          : 'text-[#94A3B8] hover:bg-white/[0.04] hover:text-[#F8FAFC]'
+          ? 'bg-primary/15 text-primary' 
+          : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
       }`}
     >
       <Icon className="w-[18px] h-[18px]" />
-      {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 bg-[#2563EB] rounded-r-full" />}
-      
-      {/* Tooltip */}
-      <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded-lg bg-[#172033] border border-white/[0.08] shadow-lg text-[10px] font-medium text-[#F8FAFC] whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-        {label}
-        {shortcut && <span className="ml-2 text-[#94A3B8] font-mono">{shortcut}</span>}
-      </div>
+      {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 bg-primary rounded-r-full" />}
     </button>
   );
 }
@@ -1474,8 +1542,8 @@ function TabButton({ active, onClick, icon: Icon, children }: any) {
       onClick={onClick}
       className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-semibold transition-all ${
         active 
-          ? "bg-[#172033] text-[#F8FAFC] shadow-xs border border-white/[0.12]" 
-          : "text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-white/[0.04] border border-transparent"
+          ? "bg-secondary text-foreground shadow-xs border border-white/[0.12]" 
+          : "text-muted-foreground hover:text-foreground hover:bg-accent/50 border border-transparent"
       }`}
     >
       {Icon && <Icon className="w-3 h-3" />}
@@ -1487,7 +1555,7 @@ function TabButton({ active, onClick, icon: Icon, children }: any) {
 function MetaBadge({ icon: Icon, label, className = "" }: any) {
   return (
     <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border ${
-      className || "text-[#CBD5E1] bg-[#172033] border-white/[0.08]"
+      className || "text-foreground/80 bg-secondary border-border"
     }`}>
       <Icon className="w-3 h-3" />
       {label}
@@ -1498,11 +1566,11 @@ function MetaBadge({ icon: Icon, label, className = "" }: any) {
 function EmptyState({ icon: Icon, title, description }: any) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="w-12 h-12 rounded-xl bg-[#172033] border border-white/[0.08] flex items-center justify-center mb-3">
-        <Icon className="w-6 h-6 text-[#94A3B8]" />
+      <div className="w-12 h-12 rounded-xl bg-secondary border border-border flex items-center justify-center mb-3">
+        <Icon className="w-6 h-6 text-muted-foreground" />
       </div>
-      <h3 className="text-sm font-semibold text-[#F8FAFC] mb-1">{title}</h3>
-      <p className="text-xs text-[#94A3B8] max-w-[240px] leading-relaxed">{description}</p>
+      <h3 className="text-sm font-semibold text-foreground mb-1">{title}</h3>
+      <p className="text-xs text-muted-foreground max-w-[240px] leading-relaxed">{description}</p>
     </div>
   );
 }

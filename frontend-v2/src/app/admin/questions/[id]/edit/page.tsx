@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { adminProblemsAPI } from "@/config/api";
 import { useQuestionStore } from "../../create/_store/useQuestionStore";
 import Link from "next/link";
-import { ArrowLeft, Save, Loader2, Settings, FileText, Code2, Database, BarChart3, Rocket, LayoutTemplate, Shield, Moon, Sun, Search, Cpu, AlertTriangle, ArrowRightLeft, Lightbulb, BookOpen, Sparkles, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Save, Settings, FileText, Code2, Database, BarChart3, Rocket, LayoutTemplate, Shield, Moon, Sun, Search, Cpu, AlertTriangle, ArrowRightLeft, Lightbulb, BookOpen, Sparkles, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ToastProvider, useToast } from "../../create/_components/Toast";
 import ProgressBar from "../../create/_components/ProgressBar";
@@ -26,6 +26,7 @@ import AIAssistance from "../../create/_components/AIAssistance";
 import SEOSection from "../../create/_components/SEOSection";
 import AnalyticsSection from "../../create/_components/AnalyticsSection";
 import PublishingSection from "../../create/_components/PublishingSection";
+import { Spinner } from "@/components/ui/spinner";
 
 const NAV_ITEMS = [
   { id: "basic-info", label: "Basic Info", icon: Settings },
@@ -271,7 +272,7 @@ function EditQuestionContent() {
   if (fetching) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Spinner className="w-8 h-8 animate-spin text-indigo-500" />
       </div>
     );
   }
@@ -279,18 +280,18 @@ function EditQuestionContent() {
   return (
     <div className={`min-h-screen pb-32 transition-colors duration-300 ${isDarkMode ? 'bg-[#0B0F1A]' : 'bg-[#F8FAFC]'}`}>
       {/* Top Header */}
-      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/[0.04] sticky top-0 z-40 shadow-sm transition-colors duration-300">
+      <div className="bg-white/80 dark:bg-background/80 backdrop-blur-xl border-b border-border dark:border-white/[0.04] sticky top-0 z-40 shadow-sm transition-colors duration-300">
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <div className="flex-shrink-0">
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400 mb-1">
-                <Link href="/admin/questions" className="hover:text-gray-900 dark:hover:text-white flex items-center gap-1 transition-colors">
+              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-muted-foreground mb-1">
+                <Link href="/admin/questions" className="hover:text-foreground dark:hover:text-white flex items-center gap-1 transition-colors">
                   <ArrowLeft className="w-3.5 h-3.5" /> Question Bank
                 </Link>
                 <span>/</span>
-                <span className="text-gray-900 dark:text-white font-medium">Edit Question</span>
+                <span className="text-foreground dark:text-white font-medium">Edit Question</span>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Edit Question</h1>
+              <h1 className="text-2xl font-bold text-foreground dark:text-white tracking-tight">Edit Question</h1>
             </div>
             
             <div className="hidden lg:block h-10 w-px bg-gray-200 dark:bg-slate-700" />
@@ -301,7 +302,7 @@ function EditQuestionContent() {
           </div>
           
           <div className="flex items-center gap-4">
-             <div className="hidden md:flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 px-3 py-1.5 rounded-full">
+             <div className="hidden md:flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-muted-foreground bg-muted dark:bg-card px-3 py-1.5 rounded-full">
                {lastSaved ? (
                  <>
                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
@@ -316,7 +317,7 @@ function EditQuestionContent() {
 
              <button
                onClick={() => setDarkMode(!isDarkMode)}
-               className="p-2.5 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+               className="p-2.5 rounded-full bg-muted dark:bg-card text-muted-foreground dark:text-muted-foreground hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
              >
                {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
              </button>
@@ -330,7 +331,7 @@ function EditQuestionContent() {
           {/* Scrollspy Sidebar */}
           <div className="hidden lg:block w-64 flex-shrink-0 sticky top-32">
             <nav className="space-y-1">
-              <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-4 px-3">Navigation</p>
+              <p className="text-[10px] font-bold text-gray-400 dark:text-muted-foreground uppercase tracking-widest mb-4 px-3">Navigation</p>
               {NAV_ITEMS.map(item => (
                 <button
                   key={item.id}
@@ -339,10 +340,10 @@ function EditQuestionContent() {
                   className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-xl transition-all text-left ${
                     activeSection === item.id
                       ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 shadow-sm"
-                      : "text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800/50 hover:text-gray-900 dark:hover:text-white"
+                      : "text-muted-foreground dark:text-muted-foreground hover:bg-muted dark:hover:bg-card/50 hover:text-foreground dark:hover:text-white"
                   }`}
                 >
-                  <item.icon className={`w-4 h-4 ${activeSection === item.id ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-slate-500"}`} />
+                  <item.icon className={`w-4 h-4 ${activeSection === item.id ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-muted-foreground"}`} />
                   {item.label}
                 </button>
               ))}
@@ -416,7 +417,7 @@ function EditQuestionContent() {
               disabled={loading}
               className="flex items-center justify-center gap-2 px-8 py-2.5 text-sm font-semibold text-white bg-primary hover:bg-primary/90 rounded-xl transition-colors shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+              {loading ? <Spinner className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
               Update Question
             </button>
           </div>

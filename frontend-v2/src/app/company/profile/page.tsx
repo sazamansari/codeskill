@@ -96,8 +96,8 @@ export default function CompanyProfilePage() {
           <h2 className="text-lg font-bold text-foreground mb-6">Basic Information</h2>
           
           <div className="flex flex-col md:flex-row gap-8 mb-8">
-            <div className="w-32 h-32 rounded-xl bg-muted border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:bg-muted/80 hover:border-blue-500/50 transition-colors cursor-pointer group">
-              <Upload className="w-6 h-6 mb-2 group-hover:text-blue-500 transition-colors" />
+            <div className="w-32 h-32 rounded-xl bg-muted border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:bg-muted/80 hover:border-primary/50 transition-colors cursor-pointer group">
+              <Upload className="w-6 h-6 mb-2 group-hover:text-primary transition-colors" />
               <span className="text-xs font-medium">Upload Logo</span>
             </div>
             <div className="flex-1 space-y-4">
@@ -109,7 +109,7 @@ export default function CompanyProfilePage() {
                     required
                     value={formData.name}
                     onChange={e => setFormData({...formData, name: e.target.value})}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -120,7 +120,7 @@ export default function CompanyProfilePage() {
                     disabled={!!companyId}
                     value={formData.username}
                     onChange={e => setFormData({...formData, username: e.target.value})}
-                    className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all disabled:opacity-50"
+                    className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -135,7 +135,7 @@ export default function CompanyProfilePage() {
                 placeholder="e.g. Software, Finance, Healthcare"
                 value={formData.industry}
                 onChange={e => setFormData({...formData, industry: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
               />
             </div>
             <div>
@@ -143,7 +143,7 @@ export default function CompanyProfilePage() {
               <select
                 value={formData.companySize}
                 onChange={e => setFormData({...formData, companySize: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
               >
                 <option value="">Select Size...</option>
                 <option value="1-10">1-10 Employees</option>
@@ -160,7 +160,7 @@ export default function CompanyProfilePage() {
                 rows={4}
                 value={formData.description}
                 onChange={e => setFormData({...formData, description: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
               />
             </div>
           </div>
@@ -178,7 +178,7 @@ export default function CompanyProfilePage() {
                 placeholder="https://"
                 value={formData.website}
                 onChange={e => setFormData({...formData, website: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
               />
             </div>
             <div>
@@ -188,7 +188,7 @@ export default function CompanyProfilePage() {
                 placeholder="City, Country"
                 value={formData.headquarters}
                 onChange={e => setFormData({...formData, headquarters: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
               />
             </div>
             <div>
@@ -197,7 +197,7 @@ export default function CompanyProfilePage() {
                 type="email" 
                 value={formData.email}
                 onChange={e => setFormData({...formData, email: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
               />
             </div>
             <div>
@@ -206,7 +206,7 @@ export default function CompanyProfilePage() {
                 type="text" 
                 value={formData.phone}
                 onChange={e => setFormData({...formData, phone: e.target.value})}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
               />
             </div>
           </div>
@@ -223,7 +223,7 @@ export default function CompanyProfilePage() {
           <button 
             type="submit" 
             disabled={saving}
-            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg shadow-blue-500/20 transition-all"
+            className="flex items-center gap-2 bg-primary hover:bg-primary disabled:opacity-50 disabled:hover:bg-primary text-white px-6 py-2.5 rounded-lg font-medium shadow-lg shadow-primary/20 transition-all"
           >
             <Save className="w-4 h-4" />
             {saving ? "Saving..." : (companyId ? "Save Changes" : "Register Company")}

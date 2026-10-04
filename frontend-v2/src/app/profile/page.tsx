@@ -11,13 +11,13 @@ import {
   Code2, 
   Target,
   CheckCircle2,
-  Loader2,
   Building2,
   GraduationCap,
   Upload
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { authAPI } from "@/config/api";
+import { Spinner } from "@/components/ui/spinner";
 
 type ProfileFormValues = {
   name: string;
@@ -58,7 +58,7 @@ export default function ProfilePage() {
   if (!mounted || loading) {
     return (
       <div className="flex-1 flex items-center justify-center bg-background min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        <Spinner className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -118,7 +118,7 @@ export default function ProfilePage() {
   const stats = [
     { label: "Total Solved", value: user.stats?.totalSolved || 0, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10" },
     { label: "Current Streak", value: `${user.stats?.currentStreak || 0} days`, icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
-    { label: "Total Submissions", value: user.stats?.totalSubmissions || 0, icon: Target, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { label: "Total Submissions", value: user.stats?.totalSubmissions || 0, icon: Target, color: "text-primary", bg: "bg-primary/10" },
   ];
 
   return (
@@ -142,7 +142,7 @@ export default function ProfilePage() {
             <div className="bg-card rounded-xl border border-border p-6 text-center shadow-sm">
               <div className="w-24 h-24 rounded-full bg-muted border border-border mx-auto mb-4 flex items-center justify-center overflow-hidden relative group cursor-pointer">
                 {isUploading ? (
-                  <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+                  <Spinner className="w-8 h-8 animate-spin text-emerald-500" />
                 ) : user.avatar ? (
                   <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
@@ -309,7 +309,7 @@ export default function ProfilePage() {
                     >
                       {isSaving ? (
                         <>
-                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          <Spinner className="w-4 h-4 animate-spin mr-2" />
                           Saving...
                         </>
                       ) : (

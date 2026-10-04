@@ -95,7 +95,7 @@ export default function CampusDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { label: "Active Batches", value: "0", icon: BookOpen, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-          { label: "Total Students", value: "0", icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
+          { label: "Total Students", value: "0", icon: Users, color: "text-primary", bg: "bg-primary/10" },
           { label: "Avg. Problems Solved", value: "0", icon: Target, color: "text-purple-500", bg: "bg-purple-500/10" },
           { label: "Campus Placements", value: "0", icon: GraduationCap, color: "text-amber-500", bg: "bg-amber-500/10" },
         ].map((stat, i) => (

@@ -4,10 +4,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
 
 import { authAPI } from "@/config/api";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -83,7 +83,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (loading || isVerifying) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Spinner className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -99,17 +99,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Standardized Admin Header with CodeSkill Branding & Theme Toggle */}
         <header className="bg-card border-b border-border h-16 flex items-center justify-between px-6 sticky top-0 z-10 shrink-0 shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-950 border border-primary/40 shadow-xs flex items-center justify-center p-1">
-              <svg viewBox="0 0 160 160" className="w-full h-full" fill="none">
-                <polygon points="80,10 145,45 145,115 80,150 15,115 15,45" fill="#0F172A" stroke="#C8102E" strokeWidth="8" strokeLinejoin="round" />
-                <path d="M60 62 L40 80 L60 98" stroke="#FFFFFF" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M85 55 L75 105" stroke="#C8102E" strokeWidth="10" strokeLinecap="round" />
-                <path d="M100 62 L120 80 L100 98" stroke="#38BDF8" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+            <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center p-1">
+              <img src="/logo-dark.svg" alt="CodeSkill" className="w-full h-full object-contain" />
             </div>
             <div>
-              <p className="text-sm font-bold text-foreground leading-tight">CodeSkill</p>
-              <p className="text-[10px] text-muted-foreground font-medium">Administration System</p>
+              <p className="text-sm font-bold text-foreground leading-tight">CodeSkill Admin</p>
+              <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Chandigarh University</p>
             </div>
             <div className="hidden md:flex items-center gap-1.5 ml-3 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -120,12 +115,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <ThemeToggle />
 
             <div className="flex items-center gap-2.5 pl-2 border-l border-border">
-              <div className="w-8 h-8 bg-primary/10 border border-primary/20 text-primary rounded-md flex items-center justify-center font-bold text-xs">
+              <div className="w-8 h-8 bg-amber-500/10 border border-amber-500/20 text-amber-600 rounded-md flex items-center justify-center font-bold text-xs">
                 {user?.name?.charAt(0) || "A"}
               </div>
               <div className="hidden sm:block">
                 <p className="text-xs font-semibold text-foreground">{user?.name || "Administrator"}</p>
-                <p className="text-[10px] text-muted-foreground font-medium">Institutional Admin</p>
+                <p className="text-[10px] text-muted-foreground font-medium">Examination Controller</p>
               </div>
             </div>
           </div>

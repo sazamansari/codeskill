@@ -3,7 +3,6 @@
 import { useState, useRef } from "react";
 import {
   Play,
-  Loader2,
   CheckCircle2,
   XCircle,
   Terminal,
@@ -13,6 +12,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { azureRunAPI } from "@/config/api";
+import { Spinner } from "@/components/ui/spinner";
 
 const LANGUAGES = [
   { value: "c", label: "C" },
@@ -245,7 +245,7 @@ export default function AssessmentCodeEditor({
             <div className="font-mono text-xs space-y-2">
               {isRunning ? (
                 <div className="flex items-center gap-2 text-zinc-400">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <Spinner className="w-3.5 h-3.5 animate-spin" />
                   Running via Azure...
                 </div>
               ) : outputResult ? (
@@ -285,7 +285,7 @@ export default function AssessmentCodeEditor({
             <div className="space-y-2">
               {isSubmitting ? (
                 <div className="flex items-center gap-2 text-zinc-400 text-xs">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <Spinner className="w-3.5 h-3.5 animate-spin" />
                   Running all test cases via Azure...
                 </div>
               ) : testResults.length > 0 ? (
@@ -344,7 +344,7 @@ export default function AssessmentCodeEditor({
               disabled={isRunning || isSubmitting}
               className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold bg-zinc-700 hover:bg-zinc-600 text-zinc-100 transition-colors disabled:opacity-50"
             >
-              {isRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
+              {isRunning ? <Spinner className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
               Run
             </button>
             {onSubmit && (
@@ -353,7 +353,7 @@ export default function AssessmentCodeEditor({
                 disabled={isRunning || isSubmitting}
                 className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-600 text-white transition-colors disabled:opacity-50"
               >
-                {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                {isSubmitting ? <Spinner className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                 Submit
               </button>
             )}

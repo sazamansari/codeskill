@@ -98,7 +98,7 @@ export default function CompanyTeamPage() {
       <div className="p-8 max-w-4xl mx-auto h-full flex flex-col items-center justify-center text-center">
         <h1 className="text-2xl font-bold text-foreground mb-4">No Company Found</h1>
         <p className="text-muted-foreground mb-8">Please create a company profile first before managing your team.</p>
-        <Link href="/company/profile" className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium">Create Company Profile</Link>
+        <Link href="/company/profile" className="bg-primary text-white px-6 py-3 rounded-lg font-medium">Create Company Profile</Link>
       </div>
     );
   }
@@ -112,7 +112,7 @@ export default function CompanyTeamPage() {
         </div>
         <button 
           onClick={() => setShowInviteForm(!showInviteForm)}
-          className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-blue-500/20 transition-colors"
+          className="inline-flex items-center gap-2 bg-primary hover:bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-primary/20 transition-colors"
         >
           <UserPlus className="w-4 h-4" /> Add Team Member
         </button>
@@ -130,7 +130,7 @@ export default function CompanyTeamPage() {
                 placeholder="User must already have a CodeSkill account"
                 value={inviteEmail}
                 onChange={e => setInviteEmail(e.target.value)}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-foreground"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-foreground"
               />
             </div>
             <div>
@@ -138,7 +138,7 @@ export default function CompanyTeamPage() {
               <select
                 value={inviteRole}
                 onChange={e => setInviteRole(e.target.value)}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-foreground"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-foreground"
               >
                 <option value="Admin">Admin</option>
                 <option value="Recruiter">Recruiter</option>
@@ -149,7 +149,7 @@ export default function CompanyTeamPage() {
             <button 
               type="submit" 
               disabled={inviting}
-              className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors w-full h-[38px]"
+              className="bg-primary hover:bg-primary disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors w-full h-[38px]"
             >
               {inviting ? "Adding..." : "Add Member"}
             </button>
@@ -164,7 +164,7 @@ export default function CompanyTeamPage() {
             <input 
               type="text" 
               placeholder="Search team members..." 
-              className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-foreground transition-all"
+              className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground transition-all"
             />
           </div>
           <div className="text-sm text-muted-foreground font-medium">
@@ -216,7 +216,7 @@ export default function CompanyTeamPage() {
                           <ShieldCheck className="w-3.5 h-3.5" /> Admin
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
                           {member.role}
                         </span>
                       )}

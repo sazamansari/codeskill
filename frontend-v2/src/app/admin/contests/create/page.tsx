@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { adminContestsAPI, adminProblemsAPI } from "@/config/api";
 import Link from "next/link";
-import { ArrowLeft, Save, Loader2, Search, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Save, Search, CheckCircle2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function CreateContestPage() {
   const router = useRouter();
@@ -291,7 +292,7 @@ export default function CreateContestPage() {
                 disabled={loading || selectedProblems.length === 0}
                 className="flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                {loading ? <Spinner className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                 Create Contest
               </button>
               <Link 

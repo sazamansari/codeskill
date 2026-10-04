@@ -10,7 +10,7 @@ type AIAction = 'hint' | 'explain' | 'optimize' | 'complexity' | 'edge_cases' | 
 const aiActions: { id: AIAction; label: string; icon: React.ElementType; color: string }[] = [
   { id: 'hint', label: 'Get Hint', icon: Lightbulb, color: 'text-amber-400 bg-amber-400/10' },
   { id: 'explain', label: 'Explain Failure', icon: Search, color: 'text-red-400 bg-red-400/10' },
-  { id: 'optimize', label: 'Optimize Solution', icon: Zap, color: 'text-blue-400 bg-blue-400/10' },
+  { id: 'optimize', label: 'Optimize Solution', icon: Zap, color: 'text-primary bg-primary/10' },
   { id: 'complexity', label: 'Analyze Complexity', icon: BarChart3, color: 'text-emerald-400 bg-emerald-400/10' },
   { id: 'edge_cases', label: 'Find Edge Cases', icon: ShieldAlert, color: 'text-purple-400 bg-purple-400/10' },
   { id: 'similar', label: 'Similar Problems', icon: Library, color: 'text-pink-400 bg-pink-400/10' },
@@ -32,7 +32,7 @@ export default function AIAssistantPanel() {
   };
 
   return (
-    <div className="flex flex-col border-t border-[#27272A] bg-[#18181B] relative overflow-hidden">
+    <div className="flex flex-col border-t border-border bg-card relative overflow-hidden">
       <div className="p-4 md:px-6 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-indigo-400" />
@@ -55,7 +55,7 @@ export default function AIAssistantPanel() {
                 "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border shrink-0",
                 isActive
                   ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-300"
-                  : "bg-[#27272A]/50 border-transparent hover:border-[#27272A] hover:bg-[#27272A] text-zinc-300"
+                  : "bg-muted/50 border-transparent hover:border-border hover:bg-muted text-zinc-300"
               )}
             >
               <span className={cn("p-1 rounded-md", action.color)}>
@@ -74,12 +74,12 @@ export default function AIAssistantPanel() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-t border-[#27272A] bg-[#121214]"
+            className="border-t border-border bg-card"
           >
             <div className="p-4 md:p-6 relative">
               <button 
                 onClick={() => setActiveDrawer(null)}
-                className="absolute top-4 right-4 p-1.5 text-zinc-500 hover:text-zinc-300 hover:bg-[#27272A] rounded-md transition-colors"
+                className="absolute top-4 right-4 p-1.5 text-zinc-500 hover:text-zinc-300 hover:bg-muted rounded-md transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>

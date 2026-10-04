@@ -78,7 +78,7 @@ export class RedisService implements OnModuleDestroy {
       ]);
       if (!value) return null;
       try {
-        return JSON.parse(value as string) as T;
+        return JSON.parse(value) as T;
       } catch {
         return value as unknown as T;
       }
@@ -112,4 +112,3 @@ export class RedisService implements OnModuleDestroy {
     }
   }
 }
-

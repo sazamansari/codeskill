@@ -24,7 +24,7 @@ export default function SubmissionSummary({
   const allPassed = passedCount === totalCount && totalCount > 0;
   
   return (
-    <div className="bg-[#121214] border-t border-[#27272A] p-4 md:p-6 rounded-b-xl">
+    <div className="bg-card border-t border-border p-4 md:p-6 rounded-b-xl">
       <h3 className="text-sm font-semibold text-zinc-100 mb-4 flex items-center gap-2">
         <TrendingUp className="w-4 h-4 text-indigo-400" />
         Submission Summary
@@ -34,7 +34,7 @@ export default function SubmissionSummary({
         {/* Passed Test Cases */}
         <motion.div 
           whileHover={{ y: -2 }}
-          className="bg-[#18181B] border border-[#27272A] rounded-xl p-4 flex flex-col gap-1 shadow-sm"
+          className="bg-card border border-border rounded-xl p-4 flex flex-col gap-1 shadow-sm"
         >
           <div className="flex items-center gap-1.5 text-zinc-400 mb-1">
             <CheckSquare className="w-3.5 h-3.5" />
@@ -54,7 +54,7 @@ export default function SubmissionSummary({
         {/* Runtime */}
         <motion.div 
           whileHover={{ y: -2 }}
-          className="bg-[#18181B] border border-[#27272A] rounded-xl p-4 flex flex-col gap-1 shadow-sm"
+          className="bg-card border border-border rounded-xl p-4 flex flex-col gap-1 shadow-sm"
         >
           <div className="flex items-center gap-1.5 text-zinc-400 mb-1">
             <Activity className="w-3.5 h-3.5" />
@@ -63,7 +63,7 @@ export default function SubmissionSummary({
           {runtimePercentile !== undefined ? (
             <div className="flex flex-col">
               <span className="text-sm font-medium text-zinc-300">Fastest than</span>
-              <span className="text-xl font-bold text-blue-400">{runtimePercentile}%</span>
+              <span className="text-xl font-bold text-primary">{runtimePercentile}%</span>
             </div>
           ) : (
             <span className="text-sm font-medium text-zinc-500 mt-1">N/A</span>
@@ -73,7 +73,7 @@ export default function SubmissionSummary({
         {/* Memory */}
         <motion.div 
           whileHover={{ y: -2 }}
-          className="bg-[#18181B] border border-[#27272A] rounded-xl p-4 flex flex-col gap-1 shadow-sm"
+          className="bg-card border border-border rounded-xl p-4 flex flex-col gap-1 shadow-sm"
         >
           <div className="flex items-center gap-1.5 text-zinc-400 mb-1">
             <Database className="w-3.5 h-3.5" />
@@ -92,7 +92,7 @@ export default function SubmissionSummary({
         {/* Language */}
         <motion.div 
           whileHover={{ y: -2 }}
-          className="bg-[#18181B] border border-[#27272A] rounded-xl p-4 flex flex-col gap-1 shadow-sm"
+          className="bg-card border border-border rounded-xl p-4 flex flex-col gap-1 shadow-sm"
         >
           <div className="flex items-center gap-1.5 text-zinc-400 mb-1">
             <Code2 className="w-3.5 h-3.5" />

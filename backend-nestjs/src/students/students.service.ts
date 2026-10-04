@@ -12,8 +12,14 @@ import * as crypto from 'crypto';
 import * as xlsx from 'xlsx';
 import * as bcrypt from 'bcryptjs';
 import { User, UserDocument } from '../database/schemas/user.schema';
-import { AuditLog, AuditLogDocument } from '../database/schemas/audit-log.schema';
-import { EmailJob, EmailJobDocument } from '../database/schemas/email-job.schema';
+import {
+  AuditLog,
+  AuditLogDocument,
+} from '../database/schemas/audit-log.schema';
+import {
+  EmailJob,
+  EmailJobDocument,
+} from '../database/schemas/email-job.schema';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { QueryStudentsDto } from './dto/query-students.dto';
@@ -134,19 +140,16 @@ export class StudentsService {
     return student;
   }
 
-  async create(
-    dto: CreateStudentDto,
-    adminUser: any,
-    ip = '',
-    userAgent = '',
-  ) {
+  async create(dto: CreateStudentDto, adminUser: any, ip = '', userAgent = '') {
     const formattedUid = dto.uid.toUpperCase().trim();
     const formattedEmail = dto.email.toLowerCase().trim();
 
     // Check duplicate UID
     const existingUid = await this.userModel.findOne({ uid: formattedUid });
     if (existingUid) {
-      throw new ConflictException(`Student with UID '${formattedUid}' already exists`);
+      throw new ConflictException(
+        `Student with UID '${formattedUid}' already exists`,
+      );
     }
 
     // Check duplicate email
@@ -258,7 +261,7 @@ export class StudentsService {
           student.studentProfile ||
           {}),
         ...dto.studentProfile,
-      } as any;
+      };
     }
 
     await student.save();
@@ -323,12 +326,7 @@ export class StudentsService {
     };
   }
 
-  async resetPassword(
-    id: string,
-    adminUser: any,
-    ip = '',
-    userAgent = '',
-  ) {
+  async resetPassword(id: string, adminUser: any, ip = '', userAgent = '') {
     const student = await this.userModel.findById(id);
     if (!student) {
       throw new NotFoundException('Student not found');
@@ -453,11 +451,7 @@ export class StudentsService {
       const rawSem = findField(row, ['semester', 'sem']);
       const semester = rawSem && !isNaN(Number(rawSem)) ? Number(rawSem) : 1;
 
-      const rawYear = findField(row, [
-        'year',
-        'grad_year',
-        'graduation_year',
-      ]);
+      const rawYear = findField(row, ['year', 'grad_year', 'graduation_year']);
       const year =
         rawYear && !isNaN(Number(rawYear))
           ? Number(rawYear)
@@ -537,7 +531,9 @@ export class StudentsService {
       } else if (!emailRegex.test(row.email)) {
         rowErrors.push(`Invalid email format '${row.email}'`);
       } else if (fileEmailMap.has(row.email)) {
-        rowErrors.push(`Duplicate email '${row.email}' within the uploaded file`);
+        rowErrors.push(
+          `Duplicate email '${row.email}' within the uploaded file`,
+        );
       } else if (existingEmailSet.has(row.email)) {
         rowErrors.push(`Email '${row.email}' already exists in database`);
       }
@@ -793,22 +789,30 @@ export class StudentsService {
       filter.status = status;
     }
 
-    const [total, pending, queued, sent, failed, retrying, jobs, filteredTotal] =
-      await Promise.all([
-        this.emailJobModel.countDocuments(),
-        this.emailJobModel.countDocuments({ status: 'pending' }),
-        this.emailJobModel.countDocuments({ status: 'queued' }),
-        this.emailJobModel.countDocuments({ status: 'sent' }),
-        this.emailJobModel.countDocuments({ status: 'failed' }),
-        this.emailJobModel.countDocuments({ status: 'retrying' }),
-        this.emailJobModel
-          .find(filter)
-          .sort({ updatedAt: -1, createdAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .lean(),
-        this.emailJobModel.countDocuments(filter),
-      ]);
+    const [
+      total,
+      pending,
+      queued,
+      sent,
+      failed,
+      retrying,
+      jobs,
+      filteredTotal,
+    ] = await Promise.all([
+      this.emailJobModel.countDocuments(),
+      this.emailJobModel.countDocuments({ status: 'pending' }),
+      this.emailJobModel.countDocuments({ status: 'queued' }),
+      this.emailJobModel.countDocuments({ status: 'sent' }),
+      this.emailJobModel.countDocuments({ status: 'failed' }),
+      this.emailJobModel.countDocuments({ status: 'retrying' }),
+      this.emailJobModel
+        .find(filter)
+        .sort({ updatedAt: -1, createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.emailJobModel.countDocuments(filter),
+    ]);
 
     return {
       stats: {
@@ -829,4 +833,3 @@ export class StudentsService {
     };
   }
 }
-

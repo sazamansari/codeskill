@@ -10,7 +10,9 @@ int main() {
     *p = 42;
     return 0;
 }`;
-  const results = await service.executeCode('cpp', code, [{ id: 1, input: '', expected: 'anything' }]);
+  const results = await service.executeCode('cpp', code, [
+    { id: 1, input: '', expected: 'anything' },
+  ]);
   console.log(JSON.stringify(results, null, 2));
 }
 

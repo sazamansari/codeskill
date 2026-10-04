@@ -3,7 +3,8 @@ import { HydratedDocument, Types } from 'mongoose';
 
 export type EmailJobDocument = HydratedDocument<EmailJob>;
 
-export type EmailJobStatus = 'pending' | 'queued' | 'sent' | 'failed' | 'retrying';
+export type EmailJobStatus =
+  'pending' | 'queued' | 'sent' | 'failed' | 'retrying';
 
 @Schema({ timestamps: true })
 export class EmailJob {

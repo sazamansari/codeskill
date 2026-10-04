@@ -25,7 +25,9 @@ export class SubmissionsController {
   @Post()
   @UseGuards(SubmissionRateLimitGuard)
   @HttpCode(HttpStatus.ACCEPTED)
-  @ApiOperation({ summary: 'Create a new code submission and queue for isolated execution' })
+  @ApiOperation({
+    summary: 'Create a new code submission and queue for isolated execution',
+  })
   async createSubmission(
     @CurrentUser('_id') userId: string,
     @Body() data: any,
@@ -93,7 +95,13 @@ export class SubmissionsController {
     @CurrentUser('_id') currentUserId: string,
     @CurrentUser('role') role: string,
     @Param('userId') targetUserId: string,
-    @Query() query: { page?: number; limit?: number; problemId?: string; status?: string },
+    @Query()
+    query: {
+      page?: number;
+      limit?: number;
+      problemId?: string;
+      status?: string;
+    },
   ) {
     const isAdmin = role === 'admin';
     const effectiveUserId = isAdmin ? targetUserId : currentUserId;

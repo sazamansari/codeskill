@@ -47,7 +47,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly s3Service: S3Service,
-  ) { }
+  ) {}
 
   @Post('register/send-otp')
   @ApiOperation({ summary: 'Send OTP for registration' })
@@ -79,7 +79,9 @@ export class AuthController {
   @Post('force-change-password')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Mandatory password change for first-time or reset logins' })
+  @ApiOperation({
+    summary: 'Mandatory password change for first-time or reset logins',
+  })
   @HttpCode(HttpStatus.OK)
   async forceChangePassword(
     @CurrentUser('_id') userId: string,
@@ -189,8 +191,12 @@ export class AuthController {
     const avatarUrl = await this.s3Service.uploadFile(file, 'avatars');
 
     // Delete the old avatar from S3 if it exists (run in background)
-    if (currentUser && currentUser.avatar && currentUser.avatar.includes('amazonaws.com')) {
-      this.s3Service.deleteFile(currentUser.avatar).catch(() => { });
+    if (
+      currentUser &&
+      currentUser.avatar &&
+      currentUser.avatar.includes('amazonaws.com')
+    ) {
+      this.s3Service.deleteFile(currentUser.avatar).catch(() => {});
     }
 
     const user = await this.authService.updateAvatar(userId, avatarUrl);

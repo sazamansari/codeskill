@@ -1,8 +1,14 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { User, UserSchema } from './schemas/user.schema';
+import { User as UserEntity } from './entities/user.entity';
 import { Problem, ProblemSchema } from './schemas/problem.schema';
+import { Problem as ProblemEntity } from './entities/problem.entity';
+import { Question as QuestionEntity } from './entities/question.entity';
+import { Assessment as AssessmentEntity } from './entities/assessment.entity';
+import { Submission as SubmissionEntity } from './entities/submission.entity';
 import {
   ProblemMetadata,
   ProblemMetadataSchema,
@@ -56,6 +62,11 @@ import {
   AssessmentAttempt,
   AssessmentAttemptSchema,
 } from './schemas/assessment-attempt.schema';
+import { ExamSession, ExamSessionSchema } from './schemas/exam-session.schema';
+import {
+  ExamSecurityEvent,
+  ExamSecurityEventSchema,
+} from './schemas/exam-security-event.schema';
 
 @Module({
   imports: [
@@ -64,6 +75,33 @@ import {
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('database.uri'),
       }),
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        const url = configService.get<string>('database.postgres.url');
+        if (url) {
+          return {
+            type: 'postgres',
+            url,
+            autoLoadEntities: true,
+            synchronize: process.env.NODE_ENV !== 'production', // Use migrations in production
+          };
+        }
+        return {
+          type: 'postgres',
+          host: configService.get<string>('database.postgres.host'),
+          port: configService.get<number>('database.postgres.port'),
+          username: configService.get<string>('database.postgres.username'),
+          password: configService.get<string>('database.postgres.password'),
+          database: configService.get<string>('database.postgres.database'),
+          ssl: configService.get<boolean>('database.postgres.ssl')
+            ? { rejectUnauthorized: false }
+            : false,
+          autoLoadEntities: true,
+          synchronize: process.env.NODE_ENV !== 'production', // Use migrations in production
+        };
+      },
     }),
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
@@ -91,8 +129,17 @@ import {
       { name: QuestionBank.name, schema: QuestionBankSchema },
       { name: Assessment.name, schema: AssessmentSchema },
       { name: AssessmentAttempt.name, schema: AssessmentAttemptSchema },
+      { name: ExamSession.name, schema: ExamSessionSchema },
+      { name: ExamSecurityEvent.name, schema: ExamSecurityEventSchema },
+    ]),
+    TypeOrmModule.forFeature([
+      UserEntity,
+      ProblemEntity,
+      QuestionEntity,
+      AssessmentEntity,
+      SubmissionEntity,
     ]),
   ],
-  exports: [MongooseModule],
+  exports: [MongooseModule, TypeOrmModule],
 })
 export class DatabaseModule {}

@@ -11,7 +11,6 @@ import {
   XCircle,
   Download,
   ArrowRight,
-  Loader2,
   RefreshCw,
   Code,
   BookOpen,
@@ -23,6 +22,7 @@ import {
   FileCode,
 } from "lucide-react";
 import { adminQuestionsAPI } from "@/config/api";
+import { Spinner } from "@/components/ui/spinner";
 
 interface PreviewData {
   summary: {
@@ -262,7 +262,7 @@ export default function ImportQuestionsPage() {
           <button
             type="button"
             onClick={() => handleDownloadSampleTemplate("coding")}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-bold transition-colors shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 text-xs font-bold transition-colors shadow-sm"
           >
             <FileCode className="w-3.5 h-3.5" />
             Coding Questions (.CSV)
@@ -336,9 +336,9 @@ export default function ImportQuestionsPage() {
               <p className="text-xs text-emerald-400 font-medium">Newly Inserted</p>
               <p className="text-xl font-black text-emerald-400 font-mono">+{importResult.insertedCount}</p>
             </div>
-            <div className="text-center px-4 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
-              <p className="text-xs text-blue-400 font-medium">Updated Existing</p>
-              <p className="text-xl font-black text-blue-400 font-mono">{importResult.updatedCount}</p>
+            <div className="text-center px-4 py-2 rounded-xl bg-primary/10 border border-primary/20">
+              <p className="text-xs text-primary font-medium">Updated Existing</p>
+              <p className="text-xl font-black text-primary font-mono">{importResult.updatedCount}</p>
             </div>
           </div>
 
@@ -410,7 +410,7 @@ export default function ImportQuestionsPage() {
 
             {(isValidating || isCommitting) && (
               <div className="mt-6 flex flex-col items-center justify-center gap-2">
-                <Loader2 className="w-7 h-7 text-primary animate-spin" />
+                <Spinner className="w-7 h-7 text-primary animate-spin" />
                 <p className="text-xs font-bold text-primary animate-pulse">
                   {isCommitting
                     ? "Converting & Upserting questions into bank in 1 attempt..."
@@ -444,9 +444,9 @@ export default function ImportQuestionsPage() {
                     {previewData.summary.toInsertCount ?? previewData.summary.validCount}
                   </p>
                 </div>
-                <div className="p-4 rounded-2xl bg-card border border-blue-500/20 bg-blue-500/5">
-                  <p className="text-xs text-blue-400 font-medium">Ready to Update (Existing)</p>
-                  <p className="text-2xl font-black text-blue-400 font-mono mt-1">
+                <div className="p-4 rounded-2xl bg-card border border-primary/20 bg-primary/5">
+                  <p className="text-xs text-primary font-medium">Ready to Update (Existing)</p>
+                  <p className="text-2xl font-black text-primary font-mono mt-1">
                     {previewData.summary.toUpdateCount ?? 0}
                   </p>
                 </div>
@@ -486,7 +486,7 @@ export default function ImportQuestionsPage() {
                   >
                     {isCommitting ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Spinner className="w-4 h-4 animate-spin" />
                         Pushing to Bank…
                       </>
                     ) : (
@@ -519,7 +519,7 @@ export default function ImportQuestionsPage() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="text-sm font-semibold text-foreground">{row.question}</p>
                           {row.isUpdate ? (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
                               UPDATE
                             </span>
                           ) : (
@@ -537,7 +537,7 @@ export default function ImportQuestionsPage() {
                           <span>· Level: <span className="capitalize font-semibold text-primary">{row.difficulty}</span></span>
                           <span>· {row.marks} mark{row.marks > 1 ? "s" : ""}</span>
                           {row.testCases?.length > 0 && (
-                            <span className="text-blue-400 font-medium">
+                            <span className="text-primary font-medium">
                               · {row.testCases.length} Test Cases
                             </span>
                           )}

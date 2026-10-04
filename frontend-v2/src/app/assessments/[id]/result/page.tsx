@@ -202,7 +202,7 @@ export default function AssessmentResultPage({
               </div>
               <div>
                 <p className="text-xs font-bold text-slate-900 leading-tight">Chandigarh University</p>
-                <p className="text-[10px] text-[#c8102e] font-semibold uppercase tracking-wider">Official Examination Scorecard</p>
+                <p className="text-[10px] text-primary font-semibold uppercase tracking-wider">Official Examination Scorecard</p>
               </div>
             </div>
 
@@ -236,7 +236,7 @@ export default function AssessmentResultPage({
                     </>
                   )}
                 </span>
-                <span className="text-xs font-mono text-slate-500 font-semibold">
+                <span className="text-xs font-mono text-muted-foreground font-semibold">
                   {assessment?.code}
                 </span>
               </div>
@@ -244,7 +244,7 @@ export default function AssessmentResultPage({
               <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
                 {assessment?.title}
               </h1>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Completed on {attempt.submittedAt ? new Date(attempt.submittedAt).toLocaleDateString(undefined, { dateStyle: 'long' }) : 'Recently'}
               </p>
             </div>

@@ -11,7 +11,6 @@ import {
   RotateCcw,
   Copy,
   Check,
-  Loader2,
   AlertTriangle,
   Clock,
   Cpu,
@@ -21,6 +20,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { azureRunAPI } from "@/config/api";
+import { Spinner } from "@/components/ui/spinner";
 
 const LANGUAGES = [
   { value: "python", label: "Python 3", ext: "py" },
@@ -74,6 +74,7 @@ int main() {
 `,
   java: `import java.util.*;
 import java.io.*;
+import { Spinner } from "@/components/ui/spinner";
 
 public class Main {
     public static void main(String[] args) {
@@ -720,7 +721,7 @@ export default function DSAAssessmentEditor({
             {/* Micro execution status */}
             {isRunning && (
               <span className="text-[11px] text-amber-400 flex items-center gap-1.5 font-mono animate-pulse">
-                <Loader2 className="w-3 h-3 animate-spin" /> Compiling & Running...
+                <Spinner className="w-3 h-3 animate-spin" /> Compiling & Running...
               </span>
             )}
           </div>
@@ -794,7 +795,7 @@ export default function DSAAssessmentEditor({
               <div className="space-y-3 font-mono text-xs">
                 {isRunning ? (
                   <div className="flex items-center gap-2 text-zinc-400 py-4 justify-center">
-                    <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                    <Spinner className="w-5 h-5 animate-spin text-primary" />
                     <span>Executing code in Microsoft Azure / Local Sandbox environment...</span>
                   </div>
                 ) : resultsList.length > 0 ? (
@@ -922,7 +923,7 @@ export default function DSAAssessmentEditor({
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-bold border border-zinc-700 transition-all disabled:opacity-50"
               >
                 {isRunning ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <Spinner className="w-3.5 h-3.5 animate-spin" />
                 ) : (
                   <Play className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                 )}
@@ -937,7 +938,7 @@ export default function DSAAssessmentEditor({
                 className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all shadow-md shadow-primary/20 disabled:opacity-50"
               >
                 {isSubmitting ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <Spinner className="w-3.5 h-3.5 animate-spin" />
                 ) : (
                   <CheckCircle2 className="w-3.5 h-3.5" />
                 )}

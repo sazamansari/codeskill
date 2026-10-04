@@ -25,7 +25,7 @@ export default function ContactPage() {
         {/* Header Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-            Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500">Touch</span>
+            Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary">Touch</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Have questions about CodeSkill or want to integrate our platform into your institution? We're here to help.
@@ -38,7 +38,7 @@ export default function ContactPage() {
           <div className="lg:col-span-1 space-y-6">
             
             <div className="bg-card/50 backdrop-blur-xl p-6 rounded-3xl shadow-xl shadow-black/5 border border-border/50 flex items-start gap-4 hover:border-primary/50 transition-colors">
-              <div className="w-12 h-12 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center shrink-0">
                 <Mail className="w-6 h-6" />
               </div>
               <div>

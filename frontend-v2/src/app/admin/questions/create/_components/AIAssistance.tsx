@@ -8,8 +8,8 @@ import { io } from "socket.io-client";
 import { useCreateProblemStore } from "@/store/createProblemStore";
 
 const AI_ACTIONS = [
-  { id: "statement", icon: FileText, label: "Generate Statement", desc: "Auto-write problem description", color: "from-blue-500 to-indigo-500" },
-  { id: "constraints", icon: AlertTriangle, label: "Generate Constraints", desc: "Suggest constraint bounds", color: "from-amber-500 to-orange-500" },
+  { id: "statement", icon: FileText, label: "Generate Statement", desc: "Auto-write problem description", color: "from-primary to-indigo-500" },
+  { id: "constraints", icon: AlertTriangle, label: "Generate Constraints", desc: "Suggest constraint bounds", color: "from-primary to-orange-500" },
   { id: "examples", icon: Lightbulb, label: "Generate Examples", desc: "Create sample test cases", color: "from-emerald-500 to-teal-500" },
   { id: "editorial", icon: BookOpen, label: "Generate Editorial", desc: "Write solution explanation", color: "from-pink-500 to-rose-500" },
 ];
@@ -99,17 +99,17 @@ export default function AIAssistance() {
             onClick={() => handleGenerate(action.id, action.label)}
             whileHover={!isGenerating ? { scale: 1.02, y: -2 } : {}}
             whileTap={!isGenerating ? { scale: 0.98 } : {}}
-            className={`group relative flex items-start gap-3 p-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 transition-all text-left overflow-hidden ${isGenerating ? 'opacity-50 cursor-not-allowed' : 'hover:border-indigo-200 hover:shadow-md'}`}
+            className={`group relative flex items-start gap-3 p-4 rounded-xl border border-border dark:border-border bg-white dark:bg-card/50 transition-all text-left overflow-hidden ${isGenerating ? 'opacity-50 cursor-not-allowed' : 'hover:border-indigo-200 hover:shadow-md'}`}
           >
             <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center flex-shrink-0 shadow-sm`}>
               <action.icon className="w-4 h-4 text-white" />
             </div>
             <div className="relative">
               <div className="flex items-center gap-1.5">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{action.label}</p>
+                <p className="text-sm font-medium text-foreground dark:text-white">{action.label}</p>
                 <Sparkles className="w-3 h-3 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-              <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">{action.desc}</p>
+              <p className="text-[11px] text-gray-500 dark:text-muted-foreground mt-0.5">{action.desc}</p>
             </div>
           </motion.button>
         ))}
@@ -121,7 +121,7 @@ export default function AIAssistance() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute inset-0 z-10 bg-slate-900/95 backdrop-blur-sm rounded-xl p-4 flex flex-col border border-indigo-500/50 shadow-2xl"
+              className="absolute inset-0 z-10 bg-background/95 backdrop-blur-sm rounded-xl p-4 flex flex-col border border-indigo-500/50 shadow-2xl"
             >
               <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
                 <div className="flex items-center gap-2">

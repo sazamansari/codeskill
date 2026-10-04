@@ -1,24 +1,13 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
-import { User, UserSchema } from '../database/schemas/user.schema';
-import {
-  ProblemMetadata,
-  ProblemMetadataSchema,
-} from '../database/schemas/problem-metadata.schema';
-import {
-  Submission,
-  SubmissionSchema,
-} from '../database/schemas/submission.schema';
+import { User as UserEntity } from '../database/entities/user.entity';
+import { Problem as ProblemEntity } from '../database/entities/problem.entity';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: User.name, schema: UserSchema },
-      { name: ProblemMetadata.name, schema: ProblemMetadataSchema },
-      { name: Submission.name, schema: SubmissionSchema },
-    ]),
+    TypeOrmModule.forFeature([UserEntity, ProblemEntity]),
   ],
   controllers: [UsersController],
   providers: [UsersService],

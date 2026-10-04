@@ -45,7 +45,10 @@ export class SubmissionsService {
     if (!submissionData.code || typeof submissionData.code !== 'string') {
       throw new BadRequestException('Missing or invalid code');
     }
-    if (!submissionData.language || typeof submissionData.language !== 'string') {
+    if (
+      !submissionData.language ||
+      typeof submissionData.language !== 'string'
+    ) {
       throw new BadRequestException('Missing or invalid language');
     }
     if (!submissionData.problemId) {
@@ -53,7 +56,7 @@ export class SubmissionsService {
     }
 
     const langLower = submissionData.language.toLowerCase();
-    if (!SUPPORTED_LANGUAGES.includes(langLower as any)) {
+    if (!SUPPORTED_LANGUAGES.includes(langLower)) {
       throw new BadRequestException(
         `Unsupported language: "${submissionData.language}". Supported: ${SUPPORTED_LANGUAGES.join(', ')}`,
       );
@@ -114,7 +117,11 @@ export class SubmissionsService {
     return submission;
   }
 
-  async getSubmissionById(userId: string, submissionId: string, isAdmin = false) {
+  async getSubmissionById(
+    userId: string,
+    submissionId: string,
+    isAdmin = false,
+  ) {
     const submission = await this.submissionModel.findById(submissionId).lean();
     if (!submission) {
       throw new NotFoundException('Submission not found');
@@ -128,8 +135,16 @@ export class SubmissionsService {
     return submission;
   }
 
-  async getSubmissionResult(userId: string, submissionId: string, isAdmin = false) {
-    const submission = await this.getSubmissionById(userId, submissionId, isAdmin);
+  async getSubmissionResult(
+    userId: string,
+    submissionId: string,
+    isAdmin = false,
+  ) {
+    const submission = await this.getSubmissionById(
+      userId,
+      submissionId,
+      isAdmin,
+    );
 
     return {
       submissionId: submission._id,
@@ -146,7 +161,11 @@ export class SubmissionsService {
     };
   }
 
-  async cancelSubmission(userId: string, submissionId: string, isAdmin = false) {
+  async cancelSubmission(
+    userId: string,
+    submissionId: string,
+    isAdmin = false,
+  ) {
     const submission = await this.submissionModel.findById(submissionId);
     if (!submission) {
       throw new NotFoundException('Submission not found');
@@ -156,7 +175,10 @@ export class SubmissionsService {
       throw new ForbiddenException('Access denied to this submission');
     }
 
-    if (submission.status !== SubmissionStatus.QUEUED && submission.status !== 'pending') {
+    if (
+      submission.status !== SubmissionStatus.QUEUED &&
+      submission.status !== 'pending'
+    ) {
       throw new BadRequestException(
         `Cannot cancel submission with status "${submission.status}". Only queued submissions can be cancelled.`,
       );
@@ -169,7 +191,9 @@ export class SubmissionsService {
         await job.remove();
       }
     } catch (err: any) {
-      this.logger.warn(`Could not remove job ${submissionId} from queue: ${err.message}`);
+      this.logger.warn(
+        `Could not remove job ${submissionId} from queue: ${err.message}`,
+      );
     }
 
     submission.status = SubmissionStatus.CANCELLED;
@@ -209,7 +233,12 @@ export class SubmissionsService {
 
   async getSubmissionsByUser(
     userId: string,
-    query: { page?: number; limit?: number; problemId?: string; status?: string },
+    query: {
+      page?: number;
+      limit?: number;
+      problemId?: string;
+      status?: string;
+    },
   ) {
     const page = Math.max(1, Number(query.page) || 1);
     const limit = Math.min(100, Math.max(1, Number(query.limit) || 20));

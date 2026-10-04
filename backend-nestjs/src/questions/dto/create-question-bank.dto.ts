@@ -13,7 +13,9 @@ export class CreateQuestionBankDto {
   @IsString()
   name: string;
 
-  @ApiPropertyOptional({ example: 'Curated pool of questions for OS semester exam' })
+  @ApiPropertyOptional({
+    example: 'Curated pool of questions for OS semester exam',
+  })
   @IsOptional()
   @IsString()
   description?: string;
@@ -23,7 +25,10 @@ export class CreateQuestionBankDto {
   @IsString()
   topic: string;
 
-  @ApiPropertyOptional({ type: [String], description: 'Array of Question ObjectIDs' })
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'Array of Question ObjectIDs',
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })

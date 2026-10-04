@@ -5,7 +5,7 @@ import { BarChart3, Trophy, Flame, CheckCircle2, TrendingUp, Sparkles, Activity 
 import { motion } from "framer-motion";
 
 const SKILL_METRICS = [
-  { name: "Data Structures", score: 88, color: "bg-blue-500" },
+  { name: "Data Structures", score: 88, color: "bg-primary" },
   { name: "Algorithms & Logic", score: 76, color: "bg-indigo-500" },
   { name: "Problem Solving", score: 79, color: "bg-emerald-500" },
   { name: "Overall DSA Mastery", score: 82, color: "bg-cyan-500" },
@@ -68,7 +68,7 @@ export function StudentAnalyticsPreview() {
                 <div className="text-3xl font-extrabold text-foreground font-mono">18</div>
                 <div className="text-[11px] text-muted-foreground font-mono">Avg Score: 92.4%</div>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                 <Trophy className="w-6 h-6" />
               </div>
             </motion.div>

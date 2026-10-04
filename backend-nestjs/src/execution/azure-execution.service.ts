@@ -42,7 +42,14 @@ export interface ExecutionRequest {
 export interface ExecutionResult {
   stdout: string;
   stderr: string;
-  status: 'accepted' | 'wrong_answer' | 'compile_error' | 'runtime_error' | 'time_limit' | 'memory_limit' | 'system_error';
+  status:
+    | 'accepted'
+    | 'wrong_answer'
+    | 'compile_error'
+    | 'runtime_error'
+    | 'time_limit'
+    | 'memory_limit'
+    | 'system_error';
   executionTimeMs?: number;
   memoryUsedKB?: number;
   passed?: boolean;
@@ -63,7 +70,9 @@ export class AzureExecutionService {
     if (this.isConfigured) {
       this.logger.log(`Azure Execution Service connected to: ${this.azureUrl}`);
     } else {
-      this.logger.warn('Azure Execution Service: No AZURE_COMPILER_URL/KEY set. Will use local executor.');
+      this.logger.warn(
+        'Azure Execution Service: No AZURE_COMPILER_URL/KEY set. Will use local executor.',
+      );
     }
   }
 
@@ -76,7 +85,9 @@ export class AzureExecutionService {
    */
   async execute(req: ExecutionRequest): Promise<ExecutionResult> {
     if (!this.isConfigured) {
-      throw new Error('Azure execution service is not configured. Set AZURE_COMPILER_URL and AZURE_COMPILER_KEY.');
+      throw new Error(
+        'Azure execution service is not configured. Set AZURE_COMPILER_URL and AZURE_COMPILER_KEY.',
+      );
     }
 
     const langId = JUDGE0_LANG_IDS[req.language?.toLowerCase()];
@@ -131,7 +142,9 @@ export class AzureExecutionService {
     language: string,
     testCases: Array<{ id: string | number; input: string; expected: string }>,
     options?: { timeoutMs?: number; memoryMB?: number },
-  ): Promise<Array<ExecutionResult & { id: string | number; passed: boolean }>> {
+  ): Promise<
+    Array<ExecutionResult & { id: string | number; passed: boolean }>
+  > {
     const results = await Promise.allSettled(
       testCases.map((tc) =>
         this.execute({
@@ -163,10 +176,7 @@ export class AzureExecutionService {
     });
   }
 
-  private mapJudge0Result(
-    data: any,
-    expectedOutput?: string,
-  ): ExecutionResult {
+  private mapJudge0Result(data: any, expectedOutput?: string): ExecutionResult {
     const statusId = data.status?.id;
     const stdout = (data.stdout || '').trim();
     const stderr = data.stderr || data.compile_output || '';
@@ -209,7 +219,9 @@ export class AzureExecutionService {
       stderr,
       status,
       passed,
-      executionTimeMs: data.time ? Math.round(parseFloat(data.time) * 1000) : undefined,
+      executionTimeMs: data.time
+        ? Math.round(parseFloat(data.time) * 1000)
+        : undefined,
       memoryUsedKB: data.memory,
     };
   }

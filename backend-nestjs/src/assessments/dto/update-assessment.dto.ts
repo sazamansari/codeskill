@@ -6,8 +6,10 @@ import {
   IsArray,
   IsEnum,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { AssessmentSectionDto } from './create-assessment.dto';
 
 export class UpdateAssessmentDto {
   @IsString()
@@ -46,6 +48,12 @@ export class UpdateAssessmentDto {
   @IsString({ each: true })
   @IsOptional()
   questionIds?: string[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AssessmentSectionDto)
+  @IsOptional()
+  sections?: AssessmentSectionDto[];
 
   @IsOptional()
   startTime?: string;

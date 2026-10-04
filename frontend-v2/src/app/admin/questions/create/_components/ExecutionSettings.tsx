@@ -5,7 +5,7 @@ import SectionCard from "./SectionCard";
 import { Cpu } from "lucide-react";
 
 const inputClass =
-  "w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all";
+  "w-full px-3.5 py-2.5 bg-muted/50 dark:bg-card border border-border dark:border-border rounded-xl text-sm text-foreground dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all";
 
 const labelClass = "text-[13px] font-medium text-gray-700 dark:text-slate-300";
 
@@ -34,7 +34,7 @@ export default function ExecutionSettings() {
                 step={100}
                 className={inputClass}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-slate-500">ms</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-muted-foreground">ms</span>
             </div>
           </div>
 
@@ -49,7 +49,7 @@ export default function ExecutionSettings() {
                 step={16}
                 className={inputClass}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-slate-500">MB</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-muted-foreground">MB</span>
             </div>
           </div>
 
@@ -63,7 +63,7 @@ export default function ExecutionSettings() {
                 min={1}
                 className={inputClass}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-slate-500">MB</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-muted-foreground">MB</span>
             </div>
           </div>
 
@@ -77,7 +77,7 @@ export default function ExecutionSettings() {
                 min={1}
                 className={inputClass}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-slate-500">MB</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-muted-foreground">MB</span>
             </div>
           </div>
 
@@ -91,7 +91,7 @@ export default function ExecutionSettings() {
                 min={1}
                 className={inputClass}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-slate-500">KB</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-muted-foreground">KB</span>
             </div>
           </div>
 
@@ -106,7 +106,7 @@ export default function ExecutionSettings() {
                 step={0.5}
                 className={inputClass}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-slate-500">cores</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-muted-foreground">cores</span>
             </div>
           </div>
         </div>
@@ -124,7 +124,7 @@ export default function ExecutionSettings() {
                 className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
                   execution[toggle.key]
                     ? "bg-indigo-50/50 border-indigo-200 dark:bg-indigo-500/10 dark:border-indigo-500/20"
-                    : "bg-gray-50/50 border-gray-200 dark:bg-slate-800/50 dark:border-slate-700"
+                    : "bg-muted/50/50 border-border dark:bg-card/50 dark:border-border"
                 }`}
               >
                 <div className="pt-0.5">
@@ -145,8 +145,8 @@ export default function ExecutionSettings() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">{toggle.label}</p>
-                  <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">{toggle.desc}</p>
+                  <p className="text-sm font-medium text-foreground dark:text-white">{toggle.label}</p>
+                  <p className="text-[11px] text-gray-500 dark:text-muted-foreground mt-0.5">{toggle.desc}</p>
                 </div>
               </label>
             ))}

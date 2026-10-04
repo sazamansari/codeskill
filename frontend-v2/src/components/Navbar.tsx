@@ -87,9 +87,9 @@ export function Navbar() {
     <>
       <header className="fixed top-2.5 sm:top-3 left-0 right-0 z-50 px-3 sm:px-6 max-w-7xl mx-auto transition-all duration-200">
         <div
-          className={`w-full bg-[#FFFFFF]/95 dark:bg-[#121212]/96 backdrop-blur-md border border-black/8 dark:border-white/10 rounded-2xl shadow-[0_6px_24px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.30)] px-3 sm:px-5 h-[56px] flex items-center justify-between transition-all duration-200 ${
+          className={`w-full bg-background/95 dark:bg-[#121212]/96 backdrop-blur-md border border-black/8 dark:border-white/10 rounded-2xl shadow-[0_6px_24px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.30)] px-3 sm:px-5 h-[56px] flex items-center justify-between transition-all duration-200 ${
             scrolled
-              ? "bg-[#FFFFFF] dark:bg-[#111111]/98 border-black/10 dark:border-white/15 shadow-[0_12px_36px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.45)]"
+              ? "bg-background dark:bg-[#0a0a0a]/98 border-black/10 dark:border-white/15 shadow-[0_12px_36px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.45)]"
               : ""
           }`}
         >
@@ -128,17 +128,9 @@ export function Navbar() {
               </svg>
             </div>
 
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-[18px] tracking-tight leading-none text-[#171717] dark:text-[#F5F5F5]">
-                  CodeSkill
-                </span>
-                <span className="text-[12px] font-medium text-[#525252] dark:text-[#A3A3A3] flex items-center gap-1">
-                  <span className="text-[#171717]/80 dark:text-white/80 font-semibold">by</span> Chandigarh University
-                </span>
-              </div>
-              <span className="hidden sm:block text-[10.5px] text-[#737373] dark:text-[#A3A3A3]/80 font-normal leading-none mt-0.5">
-                Department of Skill Development &amp; Lab
+            <div className="flex flex-col justify-center">
+              <span className="font-bold text-[19px] tracking-tight leading-none text-foreground">
+                CodeSkill
               </span>
             </div>
           </Link>
@@ -155,15 +147,15 @@ export function Navbar() {
                   href={item.href}
                   className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-[15px] whitespace-nowrap shrink-0 transition-all duration-150 ${
                     isActive
-                      ? "text-[#111111] bg-black/[0.04] border border-black/8 dark:text-white dark:bg-white/[0.08] font-bold dark:border-white/10 shadow-xs"
-                      : "text-[#525252] hover:text-[#111111] hover:bg-black/[0.03] dark:text-[#A3A3A3] dark:hover:text-white dark:hover:bg-white/[0.04] font-medium border border-transparent"
+                      ? "text-foreground bg-black/[0.04] border border-black/8 dark:text-white dark:bg-white/[0.08] font-bold dark:border-white/10 shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-black/[0.03] dark:text-muted-foreground dark:hover:text-white dark:hover:bg-white/[0.04] font-medium border border-transparent"
                   }`}
                 >
                   <Icon
                     className={`w-4 h-4 shrink-0 transition-colors duration-150 ${
                       isActive
-                        ? "text-[#2563EB] dark:text-[#3B82F6]"
-                        : "text-[#737373] group-hover:text-[#111111] dark:text-[#A3A3A3] dark:group-hover:text-white"
+                        ? "text-primary dark:text-[#3B82F6]"
+                        : "text-muted-foreground group-hover:text-foreground dark:text-muted-foreground dark:group-hover:text-white"
                     }`}
                   />
                   <span className="whitespace-nowrap">{item.name}</span>
@@ -171,7 +163,7 @@ export function Navbar() {
                   {isActive && (
                     <motion.span
                       layoutId="activeNavIndicator"
-                      className="absolute -bottom-[5px] left-3.5 right-3.5 h-[2px] bg-[#2563EB] rounded-full shadow-[0_0_6px_rgba(37,99,235,0.4)]"
+                      className="absolute -bottom-[5px] left-3.5 right-3.5 h-[2px] bg-primary rounded-full shadow-[0_0_6px_rgba(37,99,235,0.4)]"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -197,14 +189,14 @@ export function Navbar() {
                 )}
                 <Link
                   href="/profile"
-                  className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-[14px] font-medium text-neutral-800 bg-neutral-100/80 hover:bg-neutral-200/80 border border-neutral-200 dark:text-[#F5F5F5] dark:bg-white/[0.05] dark:hover:bg-white/[0.1] dark:border-white/10 transition-colors duration-150 whitespace-nowrap shrink-0"
+                  className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-[14px] font-medium text-neutral-800 bg-neutral-100/80 hover:bg-neutral-200/80 border border-neutral-200 dark:text-background dark:bg-white/[0.05] dark:hover:bg-white/[0.1] dark:border-white/10 transition-colors duration-150 whitespace-nowrap shrink-0"
                 >
-                  <User className="w-4 h-4 text-neutral-500 dark:text-[#A3A3A3] shrink-0" />
+                  <User className="w-4 h-4 text-neutral-500 dark:text-muted-foreground shrink-0" />
                   <span className="whitespace-nowrap">{user.name?.split(" ")[0] || "Profile"}</span>
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-[#525252] hover:text-[#111111] hover:bg-neutral-100 border border-neutral-200 dark:text-[#A3A3A3] dark:hover:text-white dark:hover:bg-white/[0.06] dark:border-white/10 transition-colors duration-150 cursor-pointer shrink-0"
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-neutral-100 border border-neutral-200 dark:text-muted-foreground dark:hover:text-white dark:hover:bg-white/[0.06] dark:border-white/10 transition-colors duration-150 cursor-pointer shrink-0"
                   title="Sign Out"
                 >
                   <LogOut className="w-4 h-4 shrink-0" />
@@ -214,13 +206,13 @@ export function Navbar() {
               <div className="flex items-center gap-2.5 shrink-0">
                 <Link
                   href="/login"
-                  className="inline-flex items-center justify-center h-9 px-3.5 rounded-lg text-[15px] font-medium text-[#525252] hover:text-[#111111] dark:text-[#D4D4D4] dark:hover:text-white transition-colors duration-150 whitespace-nowrap shrink-0"
+                  className="inline-flex items-center justify-center h-9 px-3.5 rounded-lg text-[15px] font-medium text-muted-foreground hover:text-foreground dark:text-foreground/90 dark:hover:text-white transition-colors duration-150 whitespace-nowrap shrink-0"
                 >
                   Log In
                 </Link>
                 <Link
                   href="/register"
-                  className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-xl text-[15px] font-bold bg-[#111111] hover:bg-[#262626] text-white shadow-xs hover:shadow dark:bg-white dark:hover:bg-neutral-100 dark:text-[#111111] transition-all duration-150 whitespace-nowrap shrink-0"
+                  className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-xl text-[15px] font-bold bg-foreground hover:bg-[#262626] text-background shadow-xs hover:shadow dark:bg-white dark:hover:bg-neutral-200 dark:text-black transition-all duration-150 whitespace-nowrap shrink-0"
                 >
                   <span className="whitespace-nowrap">Get Started</span>
                   <ArrowRight className="w-4 h-4 shrink-0" />
@@ -234,7 +226,7 @@ export function Navbar() {
             <ThemeToggle className="w-8.5 h-8.5" />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex items-center justify-center w-8.5 h-8.5 rounded-lg text-neutral-800 dark:text-[#F5F5F5] hover:bg-neutral-100 dark:hover:bg-white/[0.08] border border-neutral-200 dark:border-white/10"
+              className="flex items-center justify-center w-8.5 h-8.5 rounded-lg text-neutral-800 dark:text-background hover:bg-neutral-100 dark:hover:bg-white/[0.08] border border-neutral-200 dark:border-white/10"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-4.5 h-4.5" /> : <Menu className="w-4.5 h-4.5" />}
@@ -265,12 +257,12 @@ export function Navbar() {
                     className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-[15px] transition-all duration-150 ${
                       isActive
                         ? "text-neutral-950 bg-neutral-100 border border-neutral-200 dark:text-white dark:bg-white/[0.08] dark:border-white/10 font-bold"
-                        : "text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100/70 dark:text-[#A3A3A3] dark:hover:text-white dark:hover:bg-white/[0.04] font-medium"
+                        : "text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100/70 dark:text-muted-foreground dark:hover:text-white dark:hover:bg-white/[0.04] font-medium"
                     }`}
                   >
                     <Icon
                       className={`w-4.5 h-4.5 ${
-                        isActive ? "text-blue-600 dark:text-[#3B82F6]" : "text-neutral-400 dark:text-[#A3A3A3]"
+                        isActive ? "text-primary dark:text-[#3B82F6]" : "text-neutral-400 dark:text-muted-foreground"
                       }`}
                     />
                     <span>{item.name}</span>
@@ -295,7 +287,7 @@ export function Navbar() {
                   <Link
                     href="/profile"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-center w-full h-10 rounded-xl bg-neutral-100/80 text-neutral-800 dark:bg-white/[0.05] dark:text-[#F5F5F5] font-medium text-xs border border-neutral-200 dark:border-white/10"
+                    className="flex items-center justify-center w-full h-10 rounded-xl bg-neutral-100/80 text-neutral-800 dark:bg-white/[0.05] dark:text-background font-medium text-xs border border-neutral-200 dark:border-white/10"
                   >
                     Profile ({user.name})
                   </Link>
@@ -304,7 +296,7 @@ export function Navbar() {
                       handleLogout();
                       setMobileMenuOpen(false);
                     }}
-                    className="flex items-center justify-center w-full h-10 rounded-xl border border-neutral-200 dark:border-white/10 text-neutral-500 hover:text-neutral-900 dark:text-[#A3A3A3] dark:hover:text-white font-medium text-xs"
+                    className="flex items-center justify-center w-full h-10 rounded-xl border border-neutral-200 dark:border-white/10 text-neutral-500 hover:text-neutral-900 dark:text-muted-foreground dark:hover:text-white font-medium text-xs"
                   >
                     Sign Out
                   </button>
@@ -314,7 +306,7 @@ export function Navbar() {
                   <Link
                     href="/register"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-center gap-1.5 w-full h-10.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-100 dark:text-[#111111] font-bold text-[15px] shadow-xs"
+                    className="flex items-center justify-center gap-1.5 w-full h-10.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-100 dark:text-foreground font-bold text-[15px] shadow-xs"
                   >
                     <span>Get Started</span>
                     <ArrowRight className="w-4 h-4" />
@@ -322,7 +314,7 @@ export function Navbar() {
                   <Link
                     href="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-center w-full h-10 rounded-xl bg-neutral-100/80 text-neutral-800 dark:bg-white/[0.05] dark:text-[#F5F5F5] font-medium text-[15px] border border-neutral-200 dark:border-white/10"
+                    className="flex items-center justify-center w-full h-10 rounded-xl bg-neutral-100/80 text-neutral-800 dark:bg-white/[0.05] dark:text-background font-medium text-[15px] border border-neutral-200 dark:border-white/10"
                   >
                     Log In
                   </Link>

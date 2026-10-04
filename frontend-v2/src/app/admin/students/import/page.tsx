@@ -11,7 +11,6 @@ import {
   XCircle,
   Download,
   ArrowRight,
-  Loader2,
   RefreshCw,
   Mail,
   ShieldCheck,
@@ -20,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { adminStudentsAPI } from "@/config/api";
+import { Spinner } from "@/components/ui/spinner";
 
 interface PreviewData {
   total: number;
@@ -269,7 +269,7 @@ CU202600105,Kabir Mehta,kabir.mehta@university.edu,Chandigarh University,Electro
 
             <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 flex items-center justify-center">
               {isValidating ? (
-                <Loader2 className="w-8 h-8 animate-spin" />
+                <Spinner className="w-8 h-8 animate-spin" />
               ) : (
                 <UploadCloud className="w-8 h-8" />
               )}
@@ -359,7 +359,7 @@ CU202600105,Kabir Mehta,kabir.mehta@university.edu,Chandigarh University,Electro
                   >
                     {isCommitting ? (
                       <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Batch Importing...
+                        <Spinner className="w-3.5 h-3.5 animate-spin" /> Batch Importing...
                       </>
                     ) : (
                       <>

@@ -29,14 +29,31 @@ export interface LanguageAdapter {
   readonly id: 'c' | 'cpp' | 'java' | 'python' | 'javascript' | 'typescript';
   readonly compiled: boolean;
   readonly sandboxImage: string;
-  prepare(code: string, mode: ExecutionMode, signature?: FunctionSignature): PreparedSource;
-  compileCommand(sourcePath: string, outputPath: string, cwd: string): Command | undefined;
-  runCommand(sourcePath: string, outputPath: string, cwd: string, prepared: PreparedSource): Command;
+  prepare(
+    code: string,
+    mode: ExecutionMode,
+    signature?: FunctionSignature,
+  ): PreparedSource;
+  compileCommand(
+    sourcePath: string,
+    outputPath: string,
+    cwd: string,
+  ): Command | undefined;
+  runCommand(
+    sourcePath: string,
+    outputPath: string,
+    cwd: string,
+    prepared: PreparedSource,
+  ): Command;
 }
 
-const functionSignatureOrThrow = (signature: FunctionSignature | undefined): ResolvedFunctionSignature => {
+const functionSignatureOrThrow = (
+  signature: FunctionSignature | undefined,
+): ResolvedFunctionSignature => {
   if (!signature?.functionName) {
-    throw new Error('Function-mode problems require functionSignature.functionName');
+    throw new Error(
+      'Function-mode problems require functionSignature.functionName',
+    );
   }
   return {
     className: signature.className || 'Solution',
@@ -49,10 +66,19 @@ const functionSignatureOrThrow = (signature: FunctionSignature | undefined): Res
 const cppType = (type: string): string => {
   const normalized = type.replace(/\s/g, '').toLowerCase();
   const aliases: Record<string, string> = {
-    int: 'int', integer: 'int', number: 'long long', long: 'long long',
-    longlong: 'long long', float: 'double', double: 'double', boolean: 'bool',
-    bool: 'bool', string: 'string', 'int[]': 'vector<int>',
-    'integer[]': 'vector<int>', 'number[]': 'vector<long long>',
+    int: 'int',
+    integer: 'int',
+    number: 'long long',
+    long: 'long long',
+    longlong: 'long long',
+    float: 'double',
+    double: 'double',
+    boolean: 'bool',
+    bool: 'bool',
+    string: 'string',
+    'int[]': 'vector<int>',
+    'integer[]': 'vector<int>',
+    'number[]': 'vector<long long>',
     'string[]': 'vector<string>',
   };
   if (aliases[normalized]) return aliases[normalized];
@@ -126,11 +152,18 @@ class CppAdapter implements LanguageAdapter {
   readonly compiled = true;
   readonly sandboxImage = process.env.JUDGE_CPP_IMAGE || 'gcc:13';
 
-  prepare(code: string, mode: ExecutionMode, signature?: FunctionSignature): PreparedSource {
+  prepare(
+    code: string,
+    mode: ExecutionMode,
+    signature?: FunctionSignature,
+  ): PreparedSource {
     if (mode === 'standard') return { filename: 'solution.cpp', source: code };
     const details = functionSignatureOrThrow(signature);
     const argumentsSource = details.parameters
-      .map((parameter, index) => `CsRead<${cppType(parameter.type)}>::parse(args.at(${index}))`)
+      .map(
+        (parameter, index) =>
+          `CsRead<${cppType(parameter.type)}>::parse(args.at(${index}))`,
+      )
       .join(', ');
     return {
       filename: 'solution.cpp',
@@ -154,7 +187,18 @@ class CppAdapter implements LanguageAdapter {
   }
 
   compileCommand(sourcePath: string, outputPath: string): Command {
-    return { cmd: 'g++', args: ['-std=c++17', '-O2', '-pipe', '-Wall', sourcePath, '-o', outputPath] };
+    return {
+      cmd: 'g++',
+      args: [
+        '-std=c++17',
+        '-O2',
+        '-pipe',
+        '-Wall',
+        sourcePath,
+        '-o',
+        outputPath,
+      ],
+    };
   }
 
   runCommand(_sourcePath: string, outputPath: string): Command {
@@ -164,22 +208,35 @@ class CppAdapter implements LanguageAdapter {
 
 const javaArgument = (type: string, value: string): string => {
   const normalized = type.replace(/\s/g, '').toLowerCase();
-  if (['int', 'integer'].includes(normalized)) return `Integer.parseInt(${value})`;
-  if (['number', 'long', 'longlong'].includes(normalized)) return `Long.parseLong(${value})`;
-  if (['float', 'double'].includes(normalized)) return `Double.parseDouble(${value})`;
-  if (['boolean', 'bool'].includes(normalized)) return `Boolean.parseBoolean(${value})`;
+  if (['int', 'integer'].includes(normalized))
+    return `Integer.parseInt(${value})`;
+  if (['number', 'long', 'longlong'].includes(normalized))
+    return `Long.parseLong(${value})`;
+  if (['float', 'double'].includes(normalized))
+    return `Double.parseDouble(${value})`;
+  if (['boolean', 'bool'].includes(normalized))
+    return `Boolean.parseBoolean(${value})`;
   return `csString(${value})`;
 };
 
 class JavaAdapter implements LanguageAdapter {
   readonly id = 'java' as const;
   readonly compiled = true;
-  readonly sandboxImage = process.env.JUDGE_JAVA_IMAGE || 'eclipse-temurin:17-jdk';
+  readonly sandboxImage =
+    process.env.JUDGE_JAVA_IMAGE || 'eclipse-temurin:17-jdk';
 
-  prepare(code: string, mode: ExecutionMode, signature?: FunctionSignature): PreparedSource {
+  prepare(
+    code: string,
+    mode: ExecutionMode,
+    signature?: FunctionSignature,
+  ): PreparedSource {
     if (mode === 'standard') {
-      const publicClass = code.match(/public\s+(?:final\s+)?class\s+([A-Za-z_][A-Za-z0-9_]*)/);
-      const namedClass = code.match(/(?:public\s+)?(?:final\s+)?class\s+([A-Za-z_][A-Za-z0-9_]*)/);
+      const publicClass = code.match(
+        /public\s+(?:final\s+)?class\s+([A-Za-z_][A-Za-z0-9_]*)/,
+      );
+      const namedClass = code.match(
+        /(?:public\s+)?(?:final\s+)?class\s+([A-Za-z_][A-Za-z0-9_]*)/,
+      );
       if (!namedClass) {
         return {
           filename: 'Main.java',
@@ -187,15 +244,25 @@ class JavaAdapter implements LanguageAdapter {
           source: `public class Main {\n  public static void main(String[] args) throws Exception {\n${code}\n  }\n}`,
         };
       }
-      return { filename: `${publicClass?.[1] || 'Main'}.java`, entryPoint: publicClass?.[1] || namedClass[1], source: code };
+      return {
+        filename: `${publicClass?.[1] || 'Main'}.java`,
+        entryPoint: publicClass?.[1] || namedClass[1],
+        source: code,
+      };
     }
     const details = functionSignatureOrThrow(signature);
-    const imports = code.match(/^\s*import\s+[\w.*]+\s*;\s*$/gm)?.join('\n') || '';
+    const imports =
+      code.match(/^\s*import\s+[\w.*]+\s*;\s*$/gm)?.join('\n') || '';
     const studentCode = code
       .replace(/^\s*import\s+[\w.*]+\s*;\s*$/gm, '')
-      .replace(new RegExp(`public\\s+(?:final\\s+)?class\\s+${details.className}\\b`), `class ${details.className}`);
+      .replace(
+        new RegExp(`public\\s+(?:final\\s+)?class\\s+${details.className}\\b`),
+        `class ${details.className}`,
+      );
     const argumentsSource = details.parameters
-      .map((parameter, index) => javaArgument(parameter.type, `args.get(${index})`))
+      .map((parameter, index) =>
+        javaArgument(parameter.type, `args.get(${index})`),
+      )
       .join(', ');
     return {
       filename: 'Main.java',
@@ -215,15 +282,29 @@ class JavaAdapter implements LanguageAdapter {
         `    System.out.println(solution.${details.functionName}(${argumentsSource}));`,
         '  }',
         '}',
-      ].filter(Boolean).join('\n'),
+      ]
+        .filter(Boolean)
+        .join('\n'),
     };
   }
 
-  compileCommand(sourcePath: string, _outputPath: string, cwd: string): Command {
-    return { cmd: 'javac', args: ['-encoding', 'UTF-8', '-d', cwd, sourcePath] };
+  compileCommand(
+    sourcePath: string,
+    _outputPath: string,
+    cwd: string,
+  ): Command {
+    return {
+      cmd: 'javac',
+      args: ['-encoding', 'UTF-8', '-d', cwd, sourcePath],
+    };
   }
 
-  runCommand(_sourcePath: string, _outputPath: string, cwd: string, prepared: PreparedSource): Command {
+  runCommand(
+    _sourcePath: string,
+    _outputPath: string,
+    cwd: string,
+    prepared: PreparedSource,
+  ): Command {
     return { cmd: 'java', args: ['-cp', cwd, prepared.entryPoint || 'Main'] };
   }
 }
@@ -231,9 +312,14 @@ class JavaAdapter implements LanguageAdapter {
 class PythonAdapter implements LanguageAdapter {
   readonly id = 'python' as const;
   readonly compiled = false;
-  readonly sandboxImage = process.env.JUDGE_PYTHON_IMAGE || 'python:3.12-alpine';
+  readonly sandboxImage =
+    process.env.JUDGE_PYTHON_IMAGE || 'python:3.12-alpine';
 
-  prepare(code: string, mode: ExecutionMode, signature?: FunctionSignature): PreparedSource {
+  prepare(
+    code: string,
+    mode: ExecutionMode,
+    signature?: FunctionSignature,
+  ): PreparedSource {
     if (mode === 'standard') return { filename: 'solution.py', source: code };
     const details = functionSignatureOrThrow(signature);
     const names = details.parameters.map((parameter) => parameter.name);
@@ -269,11 +355,17 @@ class JavaScriptAdapter implements LanguageAdapter {
   readonly compiled = false;
   readonly sandboxImage = process.env.JUDGE_NODE_IMAGE || 'node:20-alpine';
 
-  prepare(code: string, mode: ExecutionMode, signature?: FunctionSignature): PreparedSource {
+  prepare(
+    code: string,
+    mode: ExecutionMode,
+    signature?: FunctionSignature,
+  ): PreparedSource {
     if (mode === 'standard') return { filename: 'solution.js', source: code };
     const details = functionSignatureOrThrow(signature);
     const names = details.parameters.map((parameter) => parameter.name);
-    const target = details.className ? `new ${details.className}().${details.functionName}` : details.functionName;
+    const target = details.className
+      ? `new ${details.className}().${details.functionName}`
+      : details.functionName;
     return {
       filename: 'solution.js',
       source: [
@@ -299,13 +391,22 @@ class JavaScriptAdapter implements LanguageAdapter {
 class TypeScriptAdapter implements LanguageAdapter {
   readonly id = 'typescript' as const;
   readonly compiled = false;
-  readonly sandboxImage = process.env.JUDGE_TS_IMAGE || process.env.JUDGE_NODE_IMAGE || 'node:20-alpine';
+  readonly sandboxImage =
+    process.env.JUDGE_TS_IMAGE ||
+    process.env.JUDGE_NODE_IMAGE ||
+    'node:20-alpine';
 
-  prepare(code: string, mode: ExecutionMode, signature?: FunctionSignature): PreparedSource {
+  prepare(
+    code: string,
+    mode: ExecutionMode,
+    signature?: FunctionSignature,
+  ): PreparedSource {
     if (mode === 'standard') return { filename: 'solution.ts', source: code };
     const details = functionSignatureOrThrow(signature);
     const names = details.parameters.map((parameter) => parameter.name);
-    const target = details.className ? `new (${details.className} as any)().${details.functionName}` : details.functionName;
+    const target = details.className
+      ? `new (${details.className} as any)().${details.functionName}`
+      : details.functionName;
     return {
       filename: 'solution.ts',
       source: [
@@ -334,12 +435,25 @@ class CAdapter implements LanguageAdapter {
   readonly sandboxImage = process.env.JUDGE_C_IMAGE || 'gcc:13';
 
   prepare(code: string, mode: ExecutionMode): PreparedSource {
-    if (mode === 'function') throw new Error('Function execution mode is not supported for C');
+    if (mode === 'function')
+      throw new Error('Function execution mode is not supported for C');
     return { filename: 'solution.c', source: code };
   }
 
   compileCommand(sourcePath: string, outputPath: string): Command {
-    return { cmd: 'gcc', args: ['-std=c11', '-O2', '-pipe', '-Wall', sourcePath, '-o', outputPath, '-lm'] };
+    return {
+      cmd: 'gcc',
+      args: [
+        '-std=c11',
+        '-O2',
+        '-pipe',
+        '-Wall',
+        sourcePath,
+        '-o',
+        outputPath,
+        '-lm',
+      ],
+    };
   }
 
   runCommand(_sourcePath: string, outputPath: string): Command {
@@ -347,7 +461,10 @@ class CAdapter implements LanguageAdapter {
   }
 }
 
-const ADAPTERS: Record<NonNullable<ReturnType<typeof canonicalLanguage>>, LanguageAdapter> = {
+const ADAPTERS: Record<
+  NonNullable<ReturnType<typeof canonicalLanguage>>,
+  LanguageAdapter
+> = {
   c: new CAdapter(),
   cpp: new CppAdapter(),
   java: new JavaAdapter(),
@@ -356,12 +473,17 @@ const ADAPTERS: Record<NonNullable<ReturnType<typeof canonicalLanguage>>, Langua
   typescript: new TypeScriptAdapter(),
 };
 
-export function getLanguageAdapter(language: string): LanguageAdapter | undefined {
+export function getLanguageAdapter(
+  language: string,
+): LanguageAdapter | undefined {
   const normalized = canonicalLanguage(language);
   return normalized ? ADAPTERS[normalized] : undefined;
 }
 
-export function getSandboxImage(language: string, config: ExecutionConfig): string | undefined {
+export function getSandboxImage(
+  language: string,
+  config: ExecutionConfig,
+): string | undefined {
   return config.sandboxImage || getLanguageAdapter(language)?.sandboxImage;
 }
 

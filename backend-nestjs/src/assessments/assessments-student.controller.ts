@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AssessmentsService } from './assessments.service';
 import { SubmitAssessmentDto } from './dto/submit-assessment.dto';
@@ -26,20 +19,19 @@ export class AssessmentsStudentController {
   }
 
   @Get(':id/overview')
-  @ApiOperation({ summary: 'Get assessment briefing and candidate eligibility' })
-  async getOverview(
-    @Param('id') id: string,
-    @CurrentUser() studentUser: any,
-  ) {
-    return this.assessmentsService.getStudentAssessmentOverview(id, studentUser);
+  @ApiOperation({
+    summary: 'Get assessment briefing and candidate eligibility',
+  })
+  async getOverview(@Param('id') id: string, @CurrentUser() studentUser: any) {
+    return this.assessmentsService.getStudentAssessmentOverview(
+      id,
+      studentUser,
+    );
   }
 
   @Post(':id/start')
   @ApiOperation({ summary: 'Begin or resume assessment attempt session' })
-  async startAttempt(
-    @Param('id') id: string,
-    @CurrentUser() studentUser: any,
-  ) {
+  async startAttempt(@Param('id') id: string, @CurrentUser() studentUser: any) {
     return this.assessmentsService.startStudentAttempt(id, studentUser);
   }
 
@@ -63,7 +55,9 @@ export class AssessmentsStudentController {
   }
 
   @Post(':id/submit')
-  @ApiOperation({ summary: 'Submit completed assessment for server evaluation' })
+  @ApiOperation({
+    summary: 'Submit completed assessment for server evaluation',
+  })
   async submitAttempt(
     @Param('id') id: string,
     @Body() dto: SubmitAssessmentDto,
@@ -74,10 +68,7 @@ export class AssessmentsStudentController {
 
   @Get(':id/result')
   @ApiOperation({ summary: 'Get candidate scorecard and performance review' })
-  async getResult(
-    @Param('id') id: string,
-    @CurrentUser() studentUser: any,
-  ) {
+  async getResult(@Param('id') id: string, @CurrentUser() studentUser: any) {
     return this.assessmentsService.getStudentResult(id, studentUser);
   }
 }

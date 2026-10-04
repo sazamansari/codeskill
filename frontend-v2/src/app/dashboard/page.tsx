@@ -12,7 +12,6 @@ import {
   ArrowRight,
   BarChart3,
   ClipboardList,
-  Loader2,
   AlertCircle,
   Play,
   FileText,
@@ -22,6 +21,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { studentAssessmentsAPI } from "@/config/api";
+import { Spinner } from "@/components/ui/spinner";
 
 interface Assessment {
   _id: string;
@@ -127,7 +127,7 @@ export default function DashboardPage() {
 
                   {assessmentsLoading ? (
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Spinner className="w-4 h-4 animate-spin" />
                       <span className="text-sm">Loading your assessments…</span>
                     </div>
                   ) : assessmentsError ? (
@@ -252,7 +252,7 @@ export default function DashboardPage() {
 
               {assessmentsLoading ? (
                 <div className="p-8 flex items-center justify-center gap-2 text-muted-foreground">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Spinner className="w-4 h-4 animate-spin" />
                   <span className="text-xs">Loading…</span>
                 </div>
               ) : assessmentsError ? (
@@ -345,7 +345,7 @@ export default function DashboardPage() {
               </div>
               {assessmentsLoading ? (
                 <div className="p-6 flex justify-center">
-                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                  <Spinner className="w-4 h-4 animate-spin text-muted-foreground" />
                 </div>
               ) : assessments.length === 0 ? (
                 <div className="p-5 text-center text-xs text-muted-foreground">

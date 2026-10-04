@@ -11,7 +11,6 @@ import {
   AlertTriangle,
   XCircle,
   RefreshCw,
-  Loader2,
   ChevronLeft,
   ChevronRight,
   Filter,
@@ -19,6 +18,7 @@ import {
   Search,
 } from "lucide-react";
 import { adminStudentsAPI } from "@/config/api";
+import { Spinner } from "@/components/ui/spinner";
 
 interface EmailJob {
   _id: string;
@@ -173,7 +173,7 @@ export default function CredentialsPage() {
               className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-red-300 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 text-red-600 text-xs font-bold hover:bg-red-100 transition-colors disabled:opacity-50"
             >
               {isRetryingFailed ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <Spinner className="w-3.5 h-3.5 animate-spin" />
               ) : (
                 <RotateCcw className="w-3.5 h-3.5" />
               )}
@@ -187,7 +187,7 @@ export default function CredentialsPage() {
             className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all disabled:opacity-50"
           >
             {isSendingAll ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <Spinner className="w-3.5 h-3.5 animate-spin" />
             ) : (
               <Send className="w-3.5 h-3.5" />
             )}
@@ -207,7 +207,7 @@ export default function CredentialsPage() {
 
         <div className="p-4 rounded-xl bg-card border border-border">
           <div className="text-xs text-muted-foreground font-medium">Queued</div>
-          <div className="text-xl font-bold text-blue-600 mt-0.5">
+          <div className="text-xl font-bold text-primary mt-0.5">
             {stats.queued.toLocaleString()}
           </div>
         </div>
@@ -264,7 +264,7 @@ export default function CredentialsPage() {
       <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
         {isLoading ? (
           <div className="p-16 flex flex-col items-center justify-center gap-3 text-muted-foreground">
-            <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+            <Spinner className="w-8 h-8 animate-spin text-amber-500" />
             <p className="text-sm">Fetching queue dispatch records...</p>
           </div>
         ) : jobs.length === 0 ? (
@@ -312,7 +312,7 @@ export default function CredentialsPage() {
                         </span>
                       )}
                       {job.status === "queued" && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold bg-blue-500/10 text-blue-600 border border-blue-500/20">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold bg-primary/10 text-primary border border-primary/20">
                           <Clock className="w-3 h-3 animate-spin" /> Queued
                         </span>
                       )}
@@ -362,7 +362,7 @@ export default function CredentialsPage() {
                         title="Dispatch / Re-send Credential Email"
                       >
                         {sendingSingleId === job._id ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <Spinner className="w-3.5 h-3.5 animate-spin" />
                         ) : (
                           <Send className="w-3.5 h-3.5" />
                         )}

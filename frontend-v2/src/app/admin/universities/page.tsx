@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { adminUniversitiesAPI } from "@/config/api";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Search,
   GraduationCap,
@@ -13,7 +14,6 @@ import {
   Globe,
   Mail,
   MapPin,
-  Loader2,
   CheckCircle2,
   AlertTriangle,
 } from "lucide-react";
@@ -132,13 +132,13 @@ export default function AdminUniversitiesPage() {
             </div>
             <h1 className="text-xl font-bold text-slate-900">Universities & Campuses</h1>
           </div>
-          <p className="text-slate-500 text-xs">
+          <p className="text-muted-foreground text-xs">
             Manage academic institutions using the Chandigarh University assessment platform.
           </p>
         </div>
         <button
           onClick={() => { setShowAddModal(true); setCreateError(null); setCreateSuccess(false); }}
-          className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#c8102e] hover:bg-[#a90c25] active:bg-[#910b20] text-white text-xs font-semibold rounded-md transition-colors shadow-xs shrink-0"
+          className="inline-flex items-center gap-2 px-3.5 py-2 bg-primary hover:bg-primary/90 active:bg-primary/80 text-white text-xs font-semibold rounded-md transition-colors shadow-xs shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
           Add University
@@ -159,9 +159,9 @@ export default function AdminUniversitiesPage() {
         </div>
         <div>
           <p className="font-bold text-slate-900 text-sm">Chandigarh University</p>
-          <p className="text-xs text-slate-500">Mohali, Punjab — Primary Academic Institution</p>
+          <p className="text-xs text-muted-foreground">Mohali, Punjab — Primary Academic Institution</p>
         </div>
-        <span className="ml-auto px-2.5 py-0.5 text-[10px] font-bold rounded bg-red-50 text-[#c8102e] border border-red-200">
+        <span className="ml-auto px-2.5 py-0.5 text-[10px] font-bold rounded bg-red-50 text-primary border border-red-200">
           PRIMARY
         </span>
       </div>
@@ -200,7 +200,7 @@ export default function AdminUniversitiesPage() {
               {loading ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
+                    <Spinner className="w-5 h-5 animate-spin mx-auto mb-2" />
                     Loading universities…
                   </td>
                 </tr>
@@ -408,7 +408,7 @@ export default function AdminUniversitiesPage() {
                   disabled={isCreating}
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-zinc-950 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50"
                 >
-                  {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                  {isCreating ? <Spinner className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                   Add University
                 </button>
               </div>

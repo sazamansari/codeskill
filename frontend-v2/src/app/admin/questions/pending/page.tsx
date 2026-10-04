@@ -121,7 +121,7 @@ export default function PendingQuestionsReviewPage() {
 
         <div className="bg-card border border-border p-4 rounded-xl">
           <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Faculty Submissions</span>
-          <div className="text-2xl font-bold text-blue-400 mt-1">{manualCount}</div>
+          <div className="text-2xl font-bold text-primary mt-1">{manualCount}</div>
           <span className="text-[11px] text-muted-foreground">Manual author drafts</span>
         </div>
       </div>
@@ -216,7 +216,7 @@ export default function PendingQuestionsReviewPage() {
                 <div className="bg-zinc-950 border border-border p-4 rounded-xl">
                   <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground mb-2">
                     <span className="flex items-center gap-1">
-                      <Code className="w-3.5 h-3.5 text-blue-400" />
+                      <Code className="w-3.5 h-3.5 text-primary" />
                       Language: {q.language || "Code"}
                     </span>
                   </div>

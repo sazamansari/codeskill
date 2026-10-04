@@ -21,11 +21,11 @@ import {
   RefreshCw,
   Settings2,
   X,
-  Loader2,
   Power,
   Edit3
 } from "lucide-react";
 import { adminAssessmentsAPI } from "@/config/api";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function AdminAssessmentsPage() {
   const [assessments, setAssessments] = useState<any[]>([]);
@@ -159,11 +159,11 @@ export default function AdminAssessmentsPage() {
                 <h1 className="text-xl font-bold tracking-tight text-slate-900">
                   Assessments & Examinations
                 </h1>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-red-50 text-[#c8102e] border border-red-200">
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-red-50 text-primary border border-red-200">
                   Chandigarh University
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Manage university examinations, availability triggers, scheduled timings, and proctoring policies.
               </p>
             </div>
@@ -173,7 +173,7 @@ export default function AdminAssessmentsPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/admin/assessments/create"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#c8102e] hover:bg-[#a90c25] active:bg-[#910b20] text-white text-xs font-semibold uppercase tracking-wider rounded-md transition-all shadow-xs"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 active:bg-primary/80 text-white text-xs font-semibold uppercase tracking-wider rounded-md transition-all shadow-xs"
           >
             <Plus className="w-4 h-4" /> Create Assessment
           </Link>
@@ -246,7 +246,7 @@ export default function AdminAssessmentsPage() {
                             ? "bg-purple-500/10 text-purple-400 border-purple-500/30"
                             : test.allowedAttempts === 1
                             ? "bg-zinc-500/10 text-zinc-400 border-zinc-500/30"
-                            : "bg-blue-500/10 text-blue-400 border-blue-500/30"
+                            : "bg-primary/10 text-primary border-primary/30"
                         }`}
                       >
                         {test.allowedAttempts === 0
@@ -550,7 +550,7 @@ export default function AdminAssessmentsPage() {
                   disabled={isSavingSchedule}
                   className="inline-flex items-center gap-1.5 px-5 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl shadow-md shadow-primary/20 disabled:opacity-50"
                 >
-                  {isSavingSchedule ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  {isSavingSchedule ? <Spinner className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                   Save Changes
                 </button>
               </div>

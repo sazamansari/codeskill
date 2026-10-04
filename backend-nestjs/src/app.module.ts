@@ -1,4 +1,6 @@
 import { S3Module } from './s3/s3.module';
+import { ReportsModule } from './reports/reports.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -41,6 +43,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ExamSecurityModule } from './exam-security/exam-security.module';
 
 @Module({
   imports: [
@@ -92,6 +95,9 @@ import { AppService } from './app.service';
     StudentsModule,
     QuestionsModule,
     AssessmentsModule,
+    ExamSecurityModule,
+    AnalyticsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [

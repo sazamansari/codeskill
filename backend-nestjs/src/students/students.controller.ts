@@ -46,13 +46,19 @@ export class StudentsController {
   }
 
   @Get('email-status')
-  @ApiOperation({ summary: 'Get delivery metrics and log entries for credential emails' })
+  @ApiOperation({
+    summary: 'Get delivery metrics and log entries for credential emails',
+  })
   async getEmailStatus(
     @Query('page') page?: number,
     @Query('limit') limit?: number,
     @Query('status') status?: string,
   ) {
-    return this.studentsService.getEmailStatus(Number(page) || 1, Number(limit) || 20, status);
+    return this.studentsService.getEmailStatus(
+      Number(page) || 1,
+      Number(limit) || 20,
+      status,
+    );
   }
 
   @Get(':id')
@@ -129,7 +135,9 @@ export class StudentsController {
 
   @Post(':id/reset-password')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Admin resets student password to a temporary password' })
+  @ApiOperation({
+    summary: 'Admin resets student password to a temporary password',
+  })
   @ApiParam({ name: 'id', description: 'Student User ID' })
   async resetPassword(
     @Param('id') id: string,
@@ -143,7 +151,10 @@ export class StudentsController {
 
   @Post('import')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Upload and validate spreadsheet (XLSX/CSV) for bulk student import' })
+  @ApiOperation({
+    summary:
+      'Upload and validate spreadsheet (XLSX/CSV) for bulk student import',
+  })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -160,7 +171,10 @@ export class StudentsController {
 
   @Post('import/confirm')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Commit validated students import into database in high-speed batches' })
+  @ApiOperation({
+    summary:
+      'Commit validated students import into database in high-speed batches',
+  })
   async confirmImport(
     @Body('validRows') validRows: any[],
     @CurrentUser() adminUser: any,
@@ -168,12 +182,19 @@ export class StudentsController {
   ) {
     const ip = req.ip || req.connection?.remoteAddress || '';
     const userAgent = req.headers['user-agent'] || '';
-    return this.studentsService.confirmImport(validRows, adminUser, ip, userAgent);
+    return this.studentsService.confirmImport(
+      validRows,
+      adminUser,
+      ip,
+      userAgent,
+    );
   }
 
   @Post('send-credentials')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Enqueue credential dispatch emails into BullMQ queue' })
+  @ApiOperation({
+    summary: 'Enqueue credential dispatch emails into BullMQ queue',
+  })
   async sendCredentials(
     @Body('jobIds') jobIds?: string[],
     @Body('portalUrl') portalUrl?: string,

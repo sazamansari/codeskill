@@ -444,7 +444,7 @@ export function CodingExperience() {
                     onClick={() => setLang(item)}
                     className={`px-3 py-1 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer border ${
                       isActive
-                        ? "bg-slate-900 text-white dark:bg-white dark:text-slate-950 font-bold border-transparent shadow-xs"
+                        ? "bg-background text-white dark:bg-white dark:text-slate-950 font-bold border-transparent shadow-xs"
                         : "bg-transparent text-neutral-600 dark:text-neutral-400 border-transparent hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-500/30"
                     }`}
                   >

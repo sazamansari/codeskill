@@ -144,7 +144,7 @@ export default function AssessmentBriefingPage({
             </div>
             <div>
               <p className="text-xs font-bold text-slate-900 leading-tight">Chandigarh University</p>
-              <p className="text-[10px] text-[#c8102e] font-semibold uppercase tracking-wider">Official Assessment & Examination Portal</p>
+              <p className="text-[10px] text-primary font-semibold uppercase tracking-wider">Official Assessment & Examination Portal</p>
             </div>
           </div>
 
@@ -183,9 +183,9 @@ export default function AssessmentBriefingPage({
 
             {user?.uid && (
               <div className="bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-md text-left sm:text-right shrink-0">
-                <span className="text-[10px] uppercase font-bold text-slate-500">Candidate</span>
+                <span className="text-[10px] uppercase font-bold text-muted-foreground">Candidate</span>
                 <div className="text-xs font-bold text-slate-900 mt-0.5">{user.name}</div>
-                <div className="text-[11px] font-mono text-[#c8102e] font-semibold">{user.uid}</div>
+                <div className="text-[11px] font-mono text-primary font-semibold">{user.uid}</div>
               </div>
             )}
           </div>
@@ -194,7 +194,7 @@ export default function AssessmentBriefingPage({
           {(assessment.startTime || assessment.endTime) && (
             <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-md flex flex-wrap items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2 text-slate-600">
-                <Clock className="w-4 h-4 text-[#c8102e]" />
+                <Clock className="w-4 h-4 text-primary" />
                 <span className="font-semibold text-slate-900">Scheduled Window:</span>
                 <span>
                   {assessment.startTime ? new Date(assessment.startTime).toLocaleString([], { dateStyle: "short", timeStyle: "short" }) : "Immediate"}
@@ -340,7 +340,7 @@ export default function AssessmentBriefingPage({
               <button
                 onClick={handleStartExam}
                 disabled={!agreedToRules || isStarting || assessment.isAvailable === false}
-                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#c8102e] hover:bg-[#a90c25] active:bg-[#910b20] text-white font-semibold rounded-md text-xs sm:text-sm uppercase tracking-wider transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary/90 active:bg-primary/80 text-white font-semibold rounded-md text-xs sm:text-sm uppercase tracking-wider transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Maximize2 className="w-4 h-4" />
                 {isStarting

@@ -42,7 +42,11 @@ export class ProblemsService {
       filter.difficulty = query.difficulty;
     }
 
-    if (query.category && query.category !== 'All Topics' && query.category !== 'all') {
+    if (
+      query.category &&
+      query.category !== 'All Topics' &&
+      query.category !== 'all'
+    ) {
       filter.categories = { $in: [new RegExp(`^${query.category}$`, 'i')] };
     }
 
@@ -67,7 +71,9 @@ export class ProblemsService {
     const [problems, total] = await Promise.all([
       this.problemModel
         .find(filter)
-        .select('title slug difficulty categories tags stats createdAt updatedAt')
+        .select(
+          'title slug difficulty categories tags stats createdAt updatedAt',
+        )
         .sort({ createdAt: -1, _id: -1 })
         .skip(startIndex)
         .limit(limit)
@@ -100,7 +106,9 @@ export class ProblemsService {
       .findOne({
         slug,
         $or: [
-          { visibility: { $in: ['Published', 'published', 'Public', 'public'] } },
+          {
+            visibility: { $in: ['Published', 'published', 'Public', 'public'] },
+          },
           { visibility: { $exists: false } },
         ],
       })
@@ -138,4 +146,3 @@ export class ProblemsService {
     return { data: problem };
   }
 }
-

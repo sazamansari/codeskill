@@ -48,11 +48,22 @@ interface LanguageConfig {
   /** Whether the language requires a compilation step */
   compiled: boolean;
   /** Build the compilation command. Returns null for interpreted langs. */
-  compileCommand?: (srcPath: string, outPath: string, cwd: string) => { cmd: string; args: string[] };
+  compileCommand?: (
+    srcPath: string,
+    outPath: string,
+    cwd: string,
+  ) => { cmd: string; args: string[] };
   /** Build the run command */
-  runCommand: (srcPath: string, outPath: string, cwd: string) => { cmd: string; args: string[] };
+  runCommand: (
+    srcPath: string,
+    outPath: string,
+    cwd: string,
+  ) => { cmd: string; args: string[] };
   /** Optional: Pre-process source code before writing (e.g., Java class renaming) */
-  preProcess?: (code: string, cwd: string) => { code: string; filename: string };
+  preProcess?: (
+    code: string,
+    cwd: string,
+  ) => { code: string; filename: string };
 }
 
 const LANGUAGE_CONFIGS: Record<string, LanguageConfig> = {
@@ -62,7 +73,16 @@ const LANGUAGE_CONFIGS: Record<string, LanguageConfig> = {
     compiled: true,
     compileCommand: (srcPath, outPath) => ({
       cmd: 'gcc',
-      args: ['-std=c11', '-O2', '-Wall', '-o', outPath, srcPath, '-lm'],
+      args: [
+        '-std=c11',
+        '-O2',
+        '-pipe',
+        '-Wall',
+        '-o',
+        outPath,
+        srcPath,
+        '-lm',
+      ],
     }),
     runCommand: (_src, outPath) => ({
       cmd: outPath,
@@ -76,7 +96,7 @@ const LANGUAGE_CONFIGS: Record<string, LanguageConfig> = {
     compiled: true,
     compileCommand: (srcPath, outPath) => ({
       cmd: 'g++',
-      args: ['-std=c++17', '-O2', '-Wall', '-o', outPath, srcPath],
+      args: ['-std=c++17', '-O2', '-pipe', '-Wall', '-o', outPath, srcPath],
     }),
     runCommand: (_src, outPath) => ({
       cmd: outPath,
@@ -89,7 +109,7 @@ const LANGUAGE_CONFIGS: Record<string, LanguageConfig> = {
     compiled: true,
     compileCommand: (srcPath, outPath) => ({
       cmd: 'g++',
-      args: ['-std=c++17', '-O2', '-Wall', '-o', outPath, srcPath],
+      args: ['-std=c++17', '-O2', '-pipe', '-Wall', '-o', outPath, srcPath],
     }),
     runCommand: (_src, outPath) => ({
       cmd: outPath,
@@ -103,7 +123,9 @@ const LANGUAGE_CONFIGS: Record<string, LanguageConfig> = {
     compiled: true,
     preProcess: (code: string, cwd: string) => {
       // Extract the public class name from the source code
-      const publicClassMatch = code.match(/public\s+class\s+([A-Za-z_][A-Za-z0-9_]*)/);
+      const publicClassMatch = code.match(
+        /public\s+class\s+([A-Za-z_][A-Za-z0-9_]*)/,
+      );
       const className = publicClassMatch ? publicClassMatch[1] : 'Main';
 
       // If no public class found, wrap the code in a Main class
@@ -284,7 +306,11 @@ export class ExecutionService {
         }));
       }
       try {
-        sourceCode = adapter.prepare(code, 'function', config.functionSignature).source;
+        sourceCode = adapter.prepare(
+          code,
+          'function',
+          config.functionSignature,
+        ).source;
       } catch (error: any) {
         return testCases.map((tc) => ({
           id: tc.id,
@@ -307,8 +333,14 @@ export class ExecutionService {
     }
 
     const runOpts: RunOptions = {
-      timeout: Math.max(100, Math.min(60_000, Number(timeout) || DEFAULT_TIMEOUT_MS)),
-      memoryLimit: Math.max(32, Math.min(1_024, Number(config.memoryLimit) || 256)),
+      timeout: Math.max(
+        100,
+        Math.min(60_000, Number(timeout) || DEFAULT_TIMEOUT_MS),
+      ),
+      memoryLimit: Math.max(
+        32,
+        Math.min(1_024, Number(config.memoryLimit) || 256),
+      ),
       cpuLimit: Math.max(0.25, Math.min(2, Number(config.cpuLimit) || 1)),
       language,
       config,
@@ -325,11 +357,42 @@ export class ExecutionService {
 
     // For compiled languages, compile once and run against all test cases
     if (langConfig.compiled) {
-      return this.executeCompiled(langConfig, language, sourceCode, normalizedTestCases, runOpts);
+      return this.executeCompiled(
+        langConfig,
+        language,
+        sourceCode,
+        normalizedTestCases,
+        runOpts,
+      );
     }
 
     // For interpreted languages, run each test case independently
-    return this.executeInterpreted(langConfig, language, sourceCode, normalizedTestCases, runOpts);
+    return this.executeInterpreted(
+      langConfig,
+      language,
+      sourceCode,
+      normalizedTestCases,
+      runOpts,
+    );
+  }
+
+  // ── Concurrency Helper ───────────────────────────────────────────────────
+  private async runTestCasesConcurrently(
+    testCases: TestCaseInput[],
+    concurrencyLimit: number,
+    runFn: (tc: TestCaseInput) => Promise<TestCaseResult>,
+  ): Promise<TestCaseResult[]> {
+    const results: TestCaseResult[] = new Array(testCases.length);
+    let index = 0;
+    const workerCount = Math.min(concurrencyLimit, testCases.length);
+    const workers = Array.from({ length: workerCount }, async () => {
+      while (index < testCases.length) {
+        const currentIndex = index++;
+        results[currentIndex] = await runFn(testCases[currentIndex]);
+      }
+    });
+    await Promise.all(workers);
+    return results;
   }
 
   // ── Compiled Language Execution ──────────────────────────────────────────
@@ -361,7 +424,13 @@ export class ExecutionService {
 
       // 3. Compile
       const outPath = path.join(tmpDir, 'solution');
-      const compileResult = await this.compile(langConfig, srcPath, outPath, tmpDir, opts);
+      const compileResult = await this.compile(
+        langConfig,
+        srcPath,
+        outPath,
+        tmpDir,
+        opts,
+      );
       if (compileResult.error) {
         // Return COMPILATION_ERROR for all test cases
         return testCases.map((tc) => ({
@@ -374,14 +443,10 @@ export class ExecutionService {
         }));
       }
 
-      // 4. Execute against each test case
-      const results: TestCaseResult[] = [];
-      for (const tc of testCases) {
-        const result = await this.runProcess(langConfig, srcPath, outPath, tmpDir, tc, opts);
-        results.push(result);
-      }
-
-      return results;
+      // 4. Execute test cases in parallel (up to 8 concurrent test cases)
+      return await this.runTestCasesConcurrently(testCases, 8, (tc) =>
+        this.runProcess(langConfig, srcPath, outPath, tmpDir, tc, opts),
+      );
     } finally {
       this.cleanup(tmpDir);
     }
@@ -396,27 +461,30 @@ export class ExecutionService {
     testCases: TestCaseInput[],
     opts: RunOptions,
   ): Promise<TestCaseResult[]> {
-    const results: TestCaseResult[] = [];
+    const submissionId = uuidv4();
+    const tmpDir = path.join(os.tmpdir(), `codeskill_${submissionId}`);
+    fs.mkdirSync(tmpDir, { recursive: true });
 
-    for (const tc of testCases) {
-      const submissionId = uuidv4();
-      const tmpDir = path.join(os.tmpdir(), `codeskill_${submissionId}`);
-      fs.mkdirSync(tmpDir, { recursive: true });
-
-      try {
-        const filename = `solution${langConfig.extension}`;
-        const srcPath = path.join(tmpDir, filename);
-        fs.writeFileSync(srcPath, code, 'utf-8');
-
-        const outPath = path.join(tmpDir, 'solution');
-        const result = await this.runProcess(langConfig, srcPath, outPath, tmpDir, tc, opts);
-        results.push(result);
-      } finally {
-        this.cleanup(tmpDir);
+    try {
+      let processedCode = code;
+      let filename = `solution${langConfig.extension}`;
+      if (langConfig.preProcess) {
+        const result = langConfig.preProcess(code, tmpDir);
+        processedCode = result.code;
+        filename = result.filename;
       }
-    }
 
-    return results;
+      const srcPath = path.join(tmpDir, filename);
+      fs.writeFileSync(srcPath, processedCode, 'utf-8');
+      const outPath = path.join(tmpDir, 'solution');
+
+      // Execute all test cases concurrently against the written source file
+      return await this.runTestCasesConcurrently(testCases, 8, (tc) =>
+        this.runProcess(langConfig, srcPath, outPath, tmpDir, tc, opts),
+      );
+    } finally {
+      this.cleanup(tmpDir);
+    }
   }
 
   // ── Compilation ──────────────────────────────────────────────────────────
@@ -447,7 +515,12 @@ export class ExecutionService {
         },
         (error, stdout, stderr) => {
           if (error) {
-            const errorOutput = (stderr || stdout || error.message || '').substring(0, 2000);
+            const errorOutput = (
+              stderr ||
+              stdout ||
+              error.message ||
+              ''
+            ).substring(0, 2000);
             // Strip absolute temp paths from error messages for security
             const sanitized = this.sanitizeCompilerOutput(errorOutput, cwd);
             resolve({ success: false, error: sanitized });
@@ -482,10 +555,15 @@ export class ExecutionService {
     const adapter = getLanguageAdapter(opts.language);
     const image = opts.config?.sandboxImage || adapter?.sandboxImage;
     if (!image) {
-      throw new Error(`No approved sandbox image configured for ${opts.language}`);
+      throw new Error(
+        `No approved sandbox image configured for ${opts.language}`,
+      );
     }
     const command = commandBasename({ cmd, args }, cwd);
-    const memory = Math.max(32, Math.min(1_024, Number(opts.memoryLimit) || 256));
+    const memory = Math.max(
+      32,
+      Math.min(1_024, Number(opts.memoryLimit) || 256),
+    );
     const cpu = Math.max(0.25, Math.min(2, Number(opts.cpuLimit) || 1));
     return {
       cmd: 'docker',
@@ -625,7 +703,12 @@ export class ExecutionService {
           return;
         }
 
-        if ((exitCode !== 0 && exitCode !== null) || (signal && (signal as string) !== 'SIGKILL' && (signal as string) !== 'SIGTERM')) {
+        if (
+          (exitCode !== 0 && exitCode !== null) ||
+          (signal &&
+            (signal as string) !== 'SIGKILL' &&
+            (signal as string) !== 'SIGTERM')
+        ) {
           // Detect specific runtime errors
           const errorMsg = this.classifyRuntimeError(stderr, exitCode, signal);
           resolve({
@@ -686,10 +769,16 @@ export class ExecutionService {
     const expectedLines = expected.split('\n').map((l) => l.trimEnd());
 
     // Remove trailing empty lines
-    while (actualLines.length > 0 && actualLines[actualLines.length - 1] === '') {
+    while (
+      actualLines.length > 0 &&
+      actualLines[actualLines.length - 1] === ''
+    ) {
       actualLines.pop();
     }
-    while (expectedLines.length > 0 && expectedLines[expectedLines.length - 1] === '') {
+    while (
+      expectedLines.length > 0 &&
+      expectedLines[expectedLines.length - 1] === ''
+    ) {
       expectedLines.pop();
     }
 
@@ -818,10 +907,16 @@ export class ExecutionService {
     if (signal === 'SIGABRT' || lower.includes('abort')) {
       return 'Aborted (SIGABRT)';
     }
-    if (lower.includes('out of memory') || lower.includes('java.lang.outofmemoryerror')) {
+    if (
+      lower.includes('out of memory') ||
+      lower.includes('java.lang.outofmemoryerror')
+    ) {
       return 'Memory Limit Exceeded';
     }
-    if (lower.includes('stack overflow') || lower.includes('stackoverflowerror')) {
+    if (
+      lower.includes('stack overflow') ||
+      lower.includes('stackoverflowerror')
+    ) {
       return 'Stack Overflow';
     }
     if (

@@ -7,7 +7,6 @@ import {
   Medal,
   Flame,
   Code2,
-  Loader2,
   RefreshCw,
   Users,
   Zap,
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usersAPI } from "@/config/api";
+import { Spinner } from "@/components/ui/spinner";
 
 interface LeaderboardUser {
   rank: number;
@@ -39,7 +39,7 @@ const TIER_CONFIG: Record<string, { color: string; bg: string; border: string }>
   Grandmaster: { color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30" },
   Master:      { color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30" },
   Expert:      { color: "text-violet-400", bg: "bg-violet-500/10", border: "border-violet-500/30" },
-  Specialist:  { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/30" },
+  Specialist:  { color: "text-primary", bg: "bg-primary/10", border: "border-primary/30" },
   Competent:   { color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30" },
   Learner:     { color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/30" },
   Beginner:    { color: "text-muted-foreground", bg: "bg-muted/30", border: "border-border" },
@@ -60,7 +60,7 @@ const PODIUM_CONFIG: Record<number, { height: string; medalColor: string; bgGrad
     bgGrad: "from-slate-400/20 to-slate-400/5",
     borderColor: "border-slate-400/30",
     shadow: "shadow-[0_0_30px_-10px_rgba(148,163,184,0.25)]",
-    rankColor: "text-slate-400",
+    rankColor: "text-muted-foreground",
   },
   3: {
     height: "h-44",

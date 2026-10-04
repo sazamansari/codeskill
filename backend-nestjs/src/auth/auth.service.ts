@@ -6,10 +6,10 @@ import {
   InternalServerErrorException,
   OnModuleInit,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-import { User, UserDocument } from '../database/schemas/user.schema';
+import { User as UserEntity } from '../database/entities/user.entity';
 import { OtpService } from '../redis/otp.service';
 import { OAuth2Client } from 'google-auth-library';
 import axios from 'axios';
@@ -34,7 +34,7 @@ export class AuthService implements OnModuleInit {
   private googleClient: OAuth2Client;
 
   constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectRepository(UserEntity) private userRepository: Repository<UserEntity>,
     private otpService: OtpService,
     private configService: ConfigService,
   ) {
@@ -65,7 +65,10 @@ export class AuthService implements OnModuleInit {
     const results = [];
     for (const email of adminEmails) {
       try {
-        let user = await this.userModel.findOne({ email }).select('+password');
+        const user = await this.userRepository.findOne({
+          where: { email },
+          select: { id: true, email: true, password: true, isAdmin: true, role: true },
+        });
         if (user) {
           let updated = false;
           if (!user.isAdmin) {
@@ -81,7 +84,7 @@ export class AuthService implements OnModuleInit {
             updated = true;
           }
           if (updated) {
-            await user.save();
+            await this.userRepository.save(user);
             results.push({ email, status: 'Upgraded / Updated Admin' });
           } else {
             results.push({ email, status: 'Already Admin' });
@@ -92,36 +95,44 @@ export class AuthService implements OnModuleInit {
               .split('@')[0]
               .replace(/[._-]/g, ' ')
               .replace(/\b\w/g, (c) => c.toUpperCase()) + ' (Admin)';
-          await this.userModel.create({
+          const newUser = this.userRepository.create({
             name: adminName,
             email,
             password: defaultPassword,
             isAdmin: true,
             role: 'super_admin',
+            stats: {},
+            profile: {},
+            studentProfile: {},
           });
+          await this.userRepository.save(newUser);
           results.push({ email, status: 'Created as Admin' });
         }
       } catch (e: any) {
         results.push({ email, status: `Failed: ${e.message}` });
       }
     }
-    return { success: true, message: 'Admin seeding process completed', results };
+    return {
+      success: true,
+      message: 'Admin seeding process completed',
+      results,
+    };
   }
 
-  private authResponse(user: UserDocument) {
-    const token = (user as any).getSignedJwtToken();
+  private authResponse(user: UserEntity) {
+    const token = user.getSignedJwtToken();
     return {
       token,
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email,
-        role: (user as any).role || (user.isAdmin ? 'admin' : 'student'),
+        role: user.role || (user.isAdmin ? 'admin' : 'student'),
         isAdmin: user.isAdmin,
-        uid: (user as any).uid || null,
-        isAssessmentStudent: (user as any).isAssessmentStudent || false,
-        forcePasswordChange: (user as any).forcePasswordChange || false,
-        studentProfile: (user as any).studentProfile || null,
+        uid: user.uid || null,
+        isAssessmentStudent: user.isAssessmentStudent || false,
+        forcePasswordChange: user.forcePasswordChange || false,
+        studentProfile: user.studentProfile || null,
         avatar: user.avatar,
         bio: user.bio,
         profile: user.profile,
@@ -136,9 +147,9 @@ export class AuthService implements OnModuleInit {
   }
 
   async sendRegistrationOtp(dto: SendOtpDto) {
-    const existingUser = await this.userModel.findOne({ email: dto.email });
+    const existingUser = await this.userRepository.findOne({ where: { email: dto.email } });
     if (existingUser) {
-      if ((existingUser as any).isAssessmentStudent) {
+      if (existingUser.isAssessmentStudent) {
         throw new BadRequestException(
           'Assessment students cannot register publicly. Please log in using your University UID and password.',
         );
@@ -151,9 +162,9 @@ export class AuthService implements OnModuleInit {
   async register(dto: RegisterDto) {
     await this.otpService.verifyOTP(dto.email, dto.otp);
 
-    const userExists = await this.userModel.findOne({ email: dto.email });
+    const userExists = await this.userRepository.findOne({ where: { email: dto.email } });
     if (userExists) {
-      if ((userExists as any).isAssessmentStudent) {
+      if (userExists.isAssessmentStudent) {
         throw new BadRequestException(
           'Assessment students cannot register publicly. Please log in using your University UID and password.',
         );
@@ -161,19 +172,24 @@ export class AuthService implements OnModuleInit {
       throw new BadRequestException('User already exists');
     }
 
-    const user = await this.userModel.create({
+    const pgUser = this.userRepository.create({
       name: dto.name,
       email: dto.email,
       password: dto.password,
+      stats: {},
+      profile: {},
+      studentProfile: {},
     });
+    const user = await this.userRepository.save(pgUser);
 
     return this.authResponse(user);
   }
 
   async login(dto: LoginDto) {
-    const user = await this.userModel
-      .findOne({ email: dto.email })
-      .select('+password');
+    const user = await this.userRepository.findOne({
+      where: { email: dto.email },
+      select: { id: true, name: true, email: true, password: true, role: true, isAdmin: true, uid: true, isAssessmentStudent: true, forcePasswordChange: true, studentProfile: true, avatar: true, bio: true, profile: true, stats: true, authProvider: true }
+    });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -184,7 +200,7 @@ export class AuthService implements OnModuleInit {
       );
     }
 
-    const isMatch = await (user as any).matchPassword(dto.password);
+    const isMatch = await user.matchPassword(dto.password);
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -195,13 +211,17 @@ export class AuthService implements OnModuleInit {
   async verifyOtp(dto: VerifyOtpDto) {
     await this.otpService.verifyOTP(dto.email, dto.code);
 
-    let user = await this.userModel.findOne({ email: dto.email });
+    let user = await this.userRepository.findOne({ where: { email: dto.email } });
     if (!user) {
-      user = await this.userModel.create({
+      const newUser = this.userRepository.create({
         name: dto.name || dto.email.split('@')[0],
         email: dto.email,
         authProvider: 'otp',
+        stats: {},
+        profile: {},
+        studentProfile: {},
       });
+      user = await this.userRepository.save(newUser);
     }
 
     return this.authResponse(user);
@@ -230,10 +250,10 @@ export class AuthService implements OnModuleInit {
     }
 
     const { email, name, sub, picture } = payload;
-    let user = await this.userModel.findOne({ email });
+    let user = await this.userRepository.findOne({ where: { email } });
 
     if (user) {
-      if ((user as any).isAssessmentStudent) {
+      if (user.isAssessmentStudent) {
         throw new UnauthorizedException(
           'Assessment students cannot use social login. Please log in using your University UID and password.',
         );
@@ -241,16 +261,20 @@ export class AuthService implements OnModuleInit {
       if (!user.googleId) {
         user.googleId = sub;
         if (!user.avatar) user.avatar = picture;
-        await user.save();
+        await this.userRepository.save(user);
       }
     } else {
-      user = await this.userModel.create({
+      const newUser = this.userRepository.create({
         name,
         email,
         googleId: sub,
         avatar: picture,
         authProvider: 'google',
+        stats: {},
+        profile: {},
+        studentProfile: {},
       });
+      user = await this.userRepository.save(newUser);
     }
 
     return this.authResponse(user);
@@ -289,9 +313,9 @@ export class AuthService implements OnModuleInit {
         emailsResponse.data[0]?.email;
       const { id, name, login, avatar_url } = userResponse.data;
 
-      let user = await this.userModel.findOne({ email: primaryEmail });
+      let user = await this.userRepository.findOne({ where: { email: primaryEmail } });
       if (user) {
-        if ((user as any).isAssessmentStudent) {
+        if (user.isAssessmentStudent) {
           throw new UnauthorizedException(
             'Assessment students cannot use social login. Please log in using your University UID and password.',
           );
@@ -299,16 +323,20 @@ export class AuthService implements OnModuleInit {
         if (!user.githubId) {
           user.githubId = id.toString();
           if (!user.avatar) user.avatar = avatar_url;
-          await user.save();
+          await this.userRepository.save(user);
         }
       } else {
-        user = await this.userModel.create({
+        const newUser = this.userRepository.create({
           name: name || login,
           email: primaryEmail,
           githubId: id.toString(),
           avatar: avatar_url,
           authProvider: 'github',
+          stats: {},
+          profile: {},
+          studentProfile: {},
         });
+        user = await this.userRepository.save(newUser);
       }
 
       return this.authResponse(user);
@@ -347,9 +375,9 @@ export class AuthService implements OnModuleInit {
 
       const { sub, name, email, picture } = userResponse.data;
 
-      let user = await this.userModel.findOne({ email });
+      let user = await this.userRepository.findOne({ where: { email } });
       if (user) {
-        if ((user as any).isAssessmentStudent) {
+        if (user.isAssessmentStudent) {
           throw new UnauthorizedException(
             'Assessment students cannot use social login. Please log in using your University UID and password.',
           );
@@ -357,16 +385,20 @@ export class AuthService implements OnModuleInit {
         if (!user.linkedinId) {
           user.linkedinId = sub;
           if (!user.avatar) user.avatar = picture;
-          await user.save();
+          await this.userRepository.save(user);
         }
       } else {
-        user = await this.userModel.create({
+        const newUser = this.userRepository.create({
           name,
           email,
           linkedinId: sub,
           avatar: picture,
           authProvider: 'linkedin',
+          stats: {},
+          profile: {},
+          studentProfile: {},
         });
+        user = await this.userRepository.save(newUser);
       }
 
       return this.authResponse(user);
@@ -376,13 +408,15 @@ export class AuthService implements OnModuleInit {
   }
 
   async getMe(userId: string) {
-    const user = await this.userModel.findById(userId);
+    const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new UnauthorizedException('User not found');
     return user;
   }
 
   async updateProfile(userId: string, data: any) {
-    const updates: any = {};
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
     const allowedFields = ['name', 'bio', 'avatar', 'username'];
     const allowedProfileFields = [
       'institution',
@@ -393,75 +427,79 @@ export class AuthService implements OnModuleInit {
     ];
 
     for (const key of allowedFields) {
-      if (data[key] !== undefined) updates[key] = data[key];
+      if (data[key] !== undefined) (user as any)[key] = data[key];
     }
 
     if (data.profile) {
       for (const key of allowedProfileFields) {
         if (data.profile[key] !== undefined) {
-          updates[`profile.${key}`] = data.profile[key];
+          if (!user.profile) user.profile = {};
+          (user.profile as any)[key] = data.profile[key];
         }
       }
     }
 
-    if (updates.username) {
-      // Validate username format (lowercase, alphanumeric, underscores)
+    if (data.username) {
       const usernameRegex = /^[a-z0-9_]+$/;
-      if (!usernameRegex.test(updates.username)) {
-        throw new BadRequestException('Username can only contain lowercase letters, numbers, and underscores');
+      if (!usernameRegex.test(data.username)) {
+        throw new BadRequestException(
+          'Username can only contain lowercase letters, numbers, and underscores',
+        );
       }
 
-      // Check if username is taken by another user
-      const existingUser = await this.userModel.findOne({
-        username: updates.username,
-        _id: { $ne: userId }
-      });
+      const existingUser = await this.userRepository.createQueryBuilder('user')
+        .where('user.username = :username', { username: data.username })
+        .andWhere('user.id != :id', { id: userId })
+        .getOne();
+      
       if (existingUser) {
         throw new BadRequestException('Username is already taken');
       }
+      user.username = data.username;
     }
 
-    const user = await this.userModel.findByIdAndUpdate(
-      userId,
-      { $set: updates },
-      { new: true, runValidators: true },
-    );
-
-    return user;
+    return await this.userRepository.save(user);
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
     const normalizedEmail = dto.email.trim().toLowerCase();
-    const user = await this.userModel.findOne({ email: normalizedEmail });
+    const user = await this.userRepository.findOne({ where: { email: normalizedEmail } });
     if (!user) {
       throw new BadRequestException('No user found with this email address');
     }
-    if ((user as any).isAssessmentStudent) {
+    if (user.isAssessmentStudent) {
       throw new BadRequestException(
         'Assessment students cannot reset password online. Please contact your institution administrator.',
       );
     }
     await this.otpService.sendOTP(normalizedEmail);
-    return { success: true, message: 'Password reset OTP sent to your email via SES' };
+    return {
+      success: true,
+      message: 'Password reset OTP sent to your email via SES',
+    };
   }
 
   async resetPassword(dto: ResetPasswordDto) {
     const normalizedEmail = dto.email.trim().toLowerCase();
     await this.otpService.verifyOTP(normalizedEmail, dto.otp);
-    const user = await this.userModel.findOne({ email: normalizedEmail }).select('+password');
+    const user = await this.userRepository.findOne({
+      where: { email: normalizedEmail },
+      select: { id: true, password: true },
+    });
     if (!user) {
       throw new BadRequestException('User not found');
     }
     user.password = dto.newPassword;
-    await user.save();
+    await this.userRepository.save(user);
     return { success: true, message: 'Password has been successfully reset' };
   }
 
   async adminLogin(dto: AdminLoginDto) {
     const normalizedEmail = dto.email.trim().toLowerCase();
-    const user = await this.userModel
-      .findOne({ email: normalizedEmail })
-      .select('+password');
+    const user = await this.userRepository.findOne({
+      where: { email: normalizedEmail },
+      select: { id: true, name: true, email: true, password: true, role: true, isAdmin: true, uid: true, isAssessmentStudent: true, forcePasswordChange: true, studentProfile: true, avatar: true, bio: true, profile: true, stats: true, authProvider: true }
+    });
     if (!user) {
       throw new UnauthorizedException('User not found with this email');
     }
@@ -471,9 +509,11 @@ export class AuthService implements OnModuleInit {
 
     if (user.password) {
       if (!dto.password) {
-        throw new BadRequestException('Password is required for this admin account');
+        throw new BadRequestException(
+          'Password is required for this admin account',
+        );
       }
-      const isMatch = await (user as any).matchPassword(dto.password);
+      const isMatch = await user.matchPassword(dto.password);
       if (!isMatch) {
         throw new UnauthorizedException('Invalid credentials');
       }
@@ -492,52 +532,55 @@ export class AuthService implements OnModuleInit {
     const normalizedEmail = dto.email.trim().toLowerCase();
     await this.otpService.verifyOTP(normalizedEmail, dto.otp);
 
-    const user = await this.userModel.findOne({ email: normalizedEmail });
+    const user = await this.userRepository.findOne({ where: { email: normalizedEmail } });
     if (!user || !user.isAdmin) {
       throw new UnauthorizedException('Access denied');
     }
 
     user.lastActive = new Date();
-    await user.save();
+    await this.userRepository.save(user);
 
     return this.authResponse(user);
   }
 
   async updateAvatar(userId: string, avatarUrl: string) {
-    await this.userModel.findByIdAndUpdate(
-      userId,
-      { avatar: avatarUrl },
-      { new: true, runValidators: true },
-    );
-    return this.getMe(userId);
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    user.avatar = avatarUrl;
+    await this.userRepository.save(user);
+    return user;
   }
 
   async studentLogin(dto: StudentLoginDto) {
     const formattedUid = dto.uid.toUpperCase().trim();
-    const user = await this.userModel
-      .findOne({ uid: formattedUid })
-      .select('+password');
+    const user = await this.userRepository.findOne({
+      where: { uid: formattedUid },
+      select: { id: true, name: true, email: true, password: true, role: true, isAdmin: true, uid: true, isAssessmentStudent: true, forcePasswordChange: true, studentProfile: true, avatar: true, bio: true, profile: true, stats: true, authProvider: true, isActive: true }
+    });
     if (!user) {
       throw new UnauthorizedException('Invalid University UID or password');
     }
-    if ((user as any).isActive === false) {
+    if (user.isActive === false) {
       throw new UnauthorizedException(
         'Your student account has been deactivated. Please contact your institution administrator.',
       );
     }
-    const isMatch = await (user as any).matchPassword(dto.password);
+    const isMatch = await user.matchPassword(dto.password);
     if (!isMatch) {
       throw new UnauthorizedException('Invalid University UID or password');
     }
     user.lastActive = new Date();
-    await user.save();
+    await this.userRepository.save(user);
     return this.authResponse(user);
   }
 
   async forceChangePassword(userId: string, dto: ForceChangePasswordDto) {
-    const user = await this.userModel.findById(userId).select('+password');
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      select: { id: true, name: true, email: true, uid: true, password: true, forcePasswordChange: true }
+    });
     if (!user) throw new NotFoundException('User not found');
-    const isMatch = await (user as any).matchPassword(dto.currentPassword);
+    const isMatch = await user.matchPassword(dto.currentPassword);
     if (!isMatch) {
       throw new BadRequestException('Current temporary password is incorrect');
     }
@@ -548,12 +591,12 @@ export class AuthService implements OnModuleInit {
     }
     user.password = dto.newPassword;
     user.forcePasswordChange = false;
-    await user.save();
+    await this.userRepository.save(user);
     return {
       success: true,
       message: 'Password successfully updated',
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email,
         uid: user.uid,

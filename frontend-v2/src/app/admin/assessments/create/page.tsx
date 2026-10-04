@@ -1,560 +1,332 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Check,
-  CheckCircle2,
-  Clock,
-  Award,
-  Layers,
-  ShieldAlert,
-  Search,
-  Filter,
-  Plus,
-  Trash2,
-  AlertTriangle,
-  Loader2,
-  HelpCircle,
-  Code2
+import { adminAssessmentsAPI } from "@/config/api";
+import { useAssessmentStore } from "./_store/useAssessmentStore";
+import QuestionPicker from "./_components/QuestionPicker";
+import { 
+  ArrowLeft, CheckCircle2, Clock, Plus, Trash2, ShieldAlert,
+  GripVertical, Settings, Save, AlertTriangle
 } from "lucide-react";
-import { adminAssessmentsAPI, adminQuestionsAPI } from "@/config/api";
+import { Spinner } from "@/components/ui/spinner";
+import { ToastProvider, useToast } from "../../questions/create/_components/Toast"; // Reuse toast
 
-export default function CreateAssessmentPage() {
+export default function AssessmentBuilderWrapper() {
+  return (
+    <ToastProvider>
+      <AssessmentBuilder />
+    </ToastProvider>
+  )
+}
+
+function AssessmentBuilder() {
   const router = useRouter();
+  const store = useAssessmentStore();
+  const { addToast } = useToast();
+  
+  const [activePicker, setActivePicker] = useState<string | null>(null);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  // Form State
-  const [title, setTitle] = useState("");
-  const [code, setCode] = useState(`EXAM-${Date.now().toString().slice(-4)}`);
-  const [description, setDescription] = useState("");
-  const [durationMinutes, setDurationMinutes] = useState(45);
-  const [passingMarks, setPassingMarks] = useState<number | "">("");
-  const [negativeMarking, setNegativeMarking] = useState(true);
-  const [category, setCategory] = useState("exam");
-  const [allowedAttempts, setAllowedAttempts] = useState(0);
+  // Calculate totals
+  const totalQuestions = store.sections.reduce((acc, sec) => acc + sec.questions.length, 0);
+  const totalMarks = store.sections.reduce((acc, sec) => acc + sec.questions.reduce((sum, q) => sum + (Number(q.marks) || 1), 0), 0);
 
-  // Proctoring Settings
-  const [enforceFullscreen, setEnforceFullscreen] = useState(true);
-  const [blockCopyPaste, setBlockCopyPaste] = useState(true);
-  const [detectTabSwitch, setDetectTabSwitch] = useState(true);
-  const [maxTabSwitches, setMaxTabSwitches] = useState(3);
-  const [autoSubmitOnViolation, setAutoSubmitOnViolation] = useState(true);
-
-  // Question Selector State
-  const [selectedQuestionIds, setSelectedQuestionIds] = useState<string[]>([]);
-  const [availableQuestions, setAvailableQuestions] = useState<any[]>([]);
-  const [topics, setTopics] = useState<string[]>([]);
-  const [filterTopic, setFilterTopic] = useState("");
-  const [filterDifficulty, setFilterDifficulty] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Fetch Questions for Selection
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      setIsLoadingQuestions(true);
-      try {
-        const res = await adminQuestionsAPI.getAll({
-          limit: 100,
-          status: "approved",
-          topic: filterTopic || undefined,
-          difficulty: filterDifficulty || undefined,
-          search: searchQuery || undefined,
-        });
-        const qList = res.data.questions || [];
-        setAvailableQuestions(qList);
-
-        // Extract topics
-        const topicRes = await adminQuestionsAPI.getTopics();
-        const topList = topicRes.data.topics || topicRes.data.data || [];
-        if (Array.isArray(topList)) {
-          setTopics(topList.map((t: any) => t.topic || t._id));
-        }
-      } catch (err) {
-        console.error("Failed to load questions:", err);
-      } finally {
-        setIsLoadingQuestions(false);
-      }
-    };
-
-    fetchQuestions();
-  }, [filterTopic, filterDifficulty, searchQuery]);
-
-  const toggleSelectQuestion = (id: string) => {
-    if (selectedQuestionIds.includes(id)) {
-      setSelectedQuestionIds(selectedQuestionIds.filter((qId) => qId !== id));
-    } else {
-      setSelectedQuestionIds([...selectedQuestionIds, id]);
-    }
-  };
-
-  const handleSelectAllFiltered = () => {
-    const ids = availableQuestions.map((q) => q._id);
-    const newSelected = Array.from(new Set([...selectedQuestionIds, ...ids]));
-    setSelectedQuestionIds(newSelected);
-  };
-
-  const handleDeselectAll = () => {
-    setSelectedQuestionIds([]);
-  };
-
-  // Calculated Metrics
-  const selectedQuestionsData = availableQuestions.filter((q) =>
-    selectedQuestionIds.includes(q._id)
-  );
-  const totalCalculatedMarks = selectedQuestionsData.reduce(
-    (sum, q) => sum + (q.marks || 1),
-    0
-  );
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) {
-      setError("Please provide an assessment title.");
+  const handlePublish = async (status: 'draft' | 'published') => {
+    if (!store.title.trim() || !store.code.trim()) {
+      addToast("error", "Validation Error", "Title and Code are required.");
       return;
     }
-    if (selectedQuestionIds.length === 0) {
-      setError("Please select at least 1 question for the assessment.");
+    if (store.sections.length === 0) {
+      addToast("error", "Validation Error", "At least one section is required.");
+      return;
+    }
+    if (totalQuestions === 0) {
+      addToast("error", "Validation Error", "At least one question is required across sections.");
       return;
     }
 
-    setIsSubmitting(true);
-    setError(null);
-
+    setIsPublishing(true);
     try {
       await adminAssessmentsAPI.create({
-        title: title.trim(),
-        code: code.trim().toUpperCase(),
-        description: description.trim(),
-        category,
-        allowedAttempts: Number(allowedAttempts),
-        durationMinutes: Number(durationMinutes),
-        passingMarks: passingMarks !== "" ? Number(passingMarks) : Math.ceil(totalCalculatedMarks * 0.4),
-        negativeMarking,
-        questionIds: selectedQuestionIds,
-        proctoring: {
-          enforceFullscreen,
-          blockCopyPaste,
-          detectTabSwitch,
-          maxTabSwitches: Number(maxTabSwitches),
-          autoSubmitOnViolation,
-        },
+        title: store.title,
+        code: store.code,
+        description: store.description,
+        durationMinutes: store.durationMinutes,
+        passingMarks: store.passingMarks ? Number(store.passingMarks) : Math.ceil(totalMarks * 0.4),
+        category: store.category,
+        allowedAttempts: store.allowedAttempts,
+        negativeMarking: store.negativeMarking,
+        proctoring: store.proctoring,
+        instructions: store.instructions,
+        status,
+        sections: store.sections.map(s => ({
+          title: s.title,
+          description: s.description,
+          order: s.order,
+          timeLimit: s.timeLimit,
+          questions: s.questions.map(q => ({
+            questionId: q.questionId,
+            marks: Number(q.marks),
+            negativeMarks: Number(q.negativeMarks),
+            order: q.order
+          }))
+        }))
       });
-
-      router.push("/admin/assessments");
+      
+      addToast("success", "Success", `Assessment ${status === 'published' ? 'published' : 'saved as draft'}`);
+      setTimeout(() => router.push("/admin/assessments"), 1000);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to create assessment");
-      setIsSubmitting(false);
+      addToast("error", "Error", err.response?.data?.message || "Failed to create assessment.");
+      setIsPublishing(false);
+      setShowConfirm(false);
     }
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-6 font-sans">
+    <div className="min-h-screen bg-background pb-32">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/admin/assessments"
-            className="p-2 rounded-xl border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Create MCQ Assessment
-            </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Assemble questions, configure duration, and enforce anti-cheat rules.
-            </p>
+      <div className="sticky top-0 z-40 bg-card/95 backdrop-blur-md border-b border-border shadow-sm">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/admin/assessments" className="p-2 rounded-xl border border-border hover:bg-muted text-muted-foreground transition-colors">
+              <ArrowLeft className="w-4 h-4" />
+            </Link>
+            <div>
+              <h1 className="text-base font-bold text-foreground">Assessment Builder</h1>
+              <p className="text-[11px] text-muted-foreground font-medium">Design professional evaluations.</p>
+            </div>
           </div>
-        </div>
-
-        {/* Live Metrics Header Pill */}
-        <div className="flex items-center gap-3 bg-card border border-border px-4 py-2 rounded-2xl shadow-sm">
-          <div className="text-center pr-3 border-r border-border">
-            <span className="text-[10px] uppercase font-bold text-muted-foreground">Selected</span>
-            <div className="text-base font-bold text-primary font-mono">{selectedQuestionIds.length} Qs</div>
-          </div>
-          <div className="text-center pl-1">
-            <span className="text-[10px] uppercase font-bold text-muted-foreground">Total Marks</span>
-            <div className="text-base font-bold text-emerald-400 font-mono">{totalCalculatedMarks} pts</div>
+          
+          <div className="flex items-center gap-4 bg-muted/40 border border-border px-4 py-2 rounded-2xl">
+            <div className="text-center pr-4 border-r border-border">
+              <div className="text-[10px] font-bold text-muted-foreground uppercase">Questions</div>
+              <div className="text-sm font-bold font-mono">{totalQuestions}</div>
+            </div>
+            <div className="text-center pr-4 border-r border-border">
+              <div className="text-[10px] font-bold text-muted-foreground uppercase">Marks</div>
+              <div className="text-sm font-bold font-mono text-emerald-500">{totalMarks}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-[10px] font-bold text-muted-foreground uppercase">Duration</div>
+              <div className="text-sm font-bold font-mono text-primary">{store.durationMinutes}m</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm flex items-center gap-3">
-          <AlertTriangle className="w-5 h-5 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Step 1: Basic Information & Timings */}
-        <div className="bg-card border border-border rounded-2xl p-6 space-y-5">
-          <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-            <Clock className="w-4 h-4 text-primary" />
-            1. Exam Details & Duration
+      <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+        
+        {/* Basic Info */}
+        <section className="bg-card border border-border rounded-2xl p-6 space-y-5 shadow-sm">
+          <h2 className="text-base font-bold flex items-center gap-2">
+            <Settings className="w-4 h-4 text-primary" /> Basic Information
           </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2 space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
-                Assessment Title <span className="text-rose-400">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Mid-Term Examination: Data Structures & Algorithms"
-                className="w-full px-3.5 py-2.5 bg-muted/40 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
-                Exam Code <span className="text-rose-400">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase())}
-                placeholder="e.g. CS2026-DSA"
-                className="w-full px-3.5 py-2.5 bg-muted/40 border border-border rounded-xl text-sm font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              />
+              <label className="text-xs font-semibold">Title <span className="text-rose-500">*</span></label>
+              <input type="text" value={store.title} onChange={e => store.setTitle(e.target.value)} className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-sm focus:ring-1 focus:ring-primary" placeholder="e.g. Frontend Engineering Test" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold">Exam Code <span className="text-rose-500">*</span></label>
+              <input type="text" value={store.code} onChange={e => store.setCode(e.target.value.toUpperCase())} className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-sm font-mono focus:ring-1 focus:ring-primary" />
+            </div>
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="text-xs font-semibold">Description</label>
+              <textarea rows={2} value={store.description} onChange={e => store.setDescription(e.target.value)} className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-sm focus:ring-1 focus:ring-primary" placeholder="Brief context about this assessment..." />
             </div>
           </div>
+        </section>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-foreground">
-              Description & Candidate Instructions
+        {/* Configuration */}
+        <section className="bg-card border border-border rounded-2xl p-6 space-y-5 shadow-sm">
+          <h2 className="text-base font-bold flex items-center gap-2">
+            <Clock className="w-4 h-4 text-primary" /> Configuration & Proctoring
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5 pb-5 border-b border-border">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold">Duration (min)</label>
+              <input type="number" value={store.durationMinutes} onChange={e => store.setDurationMinutes(Number(e.target.value))} className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-sm focus:ring-1 focus:ring-primary" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold">Passing Marks</label>
+              <input type="number" value={store.passingMarks} onChange={e => store.setPassingMarks(e.target.value ? Number(e.target.value) : '')} placeholder={`Auto: ${Math.ceil(totalMarks * 0.4)}`} className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-sm focus:ring-1 focus:ring-primary" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold">Attempts</label>
+              <select value={store.allowedAttempts} onChange={e => store.setAllowedAttempts(Number(e.target.value))} className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-sm focus:ring-1 focus:ring-primary">
+                <option value={1}>1 Attempt</option>
+                <option value={2}>2 Attempts</option>
+                <option value={0}>Unlimited</option>
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold">Category</label>
+              <select value={store.category} onChange={e => store.setCategory(e.target.value)} className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-sm focus:ring-1 focus:ring-primary">
+                <option value="exam">Exam</option>
+                <option value="quiz">Quiz</option>
+                <option value="recruitment">Recruitment</option>
+              </select>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            <label className="flex items-center gap-3 p-3 rounded-xl border border-border bg-background cursor-pointer">
+              <input type="checkbox" checked={store.proctoring.enforceFullscreen} onChange={e => store.setProctoring({ enforceFullscreen: e.target.checked })} className="rounded text-primary focus:ring-primary w-4 h-4" />
+              <span className="text-sm font-semibold">Enforce Fullscreen</span>
             </label>
-            <textarea
-              rows={2}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Important guidelines, topics covered, and university instructions..."
-              className="w-full px-3.5 py-2.5 bg-muted/40 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
+            <label className="flex items-center gap-3 p-3 rounded-xl border border-border bg-background cursor-pointer">
+              <input type="checkbox" checked={store.proctoring.blockCopyPaste} onChange={e => store.setProctoring({ blockCopyPaste: e.target.checked })} className="rounded text-primary focus:ring-primary w-4 h-4" />
+              <span className="text-sm font-semibold">Block Copy/Paste</span>
+            </label>
+            <label className="flex items-center gap-3 p-3 rounded-xl border border-border bg-background cursor-pointer">
+              <input type="checkbox" checked={store.proctoring.detectTabSwitch} onChange={e => store.setProctoring({ detectTabSwitch: e.target.checked })} className="rounded text-primary focus:ring-primary w-4 h-4" />
+              <span className="text-sm font-semibold">Detect Tab Switches</span>
+            </label>
+          </div>
+        </section>
+
+        {/* Sections */}
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-primary" /> Assessment Sections
+            </h2>
+            <button onClick={store.addSection} className="flex items-center gap-1.5 px-3 py-1.5 bg-muted border border-border rounded-lg text-xs font-semibold hover:bg-muted/80 transition-colors">
+              <Plus className="w-3.5 h-3.5" /> Add Section
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
-                Duration (Minutes) <span className="text-rose-400">*</span>
-              </label>
-              <input
-                type="number"
-                min={5}
-                max={300}
-                required
-                value={durationMinutes}
-                onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                className="w-full px-3.5 py-2.5 bg-muted/40 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
-                Passing Marks (Optional)
-              </label>
-              <input
-                type="number"
-                min={1}
-                value={passingMarks}
-                onChange={(e) => setPassingMarks(e.target.value ? Number(e.target.value) : "")}
-                placeholder={`Default: ${Math.ceil(totalCalculatedMarks * 0.4)} pts`}
-                className="w-full px-3.5 py-2.5 bg-muted/40 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
-                Category
-              </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-muted/40 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              >
-                <option value="exam">Official Semester Exam</option>
-                <option value="quiz">Weekly Quiz / Test</option>
-                <option value="practice">Practice Drill</option>
-                <option value="recruitment">Campus Placement Test</option>
-              </select>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
-                Attempt Policy <span className="text-primary">*</span>
-              </label>
-              <select
-                value={allowedAttempts}
-                onChange={(e) => setAllowedAttempts(Number(e.target.value))}
-                className="w-full px-3.5 py-2.5 bg-muted/40 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary font-medium"
-              >
-                <option value={0}>Multiple / Unlimited Attempts (Keep Best Score)</option>
-                <option value={1}>1 Attempt Allowed</option>
-                <option value={2}>2 Attempts (Keep Best Score)</option>
-                <option value={3}>3 Attempts (Keep Best Score)</option>
-                <option value={5}>5 Attempts (Keep Best Score)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Step 2: Question Selector */}
-        <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-                <Layers className="w-4 h-4 text-primary" />
-                2. Select Questions from Bank ({selectedQuestionIds.length} Selected)
-              </h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Pick questions across different topics and difficulties.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleSelectAllFiltered}
-                className="px-3 py-1.5 rounded-lg border border-border hover:bg-muted text-xs font-medium text-foreground transition-colors"
-              >
-                Select All ({availableQuestions.length})
-              </button>
-              <button
-                type="button"
-                onClick={handleDeselectAll}
-                className="px-3 py-1.5 rounded-lg border border-border hover:bg-muted text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Clear Selection
-              </button>
-            </div>
-          </div>
-
-          {/* Filters Bar */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search questions..."
-                className="w-full pl-9 pr-3 py-2 bg-muted/40 border border-border rounded-xl text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-
-            <select
-              value={filterTopic}
-              onChange={(e) => setFilterTopic(e.target.value)}
-              className="px-3 py-2 bg-muted/40 border border-border rounded-xl text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="">All Topics</option>
-              {topics.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={filterDifficulty}
-              onChange={(e) => setFilterDifficulty(e.target.value)}
-              className="px-3 py-2 bg-muted/40 border border-border rounded-xl text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="">All Difficulties</option>
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-            </select>
-          </div>
-
-          {/* Question List Selection Table */}
-          <div className="border border-border rounded-xl overflow-hidden max-h-96 overflow-y-auto divide-y divide-border">
-            {isLoadingQuestions ? (
-              <div className="py-12 text-center text-xs text-muted-foreground">
-                <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-primary" />
-                Loading question bank...
-              </div>
-            ) : availableQuestions.length === 0 ? (
-              <div className="py-12 text-center text-xs text-muted-foreground">
-                No questions found matching criteria. Upload questions via Bulk Import first.
-              </div>
-            ) : (
-              availableQuestions.map((q) => {
-                const isSelected = selectedQuestionIds.includes(q._id);
-                return (
-                  <div
-                    key={q._id}
-                    onClick={() => toggleSelectQuestion(q._id)}
-                    className={`p-3.5 flex items-start gap-3 cursor-pointer transition-colors ${
-                      isSelected
-                        ? "bg-primary/10 hover:bg-primary/15"
-                        : "hover:bg-muted/30"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => {}}
-                      className="mt-1 rounded border-border text-primary focus:ring-primary h-4 w-4"
+          {store.sections.map((section, sIdx) => {
+            const secMarks = section.questions.reduce((sum, q) => sum + (Number(q.marks)||1), 0);
+            return (
+              <div key={section.id} className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+                <div className="p-4 bg-muted/30 border-b border-border flex items-center justify-between">
+                  <div className="flex-1 flex items-center gap-3">
+                    <GripVertical className="w-5 h-5 text-muted-foreground cursor-grab" />
+                    <input 
+                      type="text" 
+                      value={section.title} 
+                      onChange={e => store.updateSection(section.id, { title: e.target.value })}
+                      className="bg-transparent border-none text-base font-bold text-foreground focus:ring-0 p-0 w-64"
                     />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-muted border border-border text-foreground">
-                          {q.topic}
-                        </span>
-                        <span
-                          className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
-                            q.difficulty === "easy"
-                              ? "text-emerald-400 bg-emerald-500/10"
-                              : q.difficulty === "medium"
-                              ? "text-amber-400 bg-amber-500/10"
-                              : "text-rose-400 bg-rose-500/10"
-                          }`}
-                        >
-                          {q.difficulty}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground ml-auto font-medium font-mono">
-                          {q.marks || 1} mark(s)
-                        </span>
-                      </div>
-                      <p className="text-xs font-medium text-foreground line-clamp-2">
-                        {q.question}
-                      </p>
-                      <div className="mt-1 text-[11px] text-muted-foreground">
-                        {q.options?.length || 4} Options Available
+                    <span className="px-2 py-1 bg-background border border-border rounded-md text-[10px] font-bold text-muted-foreground uppercase">
+                      {section.questions.length} Qs • {secMarks} Marks
+                    </span>
+                  </div>
+                  <button onClick={() => {
+                    if (confirm("Delete this section and all its questions?")) store.removeSection(section.id);
+                  }} className="p-2 text-muted-foreground hover:text-rose-500 transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                <div className="p-4 space-y-3">
+                  {section.questions.length === 0 ? (
+                    <div className="p-8 text-center bg-background border border-dashed border-border rounded-xl">
+                      <p className="text-sm text-muted-foreground mb-3">No questions in this section yet.</p>
+                      <button onClick={() => setActivePicker(section.id)} className="px-4 py-2 bg-primary text-primary-foreground text-xs font-semibold rounded-lg shadow-sm">
+                        + Select Questions from Bank
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {section.questions.map((q, qIdx) => (
+                        <div key={q.questionId} className="flex flex-col sm:flex-row gap-4 p-3 bg-background border border-border rounded-xl group hover:border-primary/30 transition-colors">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-[10px] font-bold bg-muted px-1.5 py-0.5 rounded text-foreground uppercase border border-border">
+                                {q.questionType}
+                              </span>
+                              <span className="text-xs font-semibold text-muted-foreground">Q{qIdx + 1}</span>
+                            </div>
+                            <p className="text-sm font-medium text-foreground line-clamp-1">{q.questionText}</p>
+                          </div>
+                          
+                          <div className="flex items-center gap-3 sm:w-auto w-full border-t sm:border-t-0 pt-3 sm:pt-0 border-border">
+                            <div className="flex items-center gap-2 bg-muted/50 px-2 py-1 rounded-lg border border-border">
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase">Marks</span>
+                              <input type="number" min={1} value={q.marks} onChange={e => store.updateQuestionConfig(section.id, q.questionId, { marks: Number(e.target.value) })} className="w-12 bg-transparent border-none text-xs font-mono font-bold text-emerald-500 focus:ring-0 p-0 text-center" />
+                            </div>
+                            <div className="flex items-center gap-2 bg-muted/50 px-2 py-1 rounded-lg border border-border">
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase">Neg</span>
+                              <input type="number" min={0} value={q.negativeMarks} onChange={e => store.updateQuestionConfig(section.id, q.questionId, { negativeMarks: Number(e.target.value) })} className="w-10 bg-transparent border-none text-xs font-mono font-bold text-rose-500 focus:ring-0 p-0 text-center" />
+                            </div>
+                            <button onClick={() => store.removeQuestionFromSection(section.id, q.questionId)} className="p-1.5 text-muted-foreground hover:bg-rose-500/10 hover:text-rose-500 rounded-md transition-colors ml-auto sm:ml-0">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="pt-2">
+                        <button onClick={() => setActivePicker(section.id)} className="w-full py-3 border border-dashed border-border rounded-xl text-xs font-semibold text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors flex items-center justify-center gap-2">
+                          <Plus className="w-4 h-4" /> Add More Questions
+                        </button>
                       </div>
                     </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        {/* Step 3: Proctoring & Assessment Integrity */}
-        <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
-          <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-rose-400" />
-            3. Anti-Cheat & Proctoring Controls
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-border hover:bg-muted/30 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={enforceFullscreen}
-                onChange={(e) => setEnforceFullscreen(e.target.checked)}
-                className="mt-0.5 rounded border-border text-primary focus:ring-primary h-4 w-4"
-              />
-              <div>
-                <span className="text-xs font-bold text-foreground block">
-                  Mandatory Fullscreen Mode
-                </span>
-                <span className="text-[11px] text-muted-foreground">
-                  Locks the exam browser tab into fullscreen mode throughout the test.
-                </span>
+                  )}
+                </div>
               </div>
-            </label>
+            )
+          })}
+        </section>
+      </div>
 
-            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-border hover:bg-muted/30 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={blockCopyPaste}
-                onChange={(e) => setBlockCopyPaste(e.target.checked)}
-                className="mt-0.5 rounded border-border text-primary focus:ring-primary h-4 w-4"
-              />
-              <div>
-                <span className="text-xs font-bold text-foreground block">
-                  Disable Copy & Paste
-                </span>
-                <span className="text-[11px] text-muted-foreground">
-                  Prevents copying question statements or pasting answers from external sources.
-                </span>
-              </div>
-            </label>
-
-            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-border hover:bg-muted/30 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={detectTabSwitch}
-                onChange={(e) => setDetectTabSwitch(e.target.checked)}
-                className="mt-0.5 rounded border-border text-primary focus:ring-primary h-4 w-4"
-              />
-              <div>
-                <span className="text-xs font-bold text-foreground block">
-                  Tab Switch Detection & Strike Tracking
-                </span>
-                <span className="text-[11px] text-muted-foreground">
-                  Logs every instance where the candidate blurs or switches away from the window.
-                </span>
-              </div>
-            </label>
-
-            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-border hover:bg-muted/30 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={negativeMarking}
-                onChange={(e) => setNegativeMarking(e.target.checked)}
-                className="mt-0.5 rounded border-border text-primary focus:ring-primary h-4 w-4"
-              />
-              <div>
-                <span className="text-xs font-bold text-foreground block">
-                  Enable Negative Marking
-                </span>
-                <span className="text-[11px] text-muted-foreground">
-                  Deducts marks for incorrect responses according to question parameters.
-                </span>
-              </div>
-            </label>
-          </div>
-
-          <div className="pt-2 flex items-center gap-3">
-            <span className="text-xs text-muted-foreground">Allowed tab-switch strikes before auto-submission:</span>
-            <input
-              type="number"
-              min={1}
-              max={10}
-              value={maxTabSwitches}
-              onChange={(e) => setMaxTabSwitches(Number(e.target.value))}
-              className="w-16 px-2.5 py-1 bg-muted/40 border border-border rounded-lg text-xs font-bold text-foreground text-center focus:outline-none focus:ring-1 focus:ring-primary font-mono"
-            />
-          </div>
-        </div>
-
-        {/* Submit Actions */}
-        <div className="flex items-center justify-end gap-3 pt-4">
-          <Link
-            href="/admin/assessments"
-            className="px-5 py-2.5 rounded-xl border border-border hover:bg-muted text-sm font-semibold text-foreground transition-colors"
-          >
+      {/* Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border px-6 py-3 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] z-40">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
+          <button onClick={() => router.push("/admin/assessments")} className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
             Cancel
-          </Link>
-
-          <button
-            type="submit"
-            disabled={isSubmitting || selectedQuestionIds.length === 0}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold rounded-xl transition-all shadow-md shadow-primary/20 disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <CheckCircle2 className="w-4 h-4" />
-            )}
-            Publish Assessment ({selectedQuestionIds.length} Questions)
           </button>
+          <div className="flex gap-3">
+            <button onClick={() => handlePublish('draft')} disabled={isPublishing} className="px-5 py-2.5 rounded-xl border border-border hover:bg-muted text-sm font-semibold flex items-center gap-2">
+              <Save className="w-4 h-4" /> Save as Draft
+            </button>
+            <button onClick={() => setShowConfirm(true)} disabled={isPublishing} className="px-6 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-semibold flex items-center gap-2 shadow-md">
+              <CheckCircle2 className="w-4 h-4" /> Publish Assessment
+            </button>
+          </div>
         </div>
-      </form>
+      </div>
+
+      {activePicker && (
+        <QuestionPicker sectionId={activePicker} onClose={() => setActivePicker(null)} />
+      )}
+
+      {/* Publish Confirm Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowConfirm(false)} />
+          <div className="relative w-full max-w-md bg-card border border-border rounded-2xl p-6 shadow-2xl animate-in zoom-in-95">
+            <h2 className="text-xl font-bold mb-2 text-foreground">Confirm Publish</h2>
+            <p className="text-sm text-muted-foreground mb-6">Are you sure you want to publish this assessment? It will immediately become available to assigned candidates.</p>
+            
+            <div className="space-y-3 bg-muted/40 p-4 rounded-xl border border-border mb-6">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Sections</span>
+                <span className="font-bold">{store.sections.length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Total Questions</span>
+                <span className="font-bold">{totalQuestions}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Total Marks</span>
+                <span className="font-bold text-emerald-500">{totalMarks} pts</span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={() => setShowConfirm(false)} className="flex-1 px-4 py-2.5 border border-border rounded-xl text-sm font-semibold">Cancel</button>
+              <button onClick={() => handlePublish('published')} disabled={isPublishing} className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold flex items-center justify-center gap-2">
+                {isPublishing ? <Spinner className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />} Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

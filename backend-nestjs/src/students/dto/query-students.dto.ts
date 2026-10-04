@@ -36,7 +36,9 @@ export class QueryStudentsDto {
   @IsNumber()
   semester?: number;
 
-  @ApiPropertyOptional({ description: 'Filter by active status ("true" / "false")' })
+  @ApiPropertyOptional({
+    description: 'Filter by active status ("true" / "false")',
+  })
   @IsOptional()
   @IsString()
   isActive?: string;

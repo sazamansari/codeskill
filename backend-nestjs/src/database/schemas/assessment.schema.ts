@@ -6,7 +6,41 @@ import { Question } from './question.schema';
 export type AssessmentDocument = HydratedDocument<Assessment>;
 
 export type AssessmentType = 'mcq' | 'coding' | 'hybrid';
-export type AssessmentStatus = 'draft' | 'published' | 'ongoing' | 'completed' | 'archived';
+export type AssessmentStatus =
+  'draft' | 'published' | 'ongoing' | 'completed' | 'archived';
+
+@Schema({ _id: true })
+export class AssessmentQuestionConfig {
+  @Prop({ type: Types.ObjectId, ref: 'Question', required: true })
+  questionId: Types.ObjectId;
+
+  @Prop({ required: true, default: 1 })
+  marks: number;
+
+  @Prop({ default: 0 })
+  negativeMarks: number;
+
+  @Prop({ default: 0 })
+  order: number;
+}
+
+@Schema({ _id: true })
+export class AssessmentSection {
+  @Prop({ required: true })
+  title: string;
+
+  @Prop({ default: '' })
+  description: string;
+
+  @Prop({ default: 0 })
+  order: number;
+
+  @Prop({ default: 0 })
+  timeLimit: number; // in minutes, optional per section
+
+  @Prop({ type: [AssessmentQuestionConfig], default: [] })
+  questions: AssessmentQuestionConfig[];
+}
 
 @Schema({ _id: false })
 export class ProctoringSettings {
@@ -24,6 +58,56 @@ export class ProctoringSettings {
 
   @Prop({ default: true })
   autoSubmitOnViolation: boolean;
+}
+
+@Schema({ _id: false })
+export class SecurityPolicy {
+  @Prop({
+    type: String,
+    enum: ['DISABLED', 'STANDARD', 'STRICT'],
+    default: 'DISABLED',
+  })
+  secureExamMode: 'DISABLED' | 'STANDARD' | 'STRICT';
+
+  @Prop({ default: false })
+  requireSEB: boolean;
+
+  @Prop({ type: [String], default: [] })
+  allowedSEBVersions: string[];
+
+  @Prop({ default: false })
+  requireFullscreen: boolean;
+
+  @Prop({ default: false })
+  disableClipboard: boolean;
+
+  @Prop({ default: false })
+  disableNavigation: boolean;
+
+  @Prop({ default: false })
+  disablePrinting: boolean;
+
+  @Prop({ default: false })
+  allowDownloads: boolean;
+
+  @Prop({ default: false })
+  allowUploads: boolean;
+
+  @Prop({ default: 30 }) // in seconds
+  heartbeatInterval: number;
+
+  @Prop({ default: 60 }) // in seconds
+  heartbeatGracePeriod: number;
+
+  @Prop({ default: 3 })
+  violationThreshold: number;
+
+  @Prop({
+    type: String,
+    enum: ['NONE', 'BASIC', 'STANDARD', 'STRICT'],
+    default: 'NONE',
+  })
+  proctoringMode: 'NONE' | 'BASIC' | 'STANDARD' | 'STRICT';
 }
 
 @Schema({ timestamps: true })
@@ -64,7 +148,10 @@ export class Assessment {
   negativeMarking: boolean;
 
   @Prop([{ type: Types.ObjectId, ref: 'Question' }])
-  questions: Types.ObjectId[];
+  questions: Types.ObjectId[]; // Kept for backwards compatibility
+
+  @Prop({ type: [AssessmentSection], default: [] })
+  sections: AssessmentSection[];
 
   // University Target Cohorts
   @Prop({ type: [String], default: [] })
@@ -103,6 +190,9 @@ export class Assessment {
 
   @Prop({ type: ProctoringSettings, default: () => ({}) })
   proctoring: ProctoringSettings;
+
+  @Prop({ type: SecurityPolicy, default: () => ({}) })
+  securityPolicy: SecurityPolicy;
 
   @Prop({
     type: String,

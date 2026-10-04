@@ -2,12 +2,13 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { fadeUp, staggerContainer } from "@/lib/animations";
-import { Search, Filter, Play, CheckCircle2, Circle, Loader2 } from "lucide-react";
+import { Search, Filter, Play, CheckCircle2, Circle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { problemsAPI } from "@/config/api";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function ProblemsPage() {
   const [search, setSearch] = useState("");
@@ -123,7 +124,7 @@ export default function ProblemsPage() {
                   {loading ? (
                     <tr>
                       <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
-                        <Loader2 className="w-6 h-6 animate-spin mx-auto text-foreground" />
+                        <Spinner className="w-6 h-6 animate-spin mx-auto text-foreground" />
                       </td>
                     </tr>
                   ) : filtered.length === 0 ? (

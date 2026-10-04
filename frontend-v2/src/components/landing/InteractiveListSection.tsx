@@ -48,7 +48,7 @@ export function InteractiveListSection() {
   const [activeItem, setActiveItem] = useState<InteractiveListItem | null>(null);
 
   return (
-    <section className="relative w-full py-28 bg-[#050505] border-t border-b border-border/40 overflow-hidden text-white">
+    <section className="relative w-full py-28 bg-background border-t border-b border-border/40 overflow-hidden text-white">
       
       {/* 1. Full Screen Background Colorful Radial Gradient Ambient Mesh */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">

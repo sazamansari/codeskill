@@ -112,7 +112,7 @@ export default function CandidatesPipelinePage() {
       <div className="p-8 max-w-4xl mx-auto h-full flex flex-col items-center justify-center text-center">
         <h1 className="text-2xl font-bold text-foreground mb-4">No Company Found</h1>
         <p className="text-muted-foreground mb-8">Please create a company profile first before managing candidates.</p>
-        <Link href="/company/profile" className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium">Create Company Profile</Link>
+        <Link href="/company/profile" className="bg-primary text-white px-6 py-3 rounded-lg font-medium">Create Company Profile</Link>
       </div>
     );
   }
@@ -171,7 +171,7 @@ export default function CandidatesPipelinePage() {
                       draggable
                       onDragStart={(e) => handleDragStart(e, app._id)}
                       onDragEnd={handleDragEnd}
-                      className="bg-card border border-border p-4 rounded-lg shadow-sm cursor-grab active:cursor-grabbing hover:border-blue-500/50 transition-colors group"
+                      className="bg-card border border-border p-4 rounded-lg shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors group"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
@@ -194,7 +194,7 @@ export default function CandidatesPipelinePage() {
                         <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
                           {new Date(app.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                         </div>
-                        <button className="text-blue-500 hover:text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 p-1.5 rounded text-xs transition-colors" title="View Resume">
+                        <button className="text-primary hover:text-primary bg-primary/10 hover:bg-primary/20 p-1.5 rounded text-xs transition-colors" title="View Resume">
                           <FileText className="w-3.5 h-3.5" />
                         </button>
                       </div>

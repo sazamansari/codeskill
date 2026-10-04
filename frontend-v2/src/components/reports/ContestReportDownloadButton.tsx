@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Download, Loader2, FileText, CheckCircle2, AlertCircle } from "lucide-react";
+import { Download, FileText, CheckCircle2, AlertCircle } from "lucide-react";
 import { ContestReportData } from "@/types/contest-report";
+import { Spinner } from "@/components/ui/spinner";
 
 interface ContestReportDownloadButtonProps {
   data: ContestReportData;
@@ -104,7 +105,7 @@ export function ContestReportDownloadButton({
       >
         {isGenerating ? (
           <>
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            <Spinner className="w-3.5 h-3.5 animate-spin" />
             <span>Generating A4 PDF...</span>
           </>
         ) : downloadSuccess ? (
