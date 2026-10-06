@@ -6,14 +6,14 @@ import { Download, FileText, X } from 'lucide-react';
 import { AssessmentReportData } from './types';
 import { AssessmentReportPDF } from './AssessmentReportPDF';
 
-// Dynamically import PDF features to avoid SSR issues in Next.js
+// Dynamically import PDF features via our local wrapper to avoid Next.js ESM dynamic import bugs
 const PDFDownloadLink = dynamic(
-  () => import('@react-pdf/renderer').then(mod => mod.PDFDownloadLink),
+  () => import('./PDFComponents').then(mod => mod.PDFDownloadLink),
   { ssr: false }
 );
 
 const PDFViewer = dynamic(
-  () => import('@react-pdf/renderer').then(mod => mod.PDFViewer),
+  () => import('./PDFComponents').then(mod => mod.PDFViewer),
   { ssr: false, loading: () => <div className="p-8 text-center text-muted-foreground animate-pulse">Loading PDF Viewer...</div> }
 );
 

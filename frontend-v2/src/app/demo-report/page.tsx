@@ -5,9 +5,9 @@ import dynamic from "next/dynamic";
 import { StudentResultReport, StudentResult } from "@/components/pdf/StudentResultReport";
 import Navbar from "@/components/Navbar";
 
-// We must dynamically import PDFViewer to avoid SSR issues with react-pdf
+// We must dynamically import PDFViewer via local wrapper to avoid Next.js ESM/dynamic import bugs
 const PDFViewer = dynamic(
-  () => import("@react-pdf/renderer").then((mod) => mod.PDFViewer),
+  () => import("@/components/reports/pdf/PDFComponents").then((mod) => mod.PDFViewer),
   { ssr: false, loading: () => <div className="animate-pulse w-full h-[800px] bg-muted rounded-xl flex items-center justify-center">Loading PDF engine...</div> }
 );
 
