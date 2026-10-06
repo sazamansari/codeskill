@@ -31,13 +31,13 @@ jobs:
       - name: Install and Build Backend
         working-directory: ./backend-nestjs
         run: |
-          npm ci
+          npm install --legacy-peer-deps
           npm run build
 
       - name: Install and Build Frontend
         working-directory: ./frontend-v2
         run: |
-          npm ci
+          npm install --legacy-peer-deps
           npm run build
 
       - name: Package Application
