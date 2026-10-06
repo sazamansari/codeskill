@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: ap-south-1
   S3_BUCKET: codeskill-prod-files-reports
   ASG_NAME: codeskill-prod-asg
 
@@ -68,18 +68,18 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: $${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: $${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: $${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Upload Build to S3
         run: |
-          aws s3 cp latest.zip s3://$${{ env.S3_BUCKET }}/releases/latest.zip
+          aws s3 cp latest.zip s3://${{ env.S3_BUCKET }}/releases/latest.zip
 
       - name: Trigger Auto Scaling Group Instance Refresh
         run: |
           # This tells AWS to replace the existing EC2 instances with new ones,
           # triggering the user_data script on boot which downloads the fresh latest.zip
           aws autoscaling start-instance-refresh \
-            --auto-scaling-group-name $${{ env.ASG_NAME }} \
+            --auto-scaling-group-name ${{ env.ASG_NAME }} \
             --preferences '{"MinHealthyPercentage": 50, "InstanceWarmup": 300}'
