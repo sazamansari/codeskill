@@ -1,0 +1,83 @@
+name: Build and Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-east-1
+  S3_BUCKET: codeskill-prod-files-reports
+  ASG_NAME: codeskill-prod-asg
+
+permissions:
+  id-token: write # Required for configuring AWS Credentials via OIDC
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install and Build Backend
+        working-directory: ./backend-nestjs
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install and Build Frontend
+        working-directory: ./frontend-v2
+        run: |
+          npm ci
+          npm run build
+
+      - name: Package Application
+        run: |
+          # Create a deployment directory
+          mkdir deploy_package
+          
+          # Copy Backend files
+          mkdir -p deploy_package/backend-nestjs
+          cp -r backend-nestjs/dist deploy_package/backend-nestjs/
+          cp backend-nestjs/package.json deploy_package/backend-nestjs/
+          cp backend-nestjs/package-lock.json deploy_package/backend-nestjs/
+          
+          # Copy Frontend files
+          mkdir -p deploy_package/frontend-v2
+          cp -r frontend-v2/.next deploy_package/frontend-v2/
+          cp -r frontend-v2/public deploy_package/frontend-v2/
+          cp frontend-v2/package.json deploy_package/frontend-v2/
+          cp frontend-v2/package-lock.json deploy_package/frontend-v2/
+          cp frontend-v2/next.config.js deploy_package/frontend-v2/ || true
+          cp frontend-v2/next.config.mjs deploy_package/frontend-v2/ || true
+
+          # Zip the contents
+          cd deploy_package
+          zip -r ../latest.zip .
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: $${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: $${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: $${{ env.AWS_REGION }}
+
+      - name: Upload Build to S3
+        run: |
+          aws s3 cp latest.zip s3://$${{ env.S3_BUCKET }}/releases/latest.zip
+
+      - name: Trigger Auto Scaling Group Instance Refresh
+        run: |
+          # This tells AWS to replace the existing EC2 instances with new ones,
+          # triggering the user_data script on boot which downloads the fresh latest.zip
+          aws autoscaling start-instance-refresh \
+            --auto-scaling-group-name $${{ env.ASG_NAME }} \
+            --preferences '{"MinHealthyPercentage": 50, "InstanceWarmup": 300}'
