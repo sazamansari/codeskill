@@ -59,6 +59,7 @@ jobs:
           cp frontend-v2/package-lock.json deploy_package/frontend-v2/
           cp frontend-v2/next.config.js deploy_package/frontend-v2/ || true
           cp frontend-v2/next.config.mjs deploy_package/frontend-v2/ || true
+          cp frontend-v2/next.config.ts deploy_package/frontend-v2/ || true
 
           # Zip the contents
           cd deploy_package
