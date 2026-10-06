@@ -13,8 +13,8 @@ export default function ProgressBar({ value }: ProgressBarProps) {
 
   const getColor = () => {
     if (clampedValue < 30) return { stroke: "#ef4444", text: "text-red-500", bg: "bg-red-500" };
-    if (clampedValue < 60) return { stroke: "#f59e0b", text: "text-amber-500", bg: "bg-amber-500" };
-    if (clampedValue < 90) return { stroke: "#3b82f6", text: "text-blue-500", bg: "bg-blue-500" };
+    if (clampedValue < 60) return { stroke: "#f59e0b", text: "text-primary", bg: "bg-primary" };
+    if (clampedValue < 90) return { stroke: "#3b82f6", text: "text-primary", bg: "bg-primary" };
     return { stroke: "#10b981", text: "text-emerald-500", bg: "bg-emerald-500" };
   };
 
@@ -55,7 +55,7 @@ export default function ProgressBar({ value }: ProgressBarProps) {
 
       {/* Label + linear bar */}
       <div className="flex-1 min-w-0 hidden sm:block">
-        <p className="text-[11px] font-medium text-gray-500 dark:text-slate-400 mb-1">Form Completion</p>
+        <p className="text-[11px] font-medium text-gray-500 dark:text-muted-foreground mb-1">Form Completion</p>
         <div className="h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
           <motion.div
             className={`h-full rounded-full ${color.bg}`}

@@ -67,7 +67,7 @@ export default function CompanyJobsPage() {
       <div className="p-8 max-w-4xl mx-auto h-full flex flex-col items-center justify-center text-center">
         <h1 className="text-2xl font-bold text-foreground mb-4">No Company Found</h1>
         <p className="text-muted-foreground mb-8">Please create a company profile first before managing jobs.</p>
-        <Link href="/company/profile" className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium">Create Company Profile</Link>
+        <Link href="/company/profile" className="bg-primary text-white px-6 py-3 rounded-lg font-medium">Create Company Profile</Link>
       </div>
     );
   }
@@ -81,7 +81,7 @@ export default function CompanyJobsPage() {
         </div>
         <Link 
           href="/company/jobs/create" 
-          className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-blue-500/20 transition-colors"
+          className="inline-flex items-center gap-2 bg-primary hover:bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-primary/20 transition-colors"
         >
           <Plus className="w-4 h-4" /> Post a Job
         </Link>
@@ -94,7 +94,7 @@ export default function CompanyJobsPage() {
             <input 
               type="text" 
               placeholder="Search jobs..." 
-              className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-foreground transition-all"
+              className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground transition-all"
             />
           </div>
           <div className="text-sm text-muted-foreground font-medium">
@@ -158,7 +158,7 @@ export default function CompanyJobsPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10 rounded-md transition-colors" title="Edit Job">
+                        <button className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-colors" title="Edit Job">
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button 

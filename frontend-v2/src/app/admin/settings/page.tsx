@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ShieldCheck, ShieldOff, Search, Loader2 } from "lucide-react";
+import { ShieldCheck, ShieldOff, Search } from "lucide-react";
 import { adminUsersAPI } from "@/config/api";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function AdminSettingsPage() {
   const { user: currentUser } = useAuth();
@@ -79,7 +80,7 @@ export default function AdminSettingsPage() {
               placeholder="Search by name or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-foreground"
+              className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-foreground"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -88,7 +89,7 @@ export default function AdminSettingsPage() {
               id="adminsOnly"
               checked={adminsOnly}
               onChange={(e) => setAdminsOnly(e.target.checked)}
-              className="rounded border-border text-blue-500 focus:ring-blue-500/20 w-4 h-4 bg-background"
+              className="rounded border-border text-primary focus:ring-primary/20 w-4 h-4 bg-background"
             />
             <label htmlFor="adminsOnly" className="text-sm font-medium text-muted-foreground cursor-pointer select-none">
               Show Admins Only
@@ -100,7 +101,7 @@ export default function AdminSettingsPage() {
         <div className="overflow-x-auto min-h-[400px]">
           {loading ? (
             <div className="flex items-center justify-center h-64">
-              <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+              <Spinner className="w-8 h-8 text-primary animate-spin" />
             </div>
           ) : users.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
@@ -157,7 +158,7 @@ export default function AdminSettingsPage() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
                         {actionLoading === u._id ? (
-                          <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
+                          <Spinner className="w-5 h-5 text-muted-foreground animate-spin" />
                         ) : u.isAdmin ? (
                           <button
                             disabled={currentUser?.id === u._id}
@@ -174,7 +175,7 @@ export default function AdminSettingsPage() {
                         ) : (
                           <button
                             onClick={() => handlePromote(u._id)}
-                            className="text-xs font-medium text-blue-500 bg-blue-500/10 hover:bg-blue-500 hover:text-white px-3 py-1.5 rounded-md transition-colors"
+                            className="text-xs font-medium text-primary bg-primary/10 hover:bg-primary hover:text-white px-3 py-1.5 rounded-md transition-colors"
                           >
                             Promote to Admin
                           </button>

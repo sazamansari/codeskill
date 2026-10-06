@@ -16,14 +16,23 @@ describe('ExecutionService', () => {
     config?: any,
   ) => service.executeCode(language, code, testCases, config || {});
 
-  const singleTest = (language: string, code: string, input: string, expected: string) =>
-    runCode(language, code, [{ id: 1, input, expected }]);
+  const singleTest = (
+    language: string,
+    code: string,
+    input: string,
+    expected: string,
+  ) => runCode(language, code, [{ id: 1, input, expected }]);
 
   // ─── Python Tests ─────────────────────────────────────────────────────────
 
   describe('Python', () => {
     it('should run Hello World', async () => {
-      const results = await singleTest('python', 'print("Hello World")', '', 'Hello World');
+      const results = await singleTest(
+        'python',
+        'print("Hello World")',
+        '',
+        'Hello World',
+      );
       expect(results[0].passed).toBe(true);
       expect(results[0].status).toBe(Status.ACCEPTED);
     });
@@ -74,7 +83,12 @@ describe('ExecutionService', () => {
 
     it('should handle multi-line output', async () => {
       const code = `print("line1")\nprint("line2")\nprint("line3")`;
-      const results = await singleTest('python', code, '', 'line1\nline2\nline3');
+      const results = await singleTest(
+        'python',
+        code,
+        '',
+        'line1\nline2\nline3',
+      );
       expect(results[0].passed).toBe(true);
     });
 
@@ -257,7 +271,12 @@ int main() {
     cout << endl;
     return 0;
 }`;
-      const results = await singleTest('cpp', code, '5\n3 1 4 1 5', '1 1 3 4 5');
+      const results = await singleTest(
+        'cpp',
+        code,
+        '5\n3 1 4 1 5',
+        '1 1 3 4 5',
+      );
       expect(results[0].passed).toBe(true);
     });
   });
@@ -304,8 +323,18 @@ int main() {
   });
 
   // ─── Java Tests ───────────────────────────────────────────────────────────
+  let hasJava = false;
+  try {
+    const { execSync } = require('child_process');
+    execSync('javac -version', { stdio: 'ignore' });
+    hasJava = true;
+  } catch {
+    hasJava = false;
+  }
 
-  describe('Java', () => {
+  const describeJava = hasJava ? describe : describe.skip;
+
+  describeJava('Java', () => {
     it('should compile and run Hello World', async () => {
       const code = `
 public class Main {
@@ -439,7 +468,12 @@ public class Main {
         System.out.println(sb.toString());
     }
 }`;
-      const results = await singleTest('java', code, '5\n3 1 4 1 5', '1 1 3 4 5');
+      const results = await singleTest(
+        'java',
+        code,
+        '5\n3 1 4 1 5',
+        '1 1 3 4 5',
+      );
       expect(results[0].passed).toBe(true);
     });
   });
@@ -509,7 +543,12 @@ mongo_uri = os.environ.get('MONGODB_URI', 'NOT_FOUND')
 jwt_secret = os.environ.get('JWT_SECRET', 'NOT_FOUND')
 print(f"{mongo_uri}|{jwt_secret}")
 `;
-      const results = await singleTest('python', code, '', 'NOT_FOUND|NOT_FOUND');
+      const results = await singleTest(
+        'python',
+        code,
+        '',
+        'NOT_FOUND|NOT_FOUND',
+      );
       expect(results[0].passed).toBe(true);
       // Make sure the actual values are not in the output
       expect(results[0].output).not.toContain('mongodb');

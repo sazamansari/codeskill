@@ -30,7 +30,7 @@ export default function ResultDemoPage() {
           <button onClick={() => setStatus('runtime_error')} className="px-4 py-2 bg-orange-500/10 text-orange-500 border border-orange-500/20 rounded-md">Runtime Error</button>
           <button onClick={() => setStatus('compilation_error')} className="px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-md">Compilation Error</button>
           <button onClick={() => setStatus('time_limit')} className="px-4 py-2 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-md">Time Limit Exceeded</button>
-          <button onClick={() => setStatus('pending')} className="px-4 py-2 bg-gray-500/10 text-gray-400 border border-gray-500/20 rounded-md">Pending...</button>
+          <button onClick={() => setStatus('pending')} className="px-4 py-2 bg-muted/500/10 text-gray-400 border border-gray-500/20 rounded-md">Pending...</button>
         </div>
 
         <ResultCard

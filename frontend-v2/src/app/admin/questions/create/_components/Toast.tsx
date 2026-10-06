@@ -35,15 +35,15 @@ const iconMap = {
 const colorMap = {
   success: "bg-emerald-50 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20",
   error: "bg-red-50 border-red-200 dark:bg-red-500/10 dark:border-red-500/20",
-  warning: "bg-amber-50 border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/20",
-  info: "bg-blue-50 border-blue-200 dark:bg-blue-500/10 dark:border-blue-500/20",
+  warning: "bg-primary/10 border-primary/20 dark:bg-primary/10 dark:border-primary/20",
+  info: "bg-blue-50 border-blue-200 dark:bg-primary/10 dark:border-primary/20",
 };
 
 const iconColorMap = {
   success: "text-emerald-600 dark:text-emerald-400",
   error: "text-red-600 dark:text-red-400",
-  warning: "text-amber-600 dark:text-amber-400",
-  info: "text-blue-600 dark:text-blue-400",
+  warning: "text-primary dark:text-primary",
+  info: "text-primary dark:text-primary",
 };
 
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {
@@ -65,14 +65,14 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
     >
       <Icon className={`w-5 h-5 mt-0.5 flex-shrink-0 ${iconColorMap[toast.type]}`} />
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-gray-900 dark:text-white">{toast.title}</p>
+        <p className="text-sm font-semibold text-foreground dark:text-white">{toast.title}</p>
         {toast.message && (
-          <p className="text-xs text-gray-600 dark:text-slate-400 mt-0.5">{toast.message}</p>
+          <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-0.5">{toast.message}</p>
         )}
       </div>
       <button
         onClick={() => onDismiss(toast.id)}
-        className="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors p-0.5"
+        className="text-gray-400 hover:text-muted-foreground dark:hover:text-white transition-colors p-0.5"
       >
         <X className="w-3.5 h-3.5" />
       </button>

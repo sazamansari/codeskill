@@ -39,7 +39,7 @@ const statusConfig: Record<StatusType, { label: string; icon: React.ElementType;
   pending: {
     label: 'Pending...',
     icon: Clock,
-    classes: 'bg-gray-500/10 text-gray-400 border-gray-500/20 animate-pulse',
+    classes: 'bg-muted/500/10 text-gray-400 border-gray-500/20 animate-pulse',
   }
 };
 

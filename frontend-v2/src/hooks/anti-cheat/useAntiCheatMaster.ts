@@ -32,7 +32,8 @@ export function useAntiCheatMaster(
 
   // Initialize WebSocket
   useEffect(() => {
-    const newSocket = io(process.env.NEXT_PUBLIC_WS_URL || "http://localhost:5001", {
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || (typeof window !== "undefined" ? window.location.origin : "http://localhost:5001");
+    const newSocket = io(wsUrl, {
       path: "/socket.io",
       withCredentials: true,
     });

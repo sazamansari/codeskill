@@ -165,7 +165,7 @@ export default function AnimatedBackground({
         />
         <div
           ref={glowBlob2}
-          className="parallax-layer absolute bottom-1/4 right-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-blue-600/20 via-cyan-500/20 to-emerald-500/10 blur-[140px]"
+          className="parallax-layer absolute bottom-1/4 right-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-primary/20 via-cyan-500/20 to-emerald-500/10 blur-[140px]"
         />
       </div>
 

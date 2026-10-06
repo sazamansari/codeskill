@@ -1,47 +1,80 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, isValidObjectId } from 'mongoose';
-import { User, UserDocument } from '../database/schemas/user.schema';
-import {
-  ProblemMetadata,
-  ProblemMetadataDocument,
-} from '../database/schemas/problem-metadata.schema';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, In } from 'typeorm';
+import { User as UserEntity } from '../database/entities/user.entity';
+import { Problem as ProblemEntity } from '../database/entities/problem.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
-    @InjectModel(ProblemMetadata.name)
-    private problemMetadataModel: Model<ProblemMetadataDocument>,
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
+    @InjectRepository(ProblemEntity)
+    private problemRepository: Repository<ProblemEntity>,
   ) {}
+
+  private getTier(xp: number): string {
+    if (xp >= 50000) return 'Grandmaster';
+    if (xp >= 30000) return 'Master';
+    if (xp >= 15000) return 'Expert';
+    if (xp >= 8000) return 'Specialist';
+    if (xp >= 3000) return 'Competent';
+    if (xp >= 1000) return 'Learner';
+    return 'Beginner';
+  }
+
+  async getLeaderboard(limit = 50) {
+    const users = await this.userRepository.find({
+      where: { isActive: true },
+      order: { stats: { xp: 'DESC' } },
+      take: limit,
+    });
+
+    const leaderboard = users.map((u, idx) => ({
+      rank: idx + 1,
+      _id: u.id,
+      name: u.name,
+      username: u.username,
+      uid: u.uid,
+      avatar: u.avatar || '',
+      xp: u.stats?.xp ?? 0,
+      totalSolved: u.stats?.totalSolved ?? 0,
+      currentStreak: u.stats?.currentStreak ?? 0,
+      tier: this.getTier(u.stats?.xp ?? 0),
+      department: u.studentProfile?.department || '',
+      batch: u.studentProfile?.batch || '',
+    }));
+
+    return { success: true, leaderboard, total: leaderboard.length };
+  }
 
   async getPublicProfile(identifier: string) {
     let user;
 
-    // Check if identifier is a valid MongoDB ObjectId or a username
-    if (isValidObjectId(identifier)) {
-      user = await this.userModel
-        .findById(identifier)
-        .select('-password -email -resetPasswordToken -resetPasswordExpire')
-        .lean();
-    }
-    if (!user) {
-      user = await this.userModel
-        .findOne({ username: identifier.toLowerCase() })
-        .select('-password -email -resetPasswordToken -resetPasswordExpire')
-        .lean();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
+
+    if (isUuid) {
+      user = await this.userRepository.findOne({ where: { id: identifier } });
+    } else {
+      user = await this.userRepository.findOne({ where: { username: identifier.toLowerCase() } });
     }
 
     if (!user) return null;
 
-    // Fetch problem details for the problems this user has solved
-    // Assuming user.solvedProblems contains problem slugs
     let solvedProblemsDetails: any[] = [];
     if (user.solvedProblems && user.solvedProblems.length > 0) {
-      solvedProblemsDetails = await this.problemMetadataModel
-        .find({ slug: { $in: user.solvedProblems } })
-        .select('slug title difficulty tags acceptanceRate')
-        .lean();
+      solvedProblemsDetails = await this.problemRepository.find({
+        where: { slug: In(user.solvedProblems) },
+        select: { slug: true, title: true, difficulty: true, tags: true, stats: true },
+      });
+      // Map to old structure format if needed
+      solvedProblemsDetails = solvedProblemsDetails.map(p => ({
+        slug: p.slug,
+        title: p.title,
+        difficulty: p.difficulty,
+        tags: p.tags,
+        acceptanceRate: p.stats?.acceptanceRate || 0,
+      }));
     }
 
     return {

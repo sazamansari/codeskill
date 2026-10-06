@@ -35,6 +35,8 @@ import {
   AdminVerifyOtpDto,
   ForgotPasswordDto,
   ResetPasswordDto,
+  StudentLoginDto,
+  ForceChangePasswordDto,
 } from './dto/auth.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -45,7 +47,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly s3Service: S3Service,
-  ) { }
+  ) {}
 
   @Post('register/send-otp')
   @ApiOperation({ summary: 'Send OTP for registration' })
@@ -65,6 +67,27 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post('student-login')
+  @ApiOperation({ summary: 'Student login with University UID and password' })
+  @HttpCode(HttpStatus.OK)
+  async studentLogin(@Body() dto: StudentLoginDto) {
+    return this.authService.studentLogin(dto);
+  }
+
+  @Post('force-change-password')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Mandatory password change for first-time or reset logins',
+  })
+  @HttpCode(HttpStatus.OK)
+  async forceChangePassword(
+    @CurrentUser('_id') userId: string,
+    @Body() dto: ForceChangePasswordDto,
+  ) {
+    return this.authService.forceChangePassword(userId, dto);
   }
 
   @Post('admin-login')
@@ -168,8 +191,12 @@ export class AuthController {
     const avatarUrl = await this.s3Service.uploadFile(file, 'avatars');
 
     // Delete the old avatar from S3 if it exists (run in background)
-    if (currentUser && currentUser.avatar && currentUser.avatar.includes('amazonaws.com')) {
-      this.s3Service.deleteFile(currentUser.avatar).catch(() => { });
+    if (
+      currentUser &&
+      currentUser.avatar &&
+      currentUser.avatar.includes('amazonaws.com')
+    ) {
+      this.s3Service.deleteFile(currentUser.avatar).catch(() => {});
     }
 
     const user = await this.authService.updateAvatar(userId, avatarUrl);

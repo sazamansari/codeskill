@@ -5,6 +5,7 @@ import { useQuestionStore, ALL_LANGUAGES } from "../_store/useQuestionStore";
 import SectionCard from "./SectionCard";
 import Editor from "@monaco-editor/react";
 import { ShieldCheck } from "lucide-react";
+import { ProgrammingLanguageIcon } from "@/components/ui/ProgrammingLanguageIcon";
 
 export default function ReferenceSolution() {
   const { languages, referenceSolution, setReferenceSolution, isDarkMode } = useQuestionStore();
@@ -24,32 +25,32 @@ export default function ReferenceSolution() {
     >
       <div className="space-y-4">
         {/* Warning banner */}
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl text-amber-700 dark:text-amber-300 text-xs font-medium">
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-primary/10 dark:bg-primary/10 border border-primary/20 dark:border-primary/20 rounded-xl text-primary dark:text-primary text-xs font-medium">
           <ShieldCheck className="w-4 h-4 flex-shrink-0" />
           This solution is strictly hidden from candidates and used only for test case validation.
         </div>
 
         {/* Language Tabs */}
-        <div className="flex flex-wrap gap-1 border-b border-gray-100 dark:border-white/[0.04] pb-1">
+        <div className="flex flex-wrap gap-2 pb-2">
           {supportedLangs.map((lang) => (
             <button
               key={lang.id}
               type="button"
               onClick={() => setActiveTab(lang.id)}
-              className={`px-3 py-2 text-sm font-medium border-b-2 transition-all rounded-t-md ${
+              className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium transition-all rounded-lg border ${
                 activeTab === lang.id
-                  ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-500/5"
-                  : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
-              <span className="mr-1.5">{lang.icon}</span>
+              <ProgrammingLanguageIcon language={lang.id} className="w-4 h-4 flex-shrink-0" />
               {lang.label}
             </button>
           ))}
         </div>
 
         {/* Monaco Editor */}
-        <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden bg-[#1e1e1e]">
+        <div className="border border-border dark:border-border rounded-xl overflow-hidden bg-card">
           <Editor
             height="380px"
             language={ALL_LANGUAGES.find((l) => l.id === activeTab)?.monacoId || "plaintext"}

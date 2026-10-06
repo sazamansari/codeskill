@@ -3,8 +3,8 @@ import { Shield, Lock, FileText, Mail, ArrowRight } from "lucide-react";
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Privacy Policy | CodeSkill',
-  description: 'Privacy Policy for CodeSkill by Evolvian',
+  title: 'Privacy Policy | CodeSkill • Chandigarh University',
+  description: 'Privacy Policy for CodeSkill for Chandigarh University',
 };
 
 export default function PrivacyPage() {
@@ -24,10 +24,10 @@ export default function PrivacyPage() {
             <Shield className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-            Privacy <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500">Policy</span>
+            Privacy <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary">Policy</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            At CodeSkill (an Evolvian company), we believe that your data is yours. 
+            At CodeSkill for Chandigarh University, we believe that your data is yours. 
             We are committed to safeguarding your privacy while providing a world-class coding experience.
           </p>
         </div>
@@ -35,14 +35,14 @@ export default function PrivacyPage() {
         {/* Content Container */}
         <div className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-3xl p-8 md:p-12 shadow-2xl shadow-black/5 relative overflow-hidden">
           
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2" />
 
           <div className="relative z-10 space-y-12">
             
             <section>
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+                <div className="p-2 bg-primary/10 rounded-lg text-primary">
                   <FileText className="w-5 h-5" />
                 </div>
                 <h2 className="text-2xl font-bold text-foreground tracking-tight">1. Information We Collect</h2>
@@ -112,11 +112,11 @@ export default function PrivacyPage() {
                   please don't hesitate to reach out to our privacy team.
                 </p>
                 <a 
-                  href="mailto:support@evolvian.in" 
+                  href="mailto:support@cuchd.in" 
                   className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground font-medium transition-colors"
                 >
                   <Mail className="w-4 h-4" />
-                  support@evolvian.in
+                  support@cuchd.in
                 </a>
               </div>
             </section>

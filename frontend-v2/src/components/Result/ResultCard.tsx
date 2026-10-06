@@ -59,7 +59,7 @@ export default function ResultCard({
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ duration: 0.3, type: "spring", bounce: 0.2 }}
         className={cn(
-          "flex flex-col bg-[#09090B] border border-[#27272A] shadow-2xl overflow-hidden font-sans",
+          "flex flex-col bg-background border border-border shadow-2xl overflow-hidden font-sans",
           isFullscreen 
             ? "fixed inset-4 z-50 rounded-xl" 
             : "w-full rounded-xl mt-4"
@@ -99,7 +99,7 @@ export default function ResultCard({
           )}
 
           {/* Right Panel: Output and Header */}
-          <div className="flex-1 flex flex-col bg-[#09090B] relative overflow-hidden">
+          <div className="flex-1 flex flex-col bg-background relative overflow-hidden">
             <div className="flex-1 overflow-y-auto">
               {status && (
                 <div className="px-4 md:px-6 pt-4">

@@ -112,7 +112,13 @@ export class AdminService {
       this.userModel.countDocuments(filter),
     ]);
 
-    return { success: true, users, total, page, pages: Math.ceil(total / limit) };
+    return {
+      success: true,
+      users,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+    };
   }
 
   async updateUserRole(id: string, roleData: any) {
@@ -179,7 +185,12 @@ export class AdminService {
     const skip = (page - 1) * limit;
 
     const [problems, total] = await Promise.all([
-      this.problemModel.find(filter).sort({ createdAt: -1, _id: -1 }).skip(skip).limit(limit).lean(),
+      this.problemModel
+        .find(filter)
+        .sort({ createdAt: -1, _id: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
       this.problemModel.countDocuments(filter),
     ]);
     return { problems, total, page, pages: Math.ceil(total / limit) };
@@ -217,20 +228,24 @@ export class AdminService {
       referenceSolution,
       testCases,
       customChecker,
-      publishing
+      publishing,
     } = payload;
 
     const visibility =
       publishing?.visibility ||
       metadata?.visibility ||
-      (publishing?.publishImmediately ? 'Published' : publishing?.saveAsDraft ? 'Draft' : 'Draft');
+      (publishing?.publishImmediately
+        ? 'Published'
+        : publishing?.saveAsDraft
+          ? 'Draft'
+          : 'Draft');
 
     const newProblem = new this.problemModel({
       ...metadata,
       visibility,
       author: userId || null,
     });
-    
+
     const newStatement = new this.statementModel({
       metadataId: newProblem._id,
       ...statement,
@@ -243,6 +258,9 @@ export class AdminService {
       timeLimit: execution?.timeLimit || 2000,
       memoryLimit: execution?.memoryLimit || 256,
       cpuLimit: execution?.cpuLimit || 1,
+      executionMode: execution?.executionMode || 'standard',
+      functionSignature: execution?.functionSignature,
+      exactOutput: execution?.exactOutput === true,
       starterCode: starterCode || {},
       referenceSolution: referenceSolution || {},
       hasCustomChecker: customChecker?.hasCustomChecker || false,
@@ -281,7 +299,7 @@ export class AdminService {
       referenceSolution,
       testCases,
       customChecker,
-      publishing
+      publishing,
     } = payload;
 
     const problem = await this.problemModel.findById(id);
@@ -290,7 +308,11 @@ export class AdminService {
     const visibility =
       publishing?.visibility ||
       metadata?.visibility ||
-      (publishing?.publishImmediately ? 'Published' : publishing?.saveAsDraft ? 'Draft' : undefined);
+      (publishing?.publishImmediately
+        ? 'Published'
+        : publishing?.saveAsDraft
+          ? 'Draft'
+          : undefined);
 
     if (metadata) {
       Object.assign(problem, metadata);
@@ -304,7 +326,7 @@ export class AdminService {
       const stmt = await this.statementModel.findOneAndUpdate(
         { metadataId: id },
         { $set: { ...statement, samples: sampleExamples || [] } },
-        { upsert: true, returnDocument: 'after' }
+        { upsert: true, returnDocument: 'after' },
       );
       problem.statement = stmt._id;
     }
@@ -312,17 +334,26 @@ export class AdminService {
     const configUpdate: any = {};
     if (languages) configUpdate.supportedLanguages = languages;
     if (execution?.timeLimit) configUpdate.timeLimit = execution.timeLimit;
-    if (execution?.memoryLimit) configUpdate.memoryLimit = execution.memoryLimit;
+    if (execution?.memoryLimit)
+      configUpdate.memoryLimit = execution.memoryLimit;
     if (execution?.cpuLimit) configUpdate.cpuLimit = execution.cpuLimit;
+    if (execution?.executionMode)
+      configUpdate.executionMode = execution.executionMode;
+    if (execution?.functionSignature !== undefined)
+      configUpdate.functionSignature = execution.functionSignature;
+    if (execution?.exactOutput !== undefined)
+      configUpdate.exactOutput = execution.exactOutput;
     if (starterCode) configUpdate.starterCode = starterCode;
     if (referenceSolution) configUpdate.referenceSolution = referenceSolution;
-    if (customChecker?.hasCustomChecker !== undefined) configUpdate.hasCustomChecker = customChecker.hasCustomChecker;
-    if (customChecker?.customCheckerCode) configUpdate.customCheckerCode = customChecker.customCheckerCode;
+    if (customChecker?.hasCustomChecker !== undefined)
+      configUpdate.hasCustomChecker = customChecker.hasCustomChecker;
+    if (customChecker?.customCheckerCode)
+      configUpdate.customCheckerCode = customChecker.customCheckerCode;
 
     const conf = await this.configModel.findOneAndUpdate(
       { metadataId: id },
       { $set: configUpdate },
-      { upsert: true, returnDocument: 'after' }
+      { upsert: true, returnDocument: 'after' },
     );
     problem.config = conf._id;
 
@@ -330,7 +361,7 @@ export class AdminService {
       const tc = await this.testCaseModel.findOneAndUpdate(
         { metadataId: id },
         { $set: { cases: testCases.cases } },
-        { upsert: true, returnDocument: 'after' }
+        { upsert: true, returnDocument: 'after' },
       );
       problem.testCases = tc._id;
     }
@@ -367,7 +398,7 @@ export class AdminService {
   async toggleCompanyVerification(id: string) {
     const company = await this.companyModel.findById(id);
     if (!company) throw new NotFoundException('Company not found');
-    
+
     company.isVerified = !company.isVerified;
     await company.save();
     return { success: true, isVerified: company.isVerified };
@@ -398,10 +429,37 @@ export class AdminService {
     return { universities, total, page, pages: Math.ceil(total / limit) };
   }
 
+  async createUniversity(data: {
+    name: string;
+    domain?: string;
+    website?: string;
+    location?: string;
+    contactEmail?: string;
+  }) {
+    const existing = await this.universityModel
+      .findOne({ name: data.name })
+      .lean();
+    if (existing) {
+      return {
+        success: false,
+        message: 'A university with this name already exists',
+      };
+    }
+    const university = await this.universityModel.create({
+      name: data.name,
+      domain: data.domain || '',
+      website: data.website || '',
+      location: data.location || '',
+      contactEmail: data.contactEmail || '',
+      isVerified: true,
+    });
+    return { success: true, university };
+  }
+
   async toggleUniversityVerification(id: string) {
     const university = await this.universityModel.findById(id);
     if (!university) throw new NotFoundException('University not found');
-    
+
     university.isVerified = !university.isVerified;
     await university.save();
     return { success: true, isVerified: university.isVerified };

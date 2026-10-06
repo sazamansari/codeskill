@@ -2,107 +2,475 @@
 
 import { motion } from "framer-motion";
 import { fadeUp, staggerContainer } from "@/lib/animations";
-import { Trophy, Medal, Shield, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import {
+  Trophy,
+  Medal,
+  Flame,
+  Code2,
+  RefreshCw,
+  Users,
+  Zap,
+  Sparkles,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { usersAPI } from "@/config/api";
+import { Spinner } from "@/components/ui/spinner";
 
-const TOP_USERS = [
-  { rank: 2, name: "Alex Chen", score: 14250, solved: 482, tier: "Master", trend: "up", avatar: "A" },
-  { rank: 1, name: "Sarah Drasner", score: 18500, solved: 612, tier: "Grandmaster", trend: "same", avatar: "S" },
-  { rank: 3, name: "David Kim", score: 12100, solved: 395, tier: "Expert", trend: "down", avatar: "D" },
-];
+interface LeaderboardUser {
+  rank: number;
+  _id: string;
+  name: string;
+  username?: string;
+  uid?: string;
+  avatar?: string;
+  xp: number;
+  totalSolved: number;
+  currentStreak: number;
+  tier: string;
+  department?: string;
+  batch?: string;
+}
 
-const OTHER_USERS = Array.from({ length: 7 }).map((_, i) => ({
-  rank: i + 4,
-  name: `User ${i + 4}`,
-  score: 11000 - (i * 500),
-  solved: 350 - (i * 20),
-  tier: "Specialist",
-  trend: i % 3 === 0 ? "up" : i % 2 === 0 ? "down" : "same",
-  avatar: "U"
-}));
+const OFFICIAL_CU_SEAL = "/cu-seal.png";
+const WIKIMEDIA_CU_SEAL =
+  "https://upload.wikimedia.org/wikipedia/commons/b/b0/Chandigarh_University_Seal.png";
+
+const TIER_CONFIG: Record<string, { color: string; bg: string; border: string }> = {
+  Grandmaster: { color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30" },
+  Master:      { color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30" },
+  Expert:      { color: "text-violet-400", bg: "bg-violet-500/10", border: "border-violet-500/30" },
+  Specialist:  { color: "text-primary", bg: "bg-primary/10", border: "border-primary/30" },
+  Competent:   { color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30" },
+  Learner:     { color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/30" },
+  Beginner:    { color: "text-muted-foreground", bg: "bg-muted/30", border: "border-border" },
+};
+
+const PODIUM_CONFIG: Record<number, { height: string; medalColor: string; bgGrad: string; borderColor: string; shadow: string; rankColor: string }> = {
+  1: {
+    height: "h-64",
+    medalColor: "text-amber-400",
+    bgGrad: "from-amber-500/25 to-amber-500/5",
+    borderColor: "border-amber-500/40",
+    shadow: "shadow-[0_0_50px_-10px_rgba(245,158,11,0.35)]",
+    rankColor: "text-amber-400",
+  },
+  2: {
+    height: "h-52",
+    medalColor: "text-slate-300",
+    bgGrad: "from-slate-400/20 to-slate-400/5",
+    borderColor: "border-slate-400/30",
+    shadow: "shadow-[0_0_30px_-10px_rgba(148,163,184,0.25)]",
+    rankColor: "text-muted-foreground",
+  },
+  3: {
+    height: "h-44",
+    medalColor: "text-amber-700",
+    bgGrad: "from-amber-700/20 to-amber-700/5",
+    borderColor: "border-amber-700/30",
+    shadow: "shadow-[0_0_25px_-10px_rgba(180,83,9,0.25)]",
+    rankColor: "text-amber-700",
+  },
+};
+
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+function PodiumCard({ user, podiumRank }: { user: LeaderboardUser; podiumRank: 1 | 2 | 3 }) {
+  const cfg = PODIUM_CONFIG[podiumRank];
+  const tier = TIER_CONFIG[user.tier] ?? TIER_CONFIG.Specialist;
+
+  return (
+    <motion.div
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: "auto", opacity: 1 }}
+      transition={{ duration: 0.7, delay: podiumRank * 0.15, ease: "easeOut" }}
+      className={`relative flex-1 max-w-[230px] rounded-t-xl border border-b-0 flex flex-col items-center pt-4 pb-2 ${cfg.height} ${cfg.borderColor} bg-gradient-to-t ${cfg.bgGrad} ${cfg.shadow}`}
+    >
+      {/* Floating card */}
+      <motion.div
+        animate={{ y: [0, -7, 0] }}
+        transition={{ duration: 3.5 + podiumRank * 0.5, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute -top-22 bg-card/95 backdrop-blur-xl border border-border rounded-xl p-4 w-48 flex flex-col items-center shadow-lg z-10"
+      >
+        {/* Avatar / Badge */}
+        {user.avatar ? (
+          <img src={user.avatar} alt={user.name} className="w-12 h-12 rounded-full object-cover mb-2 ring-2 ring-border" />
+        ) : (
+          <div
+            className={`w-12 h-12 rounded-full flex items-center justify-center text-base font-bold mb-2 shadow-inner ${
+              podiumRank === 1
+                ? "bg-gradient-to-br from-amber-400 to-amber-600 text-amber-950 ring-2 ring-amber-500/30"
+                : podiumRank === 2
+                ? "bg-gradient-to-br from-slate-200 to-slate-400 text-slate-800 ring-2 ring-slate-400/30"
+                : "bg-gradient-to-br from-amber-700 to-amber-900 text-white ring-2 ring-amber-700/30"
+            }`}
+          >
+            {getInitials(user.name)}
+          </div>
+        )}
+
+        <p className="font-semibold text-foreground text-xs sm:text-sm text-center leading-tight">{user.name}</p>
+        
+        {user.uid && (
+          <p className="text-[11px] font-mono font-medium text-muted-foreground mt-0.5 tracking-wider">
+            {user.uid}
+          </p>
+        )}
+        
+        {user.department && (
+          <p className="text-[10px] text-muted-foreground mt-0.5 text-center leading-tight line-clamp-1">
+            {user.department}
+          </p>
+        )}
+
+        <div className="flex items-center gap-1.5 mt-2">
+          <span className={`text-[10px] font-medium px-2 py-0.5 rounded border ${tier.border} ${tier.bg} ${tier.color}`}>
+            {user.tier}
+          </span>
+        </div>
+
+        <p className="text-sm font-semibold text-foreground mt-1.5 font-mono">{user.xp.toLocaleString()} XP</p>
+        <p className="text-[10px] text-muted-foreground">{user.totalSolved} solved</p>
+
+        {/* Gold medal for #1 */}
+        {podiumRank === 1 && (
+          <Medal className={`absolute -top-3 -right-2 w-6 h-6 ${cfg.medalColor} drop-shadow-md`} />
+        )}
+      </motion.div>
+
+      {/* Rank number */}
+      <div className={`text-5xl font-bold mt-auto mb-2 ${cfg.rankColor} opacity-20 select-none`}>
+        {podiumRank}
+      </div>
+    </motion.div>
+  );
+}
 
 export default function LeaderboardPage() {
+  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchLeaderboard = async () => {
+      setLoading(true);
+      try {
+        const res = await usersAPI.getLeaderboard(50);
+        const data = res.data;
+        const list: LeaderboardUser[] = data?.leaderboard ?? data ?? [];
+        if (isMounted) {
+          if (Array.isArray(list) && list.length > 0) {
+            // Sort by XP descending and re-assign ranks
+            const sorted = [...list].sort((a, b) => (b.xp ?? 0) - (a.xp ?? 0));
+            const ranked = sorted.map((u, i) => ({ ...u, rank: i + 1 }));
+            setLeaderboard(ranked);
+          } else {
+            setLeaderboard([]);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load live leaderboard:", err);
+        if (isMounted) {
+          setLeaderboard([]);
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
+    return () => {
+      isMounted = false;
+    };
+  }, [refreshKey]);
+
+  const top3 = leaderboard.slice(0, 3);
+  const rest = leaderboard.slice(3);
+
+  // Reorder for podium: [2nd, 1st, 3rd]
+  const podiumOrder: (LeaderboardUser | null)[] = [
+    top3[1] ?? null,
+    top3[0] ?? null,
+    top3[2] ?? null,
+  ];
+  const podiumRanks: (1 | 2 | 3)[] = [2, 1, 3];
+
   return (
-    <div className="flex-1 flex flex-col pt-24 pb-12 px-6 max-w-5xl mx-auto w-full font-sans">
-      <motion.div variants={staggerContainer} initial="hidden" animate="show" className="w-full space-y-12">
-        
+    <div className="flex-1 flex flex-col pt-24 pb-16 px-4 sm:px-6 max-w-5xl mx-auto w-full font-sans">
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="show"
+        className="w-full space-y-10"
+      >
+        {/* Header */}
         <motion.div variants={fadeUp} className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight mb-4 flex items-center justify-center gap-3 text-foreground">
-            <Trophy className="w-10 h-10 text-amber-500" /> Global Leaderboard
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            The top ranking developers on CodeSkill. Keep solving problems to climb the ranks and earn exclusive badges.
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-lg overflow-hidden bg-white shrink-0 shadow-sm border border-border p-1">
+              <img
+                src={OFFICIAL_CU_SEAL}
+                alt="Chandigarh University"
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = WIKIMEDIA_CU_SEAL;
+                }}
+              />
+            </div>
+            <div className="text-left">
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground flex items-center gap-2">
+                  <Trophy className="w-6 h-6 text-amber-500" />
+                  CU Student Leaderboard
+                </h1>
+                <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded bg-muted text-foreground border border-border">
+                  Live
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Chandigarh University — Official Technical Ranking
+              </p>
+            </div>
+          </div>
+          <p className="text-muted-foreground max-w-lg mx-auto text-xs sm:text-sm leading-relaxed">
+            Student algorithmic problem-solving rankings across Chandigarh University departments.
           </p>
-        </motion.div>
-
-        {/* Podium */}
-        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-end justify-center gap-4 sm:gap-6 pt-12 pb-8 h-[400px]">
-          {TOP_USERS.map((user) => (
-            <motion.div 
-              key={user.rank}
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: user.rank === 1 ? 280 : user.rank === 2 ? 220 : 180, opacity: 1 }}
-              transition={{ duration: 0.8, delay: user.rank * 0.2, ease: "easeOut" }}
-              className={`relative w-full sm:w-1/3 max-w-[200px] rounded-t-3xl border border-b-0 flex flex-col items-center justify-start pt-16
-                ${user.rank === 1 ? 'bg-gradient-to-t from-amber-500/20 to-amber-500/5 border-amber-500/30 shadow-[0_0_40px_-10px_rgba(245,158,11,0.3)] z-10' : 
-                  user.rank === 2 ? 'bg-gradient-to-t from-slate-400/20 to-slate-400/5 border-slate-400/30' : 
-                  'bg-gradient-to-t from-amber-700/20 to-amber-700/5 border-amber-700/30'}`}
+          <div className="mt-3 flex items-center justify-center gap-3">
+            <button
+              onClick={() => setRefreshKey((k) => k + 1)}
+              disabled={loading}
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-md border border-border bg-card hover:bg-muted/40"
             >
-              {/* Floating Profile Card */}
-              <motion.div 
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: user.rank }}
-                className="absolute -top-16 bg-card/80 backdrop-blur-xl border border-border rounded-2xl p-4 shadow-xl flex flex-col items-center w-40 overflow-hidden group/card cursor-pointer hover:border-primary/50 transition-colors"
-              >
-                {/* Spotlight hover effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-foreground/5 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none" />
-
-                <div className={`w-14 h-14 rounded-full mb-2 flex items-center justify-center text-xl font-bold shadow-lg transition-transform group-hover/card:scale-110 group-hover/card:rotate-6
-                  ${user.rank === 1 ? 'bg-amber-500 text-amber-950 shadow-amber-500/40 ring-4 ring-amber-500/20' : 
-                    user.rank === 2 ? 'bg-slate-300 text-slate-800 shadow-slate-400/40' : 
-                    'bg-amber-700 text-white shadow-amber-700/40'}`}
-                >
-                  {user.avatar}
-                </div>
-                <p className="font-bold text-foreground text-sm whitespace-nowrap">{user.name}</p>
-                <p className="text-xs text-muted-foreground font-medium">{user.score} XP</p>
-                
-                {user.rank === 1 && <Medal className="absolute -top-3 -right-3 w-8 h-8 text-amber-500 drop-shadow-lg" />}
-              </motion.div>
-              
-              <div className="text-5xl font-black text-foreground/10 mt-4">{user.rank}</div>
-            </motion.div>
-          ))}
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-primary" : ""}`} />
+              {loading ? "Syncing…" : "Refresh Rankings"}
+            </button>
+          </div>
         </motion.div>
 
-        {/* List */}
-        <motion.div variants={staggerContainer} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-50px" }} className="bg-card border border-border rounded-3xl overflow-hidden shadow-sm p-2">
-          {OTHER_USERS.map((user, i) => (
-            <motion.div variants={fadeUp} key={user.rank} className="flex items-center gap-4 p-4 hover:bg-muted/50 rounded-2xl transition-all duration-300 group border-b border-border last:border-0 cursor-pointer">
-              <div className="w-12 text-center text-xl font-bold text-muted-foreground group-hover:text-foreground group-hover:-translate-y-1 transition-all">
-                #{user.rank}
+        {/* Loading / Empty State or Real Leaderboard */}
+        {loading ? (
+          <div className="py-20 text-center text-muted-foreground text-sm">
+            <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-primary" />
+            Loading live leaderboard...
+          </div>
+        ) : leaderboard.length === 0 ? (
+          <div className="text-center py-14 bg-card border border-border rounded-xl p-8 space-y-3 max-w-lg mx-auto shadow-xs">
+            <Trophy className="w-10 h-10 text-muted-foreground mx-auto opacity-40" />
+            <h3 className="text-base font-semibold text-foreground">No Leaderboard Standings Yet</h3>
+            <p className="text-xs text-muted-foreground max-w-sm mx-auto leading-relaxed">
+              Student rankings will appear here as soon as candidates solve coding problems and submit assessments.
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Podium Display */}
+            {top3.length > 0 && (
+              <motion.div
+                variants={fadeUp}
+                className="flex items-end justify-center gap-3 sm:gap-6 pt-20 pb-2"
+              >
+                {podiumOrder.map((user, i) =>
+                  user ? (
+                    <PodiumCard
+                      key={user._id}
+                      user={user}
+                      podiumRank={podiumRanks[i]}
+                    />
+                  ) : (
+                    <div key={i} className="flex-1 max-w-[230px]" />
+                  )
+                )}
+              </motion.div>
+            )}
+
+            {/* Quick Stats Grid */}
+            <motion.div
+              variants={fadeUp}
+              className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+            >
+              <div className="bg-card border border-border rounded-xl p-4 text-center shadow-xs">
+                <Users className="w-4 h-4 text-muted-foreground mx-auto mb-1.5" />
+                <p className="text-xs text-muted-foreground">Ranked Students</p>
+                <p className="text-lg font-semibold text-foreground mt-0.5">{leaderboard.length}</p>
               </div>
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground font-bold border border-border">
-                {user.avatar}
+              <div className="bg-card border border-border rounded-xl p-4 text-center shadow-xs">
+                <Zap className="w-4 h-4 text-amber-500 mx-auto mb-1.5" />
+                <p className="text-xs text-muted-foreground">Top Score</p>
+                <p className="text-lg font-semibold text-foreground mt-0.5 font-mono">
+                  {(top3[0]?.xp ?? 0).toLocaleString()} XP
+                </p>
               </div>
-              <div className="flex-1">
-                <p className="font-bold text-foreground transition-colors">{user.name}</p>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                  <span className="flex items-center gap-1"><Shield className="w-3 h-3 text-blue-500" /> {user.tier}</span>
-                  <span>•</span>
-                  <span>{user.solved} solved</span>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="font-bold text-foreground text-lg">{user.score.toLocaleString()}</p>
-                <p className="text-xs font-medium uppercase text-muted-foreground flex items-center justify-end gap-1">
-                  XP
-                  {user.trend === "up" && <TrendingUp className="w-3 h-3 text-emerald-500" />}
-                  {user.trend === "down" && <TrendingDown className="w-3 h-3 text-destructive" />}
-                  {user.trend === "same" && <Minus className="w-3 h-3 text-muted-foreground" />}
+              <div className="bg-card border border-border rounded-xl p-4 text-center shadow-xs">
+                <Code2 className="w-4 h-4 text-emerald-500 mx-auto mb-1.5" />
+                <p className="text-xs text-muted-foreground">Top Problem Solvers</p>
+                <p className="text-lg font-semibold text-foreground mt-0.5 font-mono">
+                  {top3[0]?.totalSolved ?? 0} problems
                 </p>
               </div>
             </motion.div>
-          ))}
+
+            {/* Full Ranked Table */}
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-30px" }}
+              className="bg-card border border-border rounded-xl overflow-hidden shadow-xs"
+            >
+              {/* Table Header */}
+              <div className="flex items-center gap-4 px-5 py-3 border-b border-border bg-muted/30 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                <div className="w-10 text-center">Rank</div>
+                <div className="w-10 text-center">Student</div>
+                <div className="flex-1">Details</div>
+                <div className="text-right">XP & Solved</div>
+              </div>
+
+              {/* Top 3 items */}
+              {top3.map((user, i) => {
+                const tier = TIER_CONFIG[user.tier] ?? TIER_CONFIG.Specialist;
+                const medals = ["🥇", "🥈", "🥉"];
+                return (
+                  <motion.div
+                    variants={fadeUp}
+                    key={user._id}
+                    className="flex items-center gap-4 p-3.5 border-b border-border hover:bg-muted/30 transition-colors group"
+                  >
+                    <div className="w-10 text-center text-lg shrink-0 select-none">
+                      {medals[i]}
+                    </div>
+                    <div
+                      className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold border ${tier.border} ${tier.bg} ${tier.color} shrink-0 shadow-xs`}
+                    >
+                      {user.avatar ? (
+                        <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        getInitials(user.name)
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-semibold text-foreground text-xs sm:text-sm truncate">{user.name}</p>
+                        {user.uid && (
+                          <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">
+                            {user.uid}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5 flex-wrap">
+                        <span className={`font-medium ${tier.color}`}>{user.tier}</span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <Code2 className="w-3 h-3 text-emerald-400" />
+                          {user.totalSolved} solved
+                        </span>
+                        {user.currentStreak > 0 && (
+                          <>
+                            <span>•</span>
+                            <span className="flex items-center gap-1 text-orange-400 font-medium">
+                              <Flame className="w-3 h-3" />
+                              {user.currentStreak}d streak
+                            </span>
+                          </>
+                        )}
+                        {user.department && (
+                          <span className="text-muted-foreground/70 hidden md:inline">
+                            · {user.department} {user.batch ? `(${user.batch})` : ""}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-semibold text-foreground font-mono text-sm">{user.xp.toLocaleString()}</p>
+                      <p className="text-[9px] text-muted-foreground uppercase">XP</p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+
+              {/* Ranks #4 and beyond */}
+              {rest.map((user) => {
+                const tier = TIER_CONFIG[user.tier] ?? TIER_CONFIG.Specialist;
+                return (
+                  <motion.div
+                    variants={fadeUp}
+                    key={user._id}
+                    className="flex items-center gap-4 p-3.5 border-b border-border last:border-0 hover:bg-muted/30 transition-colors group"
+                  >
+                    <div className="w-10 text-center text-xs font-semibold text-muted-foreground group-hover:text-foreground shrink-0 font-mono">
+                      #{user.rank}
+                    </div>
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium border ${tier.border} ${tier.bg} ${tier.color} shrink-0`}
+                    >
+                      {user.avatar ? (
+                        <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        getInitials(user.name)
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium text-foreground text-xs sm:text-sm truncate">{user.name}</p>
+                        {user.uid && (
+                          <span className="text-[10px] font-mono text-muted-foreground px-1.5 py-0.5 rounded bg-muted/60 border border-border">
+                            {user.uid}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5 flex-wrap">
+                        <span className={`font-medium ${tier.color}`}>{user.tier}</span>
+                        <span>•</span>
+                        <span>{user.totalSolved} solved</span>
+                        {user.currentStreak > 0 && (
+                          <>
+                            <span>•</span>
+                            <span className="flex items-center gap-1 text-orange-400">
+                              <Flame className="w-3 h-3" />
+                              {user.currentStreak}d
+                            </span>
+                          </>
+                        )}
+                        {user.department && (
+                          <span className="text-muted-foreground/60 hidden md:inline">
+                            · {user.department}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-semibold text-foreground font-mono text-xs sm:text-sm">{user.xp.toLocaleString()}</p>
+                      <p className="text-[9px] text-muted-foreground uppercase">XP</p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          </>
+        )}
+
+        {/* Footer info banner */}
+        <motion.div
+          variants={fadeUp}
+          className="flex items-center justify-center gap-3 text-xs text-muted-foreground py-2"
+        >
+          <img
+            src={OFFICIAL_CU_SEAL}
+            alt="Chandigarh University"
+            className="w-4 h-4 object-contain opacity-75"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = WIKIMEDIA_CU_SEAL;
+            }}
+          />
+          <span>
+            Chandigarh University Technical Assessment & Algorithm Rankings. Updated in real time.
+          </span>
         </motion.div>
       </motion.div>
     </div>

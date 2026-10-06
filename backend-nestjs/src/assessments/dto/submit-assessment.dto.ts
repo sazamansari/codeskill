@@ -1,0 +1,71 @@
+import {
+  IsArray,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class QuestionAnswerDto {
+  @IsString()
+  questionId: string;
+
+  // Selected option index (0, 1, 2, 3...) or -1 if unselected
+  @IsNumber()
+  @IsOptional()
+  selectedAnswer?: number;
+
+  @IsNumber()
+  @IsOptional()
+  timeSpentSeconds?: number;
+
+  @IsString()
+  @IsOptional()
+  status?: string; // 'answered' | 'marked_for_review' | 'skipped'
+
+  @IsString()
+  @IsOptional()
+  code?: string;
+
+  @IsString()
+  @IsOptional()
+  language?: string;
+
+  @IsNumber()
+  @IsOptional()
+  testCasesPassed?: number;
+
+  @IsNumber()
+  @IsOptional()
+  totalTestCases?: number;
+}
+
+export class ProctoringViolationDto {
+  @IsString()
+  type: string; // 'tab_switch' | 'fullscreen_exit' | 'copy_paste_attempt'
+
+  @IsOptional()
+  timestamp?: string;
+
+  @IsString()
+  @IsOptional()
+  details?: string;
+}
+
+export class SubmitAssessmentDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => QuestionAnswerDto)
+  responses: QuestionAnswerDto[];
+
+  @IsNumber()
+  @IsOptional()
+  timeSpentSeconds?: number;
+
+  @IsArray()
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => ProctoringViolationDto)
+  violations?: ProctoringViolationDto[];
+}

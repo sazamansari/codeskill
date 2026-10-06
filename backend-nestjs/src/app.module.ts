@@ -1,10 +1,14 @@
 import { S3Module } from './s3/s3.module';
+import { ReportsModule } from './reports/reports.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -33,8 +37,15 @@ import { CampusModule } from './campus/campus.module';
 import { GatewayModule } from './gateway/gateway.module';
 import { HealthModule } from './health/health.module';
 import { DiscussionsModule } from './discussions/discussions.module';
+import { StudentsModule } from './students/students.module';
+import { QuestionsModule } from './questions/questions.module';
+import { AssessmentsModule } from './assessments/assessments.module';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
+
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { ExamSecurityModule } from './exam-security/exam-security.module';
 
 @Module({
   imports: [
@@ -50,6 +61,12 @@ import { ConfigService } from '@nestjs/config';
         adminConfig,
       ],
     }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      sortSchema: true,
+      playground: false,
+    }),
     DatabaseModule,
     EmailModule,
     RedisModule,
@@ -57,9 +74,11 @@ import { ConfigService } from '@nestjs/config';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         connection: {
-          host: configService.get<string>('redis.host'),
-          port: configService.get<number>('redis.port'),
-          password: configService.get<string>('redis.password'),
+          host: configService.get<string>('redis.host') || '127.0.0.1',
+          port: Number(configService.get<number>('redis.port')) || 6379,
+          password: configService.get<string>('redis.password') || undefined,
+          maxRetriesPerRequest: null,
+          connectTimeout: 5000,
         },
       }),
       inject: [ConfigService],
@@ -81,8 +100,16 @@ import { ConfigService } from '@nestjs/config';
     HealthModule,
     DiscussionsModule,
     S3Module,
+    StudentsModule,
+    QuestionsModule,
+    AssessmentsModule,
+    ExamSecurityModule,
+    AnalyticsModule,
+    ReportsModule,
   ],
+  controllers: [AppController],
   providers: [
+    AppService,
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,

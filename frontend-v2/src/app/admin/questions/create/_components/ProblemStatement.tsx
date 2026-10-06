@@ -38,14 +38,14 @@ export default function ProblemStatement() {
         {/* Toolbar + Mode Toggle */}
         <div className="flex items-center justify-between">
           {/* Toolbar */}
-          <div className="flex items-center gap-1 bg-gray-50 dark:bg-slate-800 rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-muted/50 dark:bg-card rounded-lg p-1">
             {toolbarButtons.map(({ icon: Icon, label, action }) => (
               <button
                 key={label}
                 type="button"
                 onClick={action}
                 title={label}
-                className="p-1.5 rounded-md text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 transition-all"
+                className="p-1.5 rounded-md text-gray-500 dark:text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 transition-all"
               >
                 <Icon className="w-3.5 h-3.5" />
               </button>
@@ -53,14 +53,14 @@ export default function ProblemStatement() {
           </div>
 
           {/* Write / Preview toggle */}
-          <div className="flex bg-gray-100 dark:bg-slate-800 p-0.5 rounded-lg">
+          <div className="flex bg-muted dark:bg-card p-0.5 rounded-lg">
             <button
               type="button"
               onClick={() => setMode("write")}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                 mode === "write"
-                  ? "bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm"
-                  : "text-gray-500 dark:text-slate-400 hover:text-gray-700"
+                  ? "bg-white dark:bg-slate-700 text-foreground dark:text-white shadow-sm"
+                  : "text-gray-500 dark:text-muted-foreground hover:text-gray-700"
               }`}
             >
               <Edit3 className="w-3 h-3" /> Write
@@ -70,8 +70,8 @@ export default function ProblemStatement() {
               onClick={() => setMode("preview")}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                 mode === "preview"
-                  ? "bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm"
-                  : "text-gray-500 dark:text-slate-400 hover:text-gray-700"
+                  ? "bg-white dark:bg-slate-700 text-foreground dark:text-white shadow-sm"
+                  : "text-gray-500 dark:text-muted-foreground hover:text-gray-700"
               }`}
             >
               <Eye className="w-3 h-3" /> Preview
@@ -81,7 +81,7 @@ export default function ProblemStatement() {
 
         {/* Editor / Preview */}
         {mode === "write" ? (
-          <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
+          <div className="border border-border dark:border-border rounded-xl overflow-hidden focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
             <Editor
               height="350px"
               language="markdown"
@@ -100,20 +100,20 @@ export default function ProblemStatement() {
             />
           </div>
         ) : (
-          <div className="border border-gray-200 dark:border-slate-700 rounded-xl p-6 min-h-[350px] bg-white dark:bg-slate-800/50 prose dark:prose-invert max-w-none text-sm">
+          <div className="border border-border dark:border-border rounded-xl p-6 min-h-[350px] bg-white dark:bg-card/50 prose dark:prose-invert max-w-none text-sm">
             {statement.description ? (
               <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700 dark:text-slate-300">
                 {statement.description}
               </pre>
             ) : (
-              <p className="text-gray-400 dark:text-slate-500 italic">
+              <p className="text-gray-400 dark:text-muted-foreground italic">
                 Nothing to preview yet. Start writing your problem statement.
               </p>
             )}
           </div>
         )}
 
-        <p className="text-[11px] text-gray-400 dark:text-slate-500">
+        <p className="text-[11px] text-gray-400 dark:text-muted-foreground">
           Supports full Markdown syntax including LaTeX math expressions, code blocks, and tables.
         </p>
       </div>

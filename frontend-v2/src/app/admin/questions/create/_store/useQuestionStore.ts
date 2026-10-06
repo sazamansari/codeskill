@@ -41,7 +41,7 @@ export const DEFAULT_COMPILER_VERSIONS: Record<string, string> = {
 export interface ProblemMetadata {
   title: string;
   slug: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  difficulty: 'Easy' | 'Medium' | 'Hard' | 'easy' | 'medium' | 'hard';
   categories: string[];
   tags: string[];
   visibility: 'Draft' | 'Published' | 'Private';
@@ -49,6 +49,7 @@ export interface ProblemMetadata {
   questionId: string;
   estimatedSolveTime: number; // minutes
   points: number;
+  questionType: 'MCQ' | 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'CODE_OUTPUT' | 'DSA';
 }
 
 export interface ProblemLanguages {
@@ -129,12 +130,29 @@ export interface PublishingConfig {
   practiceOnly: boolean;
 }
 
+export interface MCQOption {
+  text: string;
+  isCorrect: boolean;
+  explanation: string;
+}
+
 export interface QuestionState {
   // State slices
   metadata: ProblemMetadata;
   languages: ProblemLanguages;
   execution: ExecutionConfig;
   statement: ProblemStatement;
+  
+  // MCQ specific
+  mcqOptions: MCQOption[];
+  
+  // Code Output specific
+  codeOutput: {
+    language: string;
+    code: string;
+    expectedOutput: string;
+  };
+
   sampleExamples: SampleExample[];
   starterCode: Record<string, string>;
   referenceSolution: Record<string, string>;
@@ -175,6 +193,9 @@ export interface QuestionState {
   updateAnalytics: (updates: Partial<AnalyticsData>) => void;
   updatePublishing: (updates: Partial<PublishingConfig>) => void;
 
+  updateMCQOptions: (options: MCQOption[]) => void;
+  updateCodeOutput: (updates: Partial<{ language: string; code: string; expectedOutput: string }>) => void;
+  
   setDarkMode: (dark: boolean) => void;
   setActiveSection: (section: string) => void;
   markSaved: () => void;
@@ -197,6 +218,7 @@ const initialState = {
     questionId: `QID-${Date.now().toString(36).toUpperCase()}`,
     estimatedSolveTime: 30,
     points: 100,
+    questionType: 'DSA' as const,
   },
   languages: {
     supported: ['javascript', 'python3', 'cpp', 'java'],
@@ -218,6 +240,17 @@ const initialState = {
     inputFormat: '',
     outputFormat: '',
     constraints: '',
+  },
+  mcqOptions: [
+    { text: '', isCorrect: true, explanation: '' },
+    { text: '', isCorrect: false, explanation: '' },
+    { text: '', isCorrect: false, explanation: '' },
+    { text: '', isCorrect: false, explanation: '' },
+  ],
+  codeOutput: {
+    language: 'javascript',
+    code: '',
+    expectedOutput: '',
   },
   sampleExamples: [],
   starterCode: {},
@@ -362,6 +395,9 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
 
   updatePublishing: (updates) =>
     set((s) => ({ publishing: { ...s.publishing, ...updates } })),
+
+  updateMCQOptions: (options) => set({ mcqOptions: options }),
+  updateCodeOutput: (updates) => set((s) => ({ codeOutput: { ...s.codeOutput, ...updates } })),
 
   setDarkMode: (dark) => set({ isDarkMode: dark }),
   setActiveSection: (section) => set({ activeSection: section }),

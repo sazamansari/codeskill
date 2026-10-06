@@ -219,7 +219,7 @@ export default function ContestAttemptPage() {
         </div>
         
         <div className="w-1/2 bg-zinc-950 p-6">
-          <div className="h-full border border-zinc-800 rounded-lg overflow-hidden bg-[#1e1e1e] flex items-center justify-center text-zinc-500">
+          <div className="h-full border border-zinc-800 rounded-lg overflow-hidden bg-card flex items-center justify-center text-zinc-500">
             [Monaco Editor Placeholder]
             <br/>
             (You can type freely here, but pasting is blocked!)

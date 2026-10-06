@@ -1,11 +1,17 @@
+const fs = require('fs');
+const path = require('path');
+
+const backendScript = fs.existsSync(path.join(__dirname, 'backend-nestjs/dist/src/main.js')) && !fs.existsSync(path.join(__dirname, 'backend-nestjs/dist/main.js'))
+  ? 'dist/src/main.js'
+  : 'dist/main.js';
+
 module.exports = {
   apps: [
     {
       name: "codeskill-backend",
-      script: "node",
-      args: "dist/main.js",
+      script: backendScript,
       cwd: "./backend-nestjs",
-      instances: 1, // Single instance — child_process code execution conflicts with cluster mode
+      instances: 1,
       exec_mode: "fork",
       autorestart: true,
       watch: false,
@@ -20,11 +26,31 @@ module.exports = {
       merge_logs: true,
     },
     {
+      name: "codeskill-worker",
+      script: backendScript.replace(/main\.js$/, "worker.js"),
+      cwd: "./backend-nestjs",
+      instances: 1,
+      exec_mode: "fork",
+      autorestart: true,
+      watch: false,
+      max_memory_restart: "768M",
+      env: {
+        NODE_ENV: "production",
+        PROCESS_ROLE: "judge",
+        JUDGE_SANDBOX: "docker",
+      },
+      log_date_format: "YYYY-MM-DD HH:mm Z",
+      error_file: "../logs/worker-error.log",
+      out_file: "../logs/worker-out.log",
+      merge_logs: true,
+    },
+    {
       name: "codeskill-frontend",
-      script: "npm",
-      args: "start",
+      script: "node_modules/next/dist/bin/next",
+      args: "start -p 3000",
       cwd: "./frontend-v2",
       instances: 1,
+      exec_mode: "fork",
       autorestart: true,
       watch: false,
       max_memory_restart: "1G",

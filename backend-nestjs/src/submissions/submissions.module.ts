@@ -8,6 +8,8 @@ import {
   SubmissionSchema,
 } from '../database/schemas/submission.schema';
 import { User, UserSchema } from '../database/schemas/user.schema';
+import { GatewayModule } from '../gateway/gateway.module';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { User, UserSchema } from '../database/schemas/user.schema';
     BullModule.registerQueue({
       name: 'submissions',
     }),
+    GatewayModule,
+    RedisModule,
   ],
   controllers: [SubmissionsController],
   providers: [SubmissionsService],

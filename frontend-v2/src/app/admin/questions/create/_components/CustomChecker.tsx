@@ -17,7 +17,7 @@ export default function CustomChecker() {
       subtitle="Optional custom judge to verify outputs with special comparison logic."
       icon={Shield}
       badge="Optional"
-      badgeColor="bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-slate-400"
+      badgeColor="bg-muted text-muted-foreground dark:bg-slate-700 dark:text-muted-foreground"
       delay={0.5}
     >
       <div className="space-y-4">
@@ -58,7 +58,7 @@ export default function CustomChecker() {
                     className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
                       activeLang === lang.id
                         ? "bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-500/10 dark:border-indigo-500/20 dark:text-indigo-300"
-                        : "bg-gray-50 border-gray-200 text-gray-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-600"
+                        : "bg-muted/50 border-border text-muted-foreground dark:bg-card dark:border-border dark:text-muted-foreground hover:border-gray-300 dark:hover:border-slate-600"
                     }`}
                   >
                     {lang.label}
@@ -68,7 +68,7 @@ export default function CustomChecker() {
             </div>
 
             {/* Reusable Monaco Editor */}
-            <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden bg-[#1e1e1e]">
+            <div className="border border-border dark:border-border rounded-xl overflow-hidden bg-card">
               <MonacoEditor
                 height="300px"
                 language={activeLang === "cpp" ? "cpp" : activeLang === "java" ? "java" : "python"}

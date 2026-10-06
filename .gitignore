@@ -52,9 +52,12 @@ frontend-v2/build/
 frontend/build/
 frontend/dist/
 
-# Backend builds (if any)
+# Backend builds
 backend/dist/
 backend/build/
+backend-nestjs/dist/
+backend-nestjs/build/
+*.tsbuildinfo
 
 # Coverage directory used by tools like istanbul
 coverage/

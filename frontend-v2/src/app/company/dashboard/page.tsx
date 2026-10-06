@@ -43,8 +43,8 @@ export default function CompanyDashboardPage() {
   if (!company) {
     return (
       <div className="p-8 max-w-4xl mx-auto h-full flex flex-col items-center justify-center text-center">
-        <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mb-6">
-          <Briefcase className="w-8 h-8 text-blue-500" />
+        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+          <Briefcase className="w-8 h-8 text-primary" />
         </div>
         <h1 className="text-3xl font-bold text-foreground mb-4">Welcome to CodeSkill Work</h1>
         <p className="text-muted-foreground max-w-lg mb-8">
@@ -52,7 +52,7 @@ export default function CompanyDashboardPage() {
         </p>
         <Link 
           href="/company/profile"
-          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+          className="bg-primary hover:bg-primary text-white px-6 py-3 rounded-lg font-medium transition-colors"
         >
           Create Company Profile
         </Link>
@@ -76,7 +76,7 @@ export default function CompanyDashboardPage() {
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-3xl font-bold text-foreground">{company.name}</h1>
               {company.isVerified && (
-                <span className="bg-blue-500/10 text-blue-500 text-xs px-2 py-0.5 rounded-full font-medium border border-blue-500/20">
+                <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full font-medium border border-primary/20">
                   Verified
                 </span>
               )}
@@ -97,7 +97,7 @@ export default function CompanyDashboardPage() {
       {/* Stats Grid (Placeholders for Phase 1) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Active Jobs", value: "0", icon: Briefcase, color: "text-blue-500", bg: "bg-blue-500/10" },
+          { label: "Active Jobs", value: "0", icon: Briefcase, color: "text-primary", bg: "bg-primary/10" },
           { label: "Total Candidates", value: "0", icon: Users, color: "text-indigo-500", bg: "bg-indigo-500/10" },
           { label: "Assessments Sent", value: "0", icon: Target, color: "text-rose-500", bg: "bg-rose-500/10" },
           { label: "Hired", value: "0", icon: FileCheck, color: "text-emerald-500", bg: "bg-emerald-500/10" },

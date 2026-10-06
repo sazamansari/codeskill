@@ -24,6 +24,12 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
         if (data && typeof data === 'object' && 'success' in data) {
           return data;
         }
+        if (Array.isArray(data)) {
+          return {
+            success: true,
+            data,
+          };
+        }
         // Otherwise wrap it
         return {
           success: true,

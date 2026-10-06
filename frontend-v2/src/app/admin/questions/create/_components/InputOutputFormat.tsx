@@ -20,7 +20,7 @@ export default function InputOutputFormat() {
         {/* Input Format */}
         <div className="space-y-2">
           <label className="text-[13px] font-medium text-gray-700 dark:text-slate-300">Input Format</label>
-          <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
+          <div className="border border-border dark:border-border rounded-xl overflow-hidden focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
             <Editor
               height="200px"
               language="markdown"
@@ -43,7 +43,7 @@ export default function InputOutputFormat() {
         {/* Output Format */}
         <div className="space-y-2">
           <label className="text-[13px] font-medium text-gray-700 dark:text-slate-300">Output Format</label>
-          <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
+          <div className="border border-border dark:border-border rounded-xl overflow-hidden focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
             <Editor
               height="200px"
               language="markdown"

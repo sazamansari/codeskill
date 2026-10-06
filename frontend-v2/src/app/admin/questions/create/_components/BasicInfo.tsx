@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuestionStore } from "../_store/useQuestionStore";
 import SectionCard from "./SectionCard";
-import { FileText, X, Plus } from "lucide-react";
+import { FileText, X, Plus, Lock, Globe, Link as LinkIcon } from "lucide-react";
 
 const CATEGORY_OPTIONS = [
   "Arrays", "Strings", "Graph", "Dynamic Programming", "Trees",
@@ -13,7 +13,7 @@ const CATEGORY_OPTIONS = [
 ];
 
 const inputClass =
-  "w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:ring-indigo-400/20 dark:focus:border-indigo-400 transition-all";
+  "w-full px-3.5 py-2.5 bg-muted/50 dark:bg-card border border-border dark:border-border rounded-xl text-sm text-foreground dark:text-white placeholder:text-gray-400 dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:ring-indigo-400/20 dark:focus:border-indigo-400 transition-all";
 
 const labelClass = "text-[13px] font-medium text-gray-700 dark:text-slate-300";
 
@@ -94,15 +94,32 @@ export default function BasicInfo() {
               className={`${inputClass} font-mono text-xs`}
             />
             {metadata.slug && (
-              <p className="text-[11px] text-gray-400 dark:text-slate-500">
+              <p className="text-[11px] text-gray-400 dark:text-muted-foreground">
                 codeskill.com/problems/<span className="text-indigo-500 font-medium">{metadata.slug}</span>
               </p>
             )}
           </div>
         </div>
 
-        {/* Row 2: Difficulty + Visibility */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {/* Row 2: Type, Difficulty + Visibility */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="space-y-1.5">
+            <label className={labelClass}>
+              Question Type <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={metadata.questionType}
+              onChange={(e) => updateMetadata({ questionType: e.target.value as any })}
+              className={`${inputClass} appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M7%207l5%205%205-5%22%20fill%3D%22none%22%20stroke%3D%22%236b7280%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_10px_center] pr-10`}
+            >
+              <option value="MCQ">Single Choice (MCQ)</option>
+              <option value="MULTIPLE_CHOICE">Multiple Choice</option>
+              <option value="TRUE_FALSE">True / False</option>
+              <option value="CODE_OUTPUT">Code Output</option>
+              <option value="DSA">DSA / Coding Problem</option>
+            </select>
+          </div>
+
           <div className="space-y-1.5">
             <label className={labelClass}>
               Difficulty <span className="text-red-500">*</span>
@@ -113,13 +130,13 @@ export default function BasicInfo() {
                 const colors = {
                   Easy: isActive
                     ? "bg-emerald-100 border-emerald-300 text-emerald-700 dark:bg-emerald-500/20 dark:border-emerald-500/30 dark:text-emerald-400"
-                    : "bg-gray-50 border-gray-200 text-gray-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400",
+                    : "bg-muted/50 border-border text-gray-500 dark:bg-card dark:border-border dark:text-muted-foreground",
                   Medium: isActive
-                    ? "bg-amber-100 border-amber-300 text-amber-700 dark:bg-amber-500/20 dark:border-amber-500/30 dark:text-amber-400"
-                    : "bg-gray-50 border-gray-200 text-gray-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400",
+                    ? "bg-primary/10 border-primary/20 text-primary dark:bg-primary/20 dark:border-primary/30 dark:text-primary"
+                    : "bg-muted/50 border-border text-gray-500 dark:bg-card dark:border-border dark:text-muted-foreground",
                   Hard: isActive
                     ? "bg-red-100 border-red-300 text-red-700 dark:bg-red-500/20 dark:border-red-500/30 dark:text-red-400"
-                    : "bg-gray-50 border-gray-200 text-gray-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400",
+                    : "bg-muted/50 border-border text-gray-500 dark:bg-card dark:border-border dark:text-muted-foreground",
                 };
                 return (
                   <button
@@ -135,26 +152,55 @@ export default function BasicInfo() {
             </div>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 relative">
             <label className={labelClass}>Visibility</label>
-            <select
-              value={metadata.visibility}
-              onChange={(e) => {
-                const vis = e.target.value as "Draft" | "Published" | "Private";
-                updateMetadata({ visibility: vis });
-                const { updatePublishing } = useQuestionStore.getState();
-                if (vis === "Published") {
-                  updatePublishing({ publishImmediately: true, saveAsDraft: false });
-                } else if (vis === "Draft") {
-                  updatePublishing({ publishImmediately: false, saveAsDraft: true });
-                }
+            <button
+              type="button"
+              onClick={() => {
+                const el = document.getElementById('visibility-dropdown');
+                if (el) el.classList.toggle('hidden');
               }}
-              className={inputClass}
+              className={`${inputClass} text-left flex items-center justify-between cursor-pointer`}
             >
-              <option value="Draft">🔒 Draft (Hidden)</option>
-              <option value="Published">🌐 Published (Public)</option>
-              <option value="Private">🔗 Private (Link Only)</option>
-            </select>
+              <span className="flex items-center gap-2">
+                {metadata.visibility === "Draft" && <Lock className="w-4 h-4 text-muted-foreground" />}
+                {metadata.visibility === "Published" && <Globe className="w-4 h-4 text-emerald-500" />}
+                {metadata.visibility === "Private" && <LinkIcon className="w-4 h-4 text-primary" />}
+                {metadata.visibility === "Draft" ? "Draft (Hidden)" : metadata.visibility === "Published" ? "Published (Public)" : "Private (Link Only)"}
+              </span>
+              <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            </button>
+
+            <div id="visibility-dropdown" className="hidden absolute z-50 w-full mt-1 bg-card border border-border rounded-xl shadow-lg shadow-black/5 overflow-hidden py-1">
+              {[
+                { value: "Draft", label: "Draft (Hidden)", icon: Lock, iconColor: "text-muted-foreground" },
+                { value: "Published", label: "Published (Public)", icon: Globe, iconColor: "text-emerald-500" },
+                { value: "Private", label: "Private (Link Only)", icon: LinkIcon, iconColor: "text-primary" }
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    updateMetadata({ visibility: opt.value as any });
+                    const { updatePublishing } = useQuestionStore.getState();
+                    if (opt.value === "Published") {
+                      updatePublishing({ publishImmediately: true, saveAsDraft: false });
+                    } else if (opt.value === "Draft") {
+                      updatePublishing({ publishImmediately: false, saveAsDraft: true });
+                    }
+                    document.getElementById('visibility-dropdown')?.classList.add('hidden');
+                  }}
+                  className={`w-full flex items-center gap-2 px-4 py-2.5 text-sm transition-colors ${
+                    metadata.visibility === opt.value
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <opt.icon className={`w-4 h-4 ${opt.iconColor}`} />
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -169,7 +215,7 @@ export default function BasicInfo() {
               onClick={() => setShowCategories(!showCategories)}
               className={`${inputClass} text-left flex items-center justify-between cursor-pointer`}
             >
-              <span className={metadata.categories.length === 0 ? "text-gray-400 dark:text-slate-500" : ""}>
+              <span className={metadata.categories.length === 0 ? "text-gray-400 dark:text-muted-foreground" : ""}>
                 {metadata.categories.length === 0
                   ? "Select categories..."
                   : `${metadata.categories.length} selected`}
@@ -178,7 +224,7 @@ export default function BasicInfo() {
             </button>
 
             {showCategories && (
-              <div className="absolute z-30 top-full mt-1 left-0 right-0 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl p-3 max-h-60 overflow-y-auto">
+              <div className="absolute z-30 top-full mt-1 left-0 right-0 bg-white dark:bg-card border border-border dark:border-border rounded-xl shadow-xl p-3 max-h-60 overflow-y-auto">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                   {CATEGORY_OPTIONS.map((cat) => (
                     <label
@@ -186,7 +232,7 @@ export default function BasicInfo() {
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-sm transition-colors ${
                         metadata.categories.includes(cat)
                           ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300"
-                          : "hover:bg-gray-50 text-gray-600 dark:hover:bg-slate-700 dark:text-slate-400"
+                          : "hover:bg-muted/50 text-muted-foreground dark:hover:bg-slate-700 dark:text-muted-foreground"
                       }`}
                     >
                       <input
@@ -227,7 +273,7 @@ export default function BasicInfo() {
             {metadata.tags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 text-xs font-medium rounded-lg"
+                className="inline-flex items-center gap-1 px-2.5 py-1 bg-muted dark:bg-slate-700 text-gray-700 dark:text-slate-300 text-xs font-medium rounded-lg"
               >
                 {tag}
                 <button type="button" onClick={() => removeTag(tag)} className="hover:text-red-500 transition-colors">
@@ -241,7 +287,7 @@ export default function BasicInfo() {
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={handleTagKeyDown}
               placeholder={metadata.tags.length === 0 ? "Type and press Enter to add tags..." : ""}
-              className="flex-1 min-w-[120px] bg-transparent text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 outline-none"
+              className="flex-1 min-w-[120px] bg-transparent text-sm text-foreground dark:text-white placeholder:text-gray-400 dark:placeholder:text-muted-foreground outline-none"
             />
           </div>
         </div>
@@ -264,7 +310,7 @@ export default function BasicInfo() {
               type="text"
               value={metadata.questionId}
               readOnly
-              className={`${inputClass} bg-gray-100 dark:bg-slate-700/50 cursor-not-allowed font-mono text-xs`}
+              className={`${inputClass} bg-muted dark:bg-slate-700/50 cursor-not-allowed font-mono text-xs`}
             />
           </div>
           <div className="space-y-1.5">
@@ -277,7 +323,7 @@ export default function BasicInfo() {
                 min={1}
                 className={inputClass}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-slate-500">min</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-muted-foreground">min</span>
             </div>
           </div>
           <div className="space-y-1.5">

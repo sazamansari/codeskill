@@ -71,6 +71,32 @@ class Badge {
   unlockedAt: Date;
 }
 
+export class StudentProfile {
+  @Prop({ default: '' })
+  university: string;
+
+  @Prop({ default: '' })
+  department: string;
+
+  @Prop({ default: '' })
+  course: string;
+
+  @Prop({ default: 1 })
+  semester: number;
+
+  @Prop({ default: '' })
+  section: string;
+
+  @Prop({ default: '' })
+  group: string;
+
+  @Prop({ default: () => new Date().getFullYear() })
+  year: number;
+
+  @Prop({ default: '' })
+  batch: string;
+}
+
 @Schema({ timestamps: true })
 export class User {
   @Prop({ required: true, trim: true, maxlength: 50 })
@@ -89,6 +115,42 @@ export class User {
 
   @Prop({ minlength: 6, select: false })
   password?: string;
+
+  @Prop({
+    enum: [
+      'student',
+      'admin',
+      'super_admin',
+      'assessment_admin',
+      'question_admin',
+      'student_admin',
+      'report_admin',
+      'proctor_admin',
+    ],
+    default: 'student',
+  })
+  role: string;
+
+  @Prop({ unique: true, sparse: true, uppercase: true, trim: true })
+  uid?: string;
+
+  @Prop({ default: false })
+  forcePasswordChange: boolean;
+
+  @Prop({ default: false })
+  isAssessmentStudent: boolean;
+
+  @Prop({ default: false })
+  mfaEnabled: boolean;
+
+  @Prop({ select: false })
+  mfaSecret?: string;
+
+  @Prop({ default: true })
+  isActive: boolean;
+
+  @Prop({ type: StudentProfile, default: () => ({}) })
+  studentProfile: StudentProfile;
 
   @Prop({
     enum: ['local', 'google', 'github', 'linkedin', 'otp'],
@@ -195,3 +257,8 @@ UserSchema.methods.updateStreak = function () {
   this.lastSolveDate = new Date();
   this.activityMap.set(today, (this.activityMap.get(today) || 0) + 1);
 };
+
+UserSchema.index({ isAssessmentStudent: 1 });
+UserSchema.index({ role: 1 });
+UserSchema.index({ 'studentProfile.department': 1 });
+UserSchema.index({ 'studentProfile.batch': 1 });

@@ -3,6 +3,7 @@
 import { useQuestionStore, ALL_LANGUAGES, DEFAULT_COMPILER_VERSIONS } from "../_store/useQuestionStore";
 import SectionCard from "./SectionCard";
 import { Code2, Check } from "lucide-react";
+import { ProgrammingLanguageIcon } from "@/components/ui/ProgrammingLanguageIcon";
 
 const PRESETS = [
   { label: "All Languages", langs: ALL_LANGUAGES.map((l) => l.id) },
@@ -35,7 +36,7 @@ export default function ProgrammingLanguages() {
               key={preset.label}
               type="button"
               onClick={() => applyPreset(preset.langs)}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-400 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 dark:hover:bg-indigo-500/10 dark:hover:border-indigo-500/30 dark:hover:text-indigo-400 transition-all"
+              className="px-3 py-1.5 text-xs font-medium rounded-lg border border-border dark:border-border bg-muted/50 dark:bg-card text-muted-foreground dark:text-muted-foreground hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 dark:hover:bg-indigo-500/10 dark:hover:border-indigo-500/30 dark:hover:text-indigo-400 transition-all"
             >
               {preset.label}
             </button>
@@ -52,7 +53,7 @@ export default function ProgrammingLanguages() {
                 className={`relative flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
                   isSelected
                     ? "bg-indigo-50/50 border-indigo-200 dark:bg-indigo-500/10 dark:border-indigo-500/20"
-                    : "bg-gray-50/50 border-gray-200 dark:bg-slate-800/50 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600"
+                    : "bg-muted/50/50 border-border dark:bg-card/50 dark:border-border hover:border-gray-300 dark:hover:border-slate-600"
                 }`}
                 onClick={() => toggleLanguage(lang.id)}
               >
@@ -70,8 +71,8 @@ export default function ProgrammingLanguages() {
                 {/* Icon + Name */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-base leading-none">{lang.icon}</span>
-                    <span className={`text-sm font-medium ${isSelected ? "text-gray-900 dark:text-white" : "text-gray-600 dark:text-slate-400"}`}>
+                    <ProgrammingLanguageIcon language={lang.id} className="w-5 h-5 flex-shrink-0" />
+                    <span className={`text-sm font-medium ${isSelected ? "text-foreground dark:text-white" : "text-muted-foreground dark:text-muted-foreground"}`}>
                       {lang.label}
                     </span>
                   </div>
@@ -93,14 +94,14 @@ export default function ProgrammingLanguages() {
                 if (!lang) return null;
                 return (
                   <div key={langId} className="space-y-1">
-                    <label className="text-[11px] font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider">
+                    <label className="text-[11px] font-medium text-gray-500 dark:text-muted-foreground uppercase tracking-wider">
                       {lang.label}
                     </label>
                     <input
                       type="text"
                       value={languages.compilerVersions[langId] || DEFAULT_COMPILER_VERSIONS[langId] || ""}
                       onChange={(e) => setCompilerVersion(langId, e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-mono text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                      className="w-full px-3 py-2 bg-muted/50 dark:bg-card border border-border dark:border-border rounded-lg text-xs font-mono text-foreground dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
                     />
                   </div>
                 );
@@ -109,7 +110,7 @@ export default function ProgrammingLanguages() {
           </div>
         )}
 
-        <p className="text-[11px] text-gray-400 dark:text-slate-500">
+        <p className="text-[11px] text-gray-400 dark:text-muted-foreground">
           {languages.supported.length} language{languages.supported.length !== 1 ? "s" : ""} selected
         </p>
       </div>

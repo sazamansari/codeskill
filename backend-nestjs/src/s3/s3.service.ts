@@ -4,7 +4,11 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 
@@ -76,8 +80,8 @@ export class S3Service {
       // We need to extract 'folder/filename.ext'
       const url = new URL(fileUrl);
       // pathname has a leading slash, e.g., '/avatars/uuid.ext'
-      const key = url.pathname.substring(1); 
-      
+      const key = url.pathname.substring(1);
+
       if (!key) return;
 
       const command = new DeleteObjectCommand({
@@ -89,7 +93,7 @@ export class S3Service {
       this.logger.log(`Successfully deleted old file from S3: ${key}`);
     } catch (error) {
       this.logger.error(`Error deleting file from S3: ${fileUrl}`, error);
-      // We usually don't throw an error here to prevent failing the avatar update 
+      // We usually don't throw an error here to prevent failing the avatar update
       // if the old file is already deleted or missing.
     }
   }

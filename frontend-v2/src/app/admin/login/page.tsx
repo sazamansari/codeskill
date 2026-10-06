@@ -9,7 +9,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { Loader2, ShieldCheck, AlertCircle } from "lucide-react";
+import {  ShieldCheck, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { useRef } from "react";
 
 const adminLoginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -22,13 +26,30 @@ type AdminLoginFormValues = z.infer<typeof adminLoginSchema>;
 export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const { adminLogin, adminLoginVerify } = useAuth();
   const router = useRouter();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    const mm = gsap.matchMedia();
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      const tl = gsap.timeline();
+      tl.from(".brand-logo", { opacity: 0, y: 20, duration: 0.6 })
+        .from(".brand-title", { opacity: 0, y: 15, duration: 0.4 }, "-=0.4")
+        .from(".brand-description", { opacity: 0, y: 10, duration: 0.4 }, "-=0.3")
+        .from(".brand-feature", { opacity: 0, x: -10, stagger: 0.1, duration: 0.4 }, "-=0.2")
+        .from(".login-card", { opacity: 0, y: 25, scale: 0.97, duration: 0.6 }, 0.2)
+        .from(".login-element", { opacity: 0, y: 10, stagger: 0.05, duration: 0.3 }, "-=0.3");
+    });
+  }, { scope: containerRef });
 
   const form = useForm<AdminLoginFormValues>({
     resolver: zodResolver(adminLoginSchema),
     defaultValues: { email: "", password: "" },
+    mode: "onSubmit",
+    reValidateMode: "onChange",
   });
 
   const onSubmit = async (data: AdminLoginFormValues) => {
@@ -42,7 +63,7 @@ export default function AdminLoginPage() {
           setShowOTP(true);
           if (res.message) setInfoMessage(res.message);
         } else {
-          router.push("/admin/dashboard");
+          window.location.href = "/admin/dashboard";
         }
       } else {
         if (!data.otp) {
@@ -50,7 +71,7 @@ export default function AdminLoginPage() {
           return;
         }
         await adminLoginVerify({ email: data.email, otp: data.otp });
-        router.push("/admin/dashboard");
+        window.location.href = "/admin/dashboard";
       }
     } catch (err: any) {
       form.setError("root", { type: "manual", message: err.message || "Failed to authenticate admin" });
@@ -60,105 +81,136 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground font-sans">
-      
-      {/* Left Column - Brand/Graphic (Hidden on smaller screens) */}
-      <div className="hidden lg:flex flex-1 relative bg-black items-center justify-center overflow-hidden flex-col p-12 text-white text-center">
-        {/* Abstract Grid / Red Admin Background */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:32px_32px] opacity-20" />
-        <div className="absolute left-1/2 top-1/2 -z-10 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-red-500/20 blur-[120px]" />
-        
-        {/* Brand Content */}
-        <div className="relative z-10 max-w-md flex flex-col items-center">
-          <Link href="/" className="w-16 h-16 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center mb-8 shadow-2xl hover:bg-white/20 transition-colors">
-            <ShieldCheck className="w-8 h-8 text-red-400" />
-          </Link>
-          <h1 className="text-4xl font-bold tracking-tight mb-4">
-            CodeSkill<br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-rose-500">Admin Portal</span>
-          </h1>
-          <p className="text-lg text-gray-400">
-            Secure access for platform administrators. Manage content, monitor activity, and configure system settings.
-          </p>
+    <div ref={containerRef} className="flex min-h-screen bg-[#F8FAFC] text-zinc-900 font-sans">
+      {/* Left Column - Institutional Branding */}
+      <div className="hidden lg:flex w-1/2 relative bg-white border-r border-[#E5E7EB] flex-col p-12 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
+        <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full">
+          {/* Logo Area */}
+          <div className="mb-10">
+            <img src="/logo-dark.svg" alt="CodeSkill" className="h-10 w-auto mb-6 brand-logo" />
+            <h1 className="text-3xl font-bold tracking-tight text-zinc-900 mb-2 brand-title">CodeSkill Admin</h1>
+            <h2 className="text-lg font-medium text-zinc-600 mb-4 brand-title">Assessment & Examination Administration</h2>
+            <p className="text-sm text-zinc-500 leading-relaxed max-w-md brand-description">
+              Secure assessment administration for Chandigarh University.
+            </p>
+          </div>
+
+          {/* Feature List */}
+          <div className="space-y-4">
+            {[
+              "Question Bank Management",
+              "Live Examination Monitoring",
+              "Exam Scheduling",
+              "Candidate Submission Auditing"
+            ].map((feature, i) => (
+              <div key={i} className="brand-feature flex items-center gap-3 text-[13px] font-medium text-zinc-700">
+                <div className="flex items-center justify-center w-5 h-5 rounded-full bg-[#FFF7D6] text-[#D99F00]">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                </div>
+                {feature}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer Attribution */}
+        <div className="mt-auto pt-8 border-t border-[#E5E7EB] flex items-center gap-4">
+          <div className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
+            Developed for
+          </div>
+          <img src="/cu-logo.png" alt="Chandigarh University" className="h-12 w-auto object-contain grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-300" />
         </div>
       </div>
 
       {/* Right Column - Admin Login Form */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 relative bg-white dark:bg-zinc-950">
-        {/* Subtle Background Pattern for Right Side */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] -z-10" />
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 relative bg-[#F8FAFC]">
+        {/* Mobile Attribution (Visible only on mobile) */}
+        <div className="absolute top-6 left-6 lg:hidden flex items-center gap-3">
+          <img src="/logo-dark.svg" alt="CodeSkill" className="h-6 w-auto" />
+          <div className="w-px h-4 bg-border" />
+          <img src="/cu-logo.png" alt="Chandigarh University" className="h-6 w-auto" />
+        </div>
 
-        <div className="w-full max-w-[420px] flex flex-col gap-6">
-          
-          {/* Mobile Logo Header */}
-          <div className="flex lg:hidden flex-col items-center text-center mb-2">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-black/5 bg-card border border-border">
-              <ShieldCheck className="w-7 h-7 text-red-500" />
+        <div className="w-full max-w-sm flex flex-col login-card">
+          {/* Header */}
+          <div className="flex flex-col items-center text-center mb-8">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-600 text-[10px] font-bold tracking-widest uppercase mb-4">
+              Admin Portal
             </div>
-          </div>
-
-          <div className="mb-4 text-center">
-            <h2 className="text-3xl font-bold tracking-tight mb-2">Admin Access</h2>
-            <p className="text-sm text-muted-foreground mt-4">Authorized personnel only.</p>
+            <h2 className="text-2xl font-bold tracking-tight text-zinc-900 mb-2">CodeSkill Admin</h2>
+            <p className="text-sm text-zinc-500">Sign in to access the assessment administration console.</p>
           </div>
 
           {/* Form */}
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            
             {form.formState.errors.root && (
-              <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
-                <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                <p className="text-sm font-medium text-red-500 leading-snug">
+              <div className="p-3 bg-[#FEF2F2] border border-[#FCA5A5] rounded-[8px] flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-[#DC2626] shrink-0 mt-0.5" />
+                <p className="text-sm font-medium text-[#991B1B] leading-snug">
                   {form.formState.errors.root.message}
                 </p>
               </div>
             )}
 
             {infoMessage && (
-              <div className="p-4 bg-blue-500/10 border border-blue-500/50 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
-                <ShieldCheck className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-                <p className="text-sm font-medium text-blue-500 leading-snug">
+              <div className="p-3 bg-[#F0FDF4] border border-[#BBF7D0] rounded-[8px] flex items-start gap-2.5">
+                <ShieldCheck className="w-4 h-4 text-[#16A34A] shrink-0 mt-0.5" />
+                <p className="text-sm font-medium text-[#166534] leading-snug">
                   {infoMessage}
                 </p>
               </div>
             )}
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 login-element">
+              <label className="text-[13px] font-semibold text-[#111827]">Email / Institutional ID</label>
               <input
                 type="email"
-                placeholder="Admin Email"
-                disabled={showOTP}
+                placeholder="admin@institution.edu"
+                disabled={showOTP || isLoading}
                 {...form.register("email")}
-                className="w-full h-12 bg-transparent border border-border rounded-md px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm disabled:opacity-50"
+                className={`w-full h-12 bg-white border ${form.formState.errors.email ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]' : 'border-[#D1D5DB] focus:border-[#F5B800] focus:ring-[#F5B800]'} rounded-[8px] px-3 text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-1 transition-all text-sm disabled:opacity-50`}
               />
               {form.formState.errors.email && (
-                <p className="text-xs text-destructive mt-1">{form.formState.errors.email.message}</p>
+                <p className="text-[12px] font-medium text-[#DC2626] mt-1">{form.formState.errors.email.message}</p>
               )}
             </div>
 
-            <div className="space-y-1.5">
-              <input
-                type="password"
-                placeholder="Password"
-                disabled={showOTP}
-                {...form.register("password")}
-                className="w-full h-12 bg-transparent border border-border rounded-md px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm disabled:opacity-50"
-              />
+            <div className="space-y-1.5 login-element relative">
+              <label className="text-[13px] font-semibold text-[#111827]">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  disabled={showOTP || isLoading}
+                  {...form.register("password")}
+                  className={`w-full h-12 bg-white border ${form.formState.errors.password ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]' : 'border-[#D1D5DB] focus:border-[#F5B800] focus:ring-[#F5B800]'} rounded-[8px] px-3 pr-10 text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-1 transition-all text-sm disabled:opacity-50`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#6B7280] transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
               {form.formState.errors.password && (
-                <p className="text-xs text-destructive mt-1">{form.formState.errors.password.message}</p>
+                <p className="text-[12px] font-medium text-[#DC2626] mt-1">{form.formState.errors.password.message}</p>
               )}
             </div>
 
             {showOTP && (
-              <div className="space-y-1.5 pt-2">
+              <div className="space-y-1.5 pt-2 login-element">
+                <label className="text-[13px] font-semibold text-[#111827]">Verification Code</label>
                 <input
                   type="text"
-                  placeholder="6-Digit Verification Code"
+                  placeholder="000000"
+                  disabled={isLoading}
                   {...form.register("otp")}
-                  className="w-full h-12 bg-transparent border border-border rounded-md px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm tracking-widest font-medium text-center"
+                  className={`w-full h-12 bg-white border ${form.formState.errors.otp ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]' : 'border-[#D1D5DB] focus:border-[#F5B800] focus:ring-[#F5B800]'} rounded-[8px] px-3 text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-1 transition-all text-sm tracking-widest font-mono text-center`}
                 />
                 {form.formState.errors.otp && (
-                  <p className="text-xs text-destructive mt-1">{form.formState.errors.otp.message}</p>
+                  <p className="text-[12px] font-medium text-[#DC2626] mt-1">{form.formState.errors.otp.message}</p>
                 )}
               </div>
             )}
@@ -166,15 +218,27 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 rounded-md bg-zinc-900 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-black font-semibold text-sm transition-all flex items-center justify-center mt-2 disabled:opacity-70 shadow-md"
+              className="w-full h-[46px] rounded-[10px] bg-[#F5B800] text-[#111827] font-semibold text-[14px] transition-colors flex items-center justify-center mt-6 disabled:opacity-70 shadow-sm login-element btn-interactive"
+              onMouseEnter={(e) => gsap.to(e.currentTarget, { scale: 1.015, backgroundColor: "#D99F00", duration: 0.15 })}
+              onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, backgroundColor: "#F5B800", duration: 0.15 })}
+              onMouseDown={(e) => gsap.to(e.currentTarget, { scale: 0.98, duration: 0.15 })}
+              onMouseUp={(e) => gsap.to(e.currentTarget, { scale: 1.015, duration: 0.15 })}
             >
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (showOTP ? "Verify Login" : "Authenticate as Admin")}
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <Spinner className="w-4 h-4 animate-spin text-[#111827]" />
+                  <span>Authenticating...</span>
+                </div>
+              ) : (showOTP ? "Verify Login" : "Authenticate as Admin")}
             </button>
           </form>
           
-          <div className="mt-6 pt-6 border-t border-border text-center">
-            <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Return to Homepage
+          <div className="mt-8 text-center flex flex-col items-center gap-4">
+            <p className="text-[11px] font-medium text-zinc-500">
+              Authorized faculty and examination controllers only.
+            </p>
+            <Link href="/" className="text-xs font-semibold text-zinc-600 hover:text-zinc-900 transition-colors">
+              Return to Portal Home
             </Link>
           </div>
         </div>

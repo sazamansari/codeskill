@@ -15,9 +15,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Server error';
+    let code = 'INTERNAL_ERROR';
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
+      code = HttpStatus[status] || 'REQUEST_ERROR';
       const res = exception.getResponse();
       message =
         typeof res === 'string'
@@ -28,13 +30,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message = message.join(', ');
       }
     } else if (exception instanceof Error) {
-      message = exception.message;
       console.error('Unhandled Exception:', exception.stack);
     }
 
     response.status(status).json({
       success: false,
       message,
+      error: { code, message },
     });
   }
 }

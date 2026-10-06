@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { BullModule } from '@nestjs/bullmq';
 import { ExecutionController } from './execution.controller';
 import { ExecutionService } from './execution.service';
+import { AzureExecutionService } from './azure-execution.service';
 import { JudgeProcessor } from './judge.processor';
 import {
   Submission,
@@ -15,7 +17,12 @@ import {
   ProblemTestCase,
   ProblemTestCaseSchema,
 } from '../database/schemas/problem-testcase.schema';
+import { User, UserSchema } from '../database/schemas/user.schema';
 import { GatewayModule } from '../gateway/gateway.module';
+import { RedisModule } from '../redis/redis.module';
+
+const judgeProviders =
+  process.env.PROCESS_ROLE === 'judge' ? [JudgeProcessor] : [];
 
 @Module({
   imports: [
@@ -23,11 +30,16 @@ import { GatewayModule } from '../gateway/gateway.module';
       { name: Submission.name, schema: SubmissionSchema },
       { name: ProblemMetadata.name, schema: ProblemMetadataSchema },
       { name: ProblemTestCase.name, schema: ProblemTestCaseSchema },
+      { name: User.name, schema: UserSchema },
     ]),
+    BullModule.registerQueue({
+      name: 'submissions',
+    }),
     GatewayModule,
+    RedisModule,
   ],
   controllers: [ExecutionController],
-  providers: [ExecutionService, JudgeProcessor],
-  exports: [ExecutionService],
+  providers: [ExecutionService, AzureExecutionService, ...judgeProviders],
+  exports: [ExecutionService, AzureExecutionService],
 })
 export class ExecutionModule {}

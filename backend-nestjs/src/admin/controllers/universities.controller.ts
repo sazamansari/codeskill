@@ -36,9 +36,18 @@ export class AdminUniversitiesController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Approve or create a university' })
-  async createUniversity(@Body() body: any) {
-    return { success: true, message: 'University action completed' };
+  @ApiOperation({ summary: 'Create/register a university' })
+  async createUniversity(
+    @Body()
+    body: {
+      name: string;
+      domain?: string;
+      website?: string;
+      location?: string;
+      contactEmail?: string;
+    },
+  ) {
+    return this.adminService.createUniversity(body);
   }
 
   @Put(':id/verify')

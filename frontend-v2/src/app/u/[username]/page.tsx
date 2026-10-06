@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { usersAPI } from "@/config/api";
 import { 
-  Loader2, 
+   
   User as UserIcon, 
   CheckCircle2, 
   Trophy, 
@@ -17,6 +17,7 @@ import {
   Code2
 } from "lucide-react";
 import Link from "next/link";
+import { Spinner } from "@/components/ui/spinner";
 
 type PublicProfile = {
   _id: string;
@@ -71,7 +72,7 @@ export default function PublicProfilePage() {
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[calc(100vh-64px)] bg-background">
-        <Loader2 className="w-10 h-10 animate-spin text-emerald-500" />
+        <Spinner className="w-10 h-10 animate-spin text-emerald-500" />
       </div>
     );
   }
@@ -210,7 +211,7 @@ export default function PublicProfilePage() {
               
               <div className="bg-card rounded-2xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <Target className="w-16 h-16 text-blue-500" />
+                  <Target className="w-16 h-16 text-primary" />
                 </div>
                 <div className="relative z-10">
                   <p className="text-sm font-medium text-muted-foreground mb-1">Total Submissions</p>

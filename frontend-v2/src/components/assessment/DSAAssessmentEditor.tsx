@@ -1,0 +1,964 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import {
+  Play,
+  CheckCircle2,
+  XCircle,
+  Terminal,
+  Code2,
+  ChevronDown,
+  RotateCcw,
+  Copy,
+  Check,
+  AlertTriangle,
+  Clock,
+  Cpu,
+  Layers,
+  Sparkles,
+  Send,
+  HelpCircle,
+} from "lucide-react";
+import { azureRunAPI } from "@/config/api";
+import { Spinner } from "@/components/ui/spinner";
+
+const LANGUAGES = [
+  { value: "python", label: "Python 3", ext: "py" },
+  { value: "cpp", label: "C++ (GCC)", ext: "cpp" },
+  { value: "java", label: "Java (OpenJDK)", ext: "java" },
+  { value: "javascript", label: "JavaScript (Node.js)", ext: "js" },
+  { value: "c", label: "C (Clang)", ext: "c" },
+  { value: "go", label: "Go", ext: "go" },
+];
+
+const DEFAULT_STARTER_CODE: Record<string, string> = {
+  python: `import sys
+
+def solve():
+    """
+    Read input from standard input (sys.stdin)
+    and print the output to standard output (print)
+    """
+    input_data = sys.stdin.read().split()
+    if not input_data:
+        return
+
+    # Write your solution logic here
+    print(" ".join(input_data))
+
+if __name__ == "__main__":
+    solve()
+`,
+  cpp: `#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+    // Fast I/O
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    // Read input from standard input (cin)
+    string token;
+    while (cin >> token) {
+        // Write your solution logic here
+        cout << token << " ";
+    }
+    cout << "\\n";
+
+    return 0;
+}
+`,
+  java: `import java.util.*;
+import java.io.*;
+import { Spinner } from "@/components/ui/spinner";
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        // Read input from standard input (System.in)
+        while (scanner.hasNext()) {
+            String token = scanner.next();
+            // Write your solution logic here
+            System.out.print(token + " ");
+        }
+        System.out.println();
+        scanner.close();
+    }
+}
+`,
+  javascript: `const fs = require('fs');
+
+function main() {
+    // Read input from standard input (stdin)
+    const input = fs.readFileSync(0, 'utf-8').trim();
+    if (!input) return;
+
+    // Write your solution logic here
+    console.log(input);
+}
+
+main();
+`,
+  c: `#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main() {
+    char buffer[1024];
+
+    // Read input from standard input (stdin)
+    while (scanf("%1023s", buffer) == 1) {
+        // Write your solution logic here
+        printf("%s ", buffer);
+    }
+    printf("\\n");
+
+    return 0;
+}
+`,
+  go: `package main
+
+import (
+    "bufio"
+    "fmt"
+    "os"
+)
+
+func main() {
+    scanner := bufio.NewScanner(os.Stdin)
+    // Read input from standard input
+    for scanner.Scan() {
+        // Write your solution logic here
+        fmt.Println(scanner.Text())
+    }
+}
+`,
+};
+
+interface TestCase {
+  id?: string;
+  input: string;
+  output?: string;
+  expected?: string;
+  explanation?: string;
+  isHidden?: boolean;
+}
+
+interface DSAAssessmentEditorProps {
+  question: {
+    _id: string;
+    questionIndex: number;
+    question: string;
+    topic: string;
+    subtopic?: string;
+    difficulty: string;
+    marks: number;
+    starterCode?: string;
+    codeSnippet?: string;
+    language?: string;
+    constraints?: string;
+    timeLimit?: number;
+    memoryLimit?: number;
+    testCases?: TestCase[];
+  };
+  savedResponse?: {
+    code?: string;
+    language?: string;
+    testCasesPassed?: number;
+    totalTestCases?: number;
+    status?: string;
+  };
+  onSave: (code: string, language: string, testCasesPassed: number, totalTestCases: number) => void;
+  onNext?: () => void;
+  isLastQuestion?: boolean;
+}
+
+export default function DSAAssessmentEditor({
+  question,
+  savedResponse,
+  onSave,
+  onNext,
+  isLastQuestion = false,
+}: DSAAssessmentEditorProps) {
+  const initialLang = savedResponse?.language || question.language || "python";
+  const [language, setLanguage] = useState(initialLang);
+
+  // Initialize code from saved response, or question starterCode, or language template
+  const getInitialCode = (lang: string) => {
+    if (savedResponse?.code && savedResponse.code.trim().length > 0) {
+      if (!savedResponse.language || savedResponse.language === lang) {
+        return savedResponse.code;
+      }
+    }
+    if (question.starterCode && question.starterCode.trim().length > 0) {
+      if (!question.language || question.language.toLowerCase() === lang.toLowerCase()) {
+        return question.starterCode;
+      }
+    }
+    return DEFAULT_STARTER_CODE[lang] || DEFAULT_STARTER_CODE.python;
+  };
+
+  const [code, setCode] = useState(() => getInitialCode(initialLang));
+  const [codeByLang, setCodeByLang] = useState<Record<string, string>>(() => {
+    const initMap: Record<string, string> = {};
+    initMap[initialLang] = getInitialCode(initialLang);
+    return initMap;
+  });
+  const [showLangDropdown, setShowLangDropdown] = useState(false);
+  const [selectedTestCaseIndex, setSelectedTestCaseIndex] = useState(0);
+  const [customInput, setCustomInput] = useState("");
+  const [bottomTab, setBottomTab] = useState<"testcases" | "custom_input" | "output">("testcases");
+
+  // Runner execution state
+  const [isRunning, setIsRunning] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [runResult, setRunResult] = useState<any>(null);
+  const [copied, setCopied] = useState(false);
+  const [saveSuccessNotice, setSaveSuccessNotice] = useState<string | null>(null);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Normalize test cases from question
+  const sampleCases: TestCase[] = (question.testCases || []).filter((tc) => !tc.isHidden);
+
+  // Update code when question changes
+  useEffect(() => {
+    const lang = savedResponse?.language || question.language || "python";
+    const initialForQuestion = getInitialCode(lang);
+    setLanguage(lang);
+    setCode(initialForQuestion);
+    setCodeByLang({ [lang]: initialForQuestion });
+    setRunResult(null);
+    setSaveSuccessNotice(null);
+    setSelectedTestCaseIndex(0);
+    setCustomInput(sampleCases[0]?.input || "");
+  }, [question._id]);
+
+  // Language switch handler - caches previous language code and retrieves/generates new language boilerplate
+  const handleLanguageChange = (newLang: string) => {
+    if (newLang === language) {
+      setShowLangDropdown(false);
+      return;
+    }
+
+    // Save current code to cache for active language
+    const updatedCache = { ...codeByLang, [language]: code };
+
+    // Determine target code for new language
+    let targetCode = updatedCache[newLang];
+    if (!targetCode || targetCode.trim().length === 0) {
+      if (question.starterCode && (!question.language || question.language.toLowerCase() === newLang.toLowerCase())) {
+        targetCode = question.starterCode;
+      } else {
+        targetCode = DEFAULT_STARTER_CODE[newLang] || DEFAULT_STARTER_CODE.python;
+      }
+      updatedCache[newLang] = targetCode;
+    }
+
+    setCodeByLang(updatedCache);
+    setCode(targetCode);
+    setLanguage(newLang);
+    setShowLangDropdown(false);
+    setRunResult(null);
+
+    const langObj = LANGUAGES.find((l) => l.value === newLang);
+    setSaveSuccessNotice(`Switched to ${langObj?.label || newLang}. Ready to compile.`);
+    setTimeout(() => setSaveSuccessNotice(null), 2500);
+  };
+
+  // Reset starter code
+  const handleResetCode = (forceDefault: boolean = false) => {
+    let template = DEFAULT_STARTER_CODE[language] || DEFAULT_STARTER_CODE.python;
+    if (!forceDefault && question.starterCode && (!question.language || question.language.toLowerCase() === language.toLowerCase())) {
+      template = question.starterCode;
+    }
+    setCode(template);
+    setCodeByLang((prev) => ({ ...prev, [language]: template }));
+    setRunResult(null);
+    const langLabel = LANGUAGES.find((l) => l.value === language)?.label || language;
+    setSaveSuccessNotice(`Boilerplate template for ${langLabel} restored.`);
+    setTimeout(() => setSaveSuccessNotice(null), 3000);
+  };
+
+  // Copy code
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Handle Tab key inside code editor
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const val = textarea.value;
+      const nextVal = val.substring(0, start) + "    " + val.substring(end);
+      setCode(nextVal);
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + 4;
+      }, 0);
+    }
+  };
+
+  // Line numbers calculation
+  const lineCount = Math.max(1, code.split("\n").length);
+  const lineNumbers = Array.from({ length: lineCount }, (_, i) => i + 1);
+
+  // Run Test (Single or Sample cases)
+  const handleRunTest = async () => {
+    setIsRunning(true);
+    setBottomTab("output");
+    setRunResult(null);
+
+    try {
+      if (bottomTab === "custom_input" && customInput.trim()) {
+        // Run with custom stdin
+        const res = await azureRunAPI.run({
+          code,
+          language,
+          stdin: customInput,
+          timeoutMs: (question.timeLimit || 2000) * 2,
+        });
+        setRunResult(res.data);
+      } else if (sampleCases.length > 0) {
+        // Run against all sample test cases
+        const payloadTestCases = sampleCases.map((tc, idx) => ({
+          id: tc.id || String(idx + 1),
+          input: tc.input || "",
+          expected: tc.expected || tc.output || "",
+        }));
+
+        const res = await azureRunAPI.run({
+          code,
+          language,
+          testCases: payloadTestCases,
+          timeoutMs: 12000,
+        });
+        setRunResult(res.data);
+      } else {
+        // Run without testcases
+        const res = await azureRunAPI.run({
+          code,
+          language,
+          stdin: customInput || "",
+          timeoutMs: 8000,
+        });
+        setRunResult(res.data);
+      }
+    } catch (err: any) {
+      setRunResult({
+        success: false,
+        results: [
+          {
+            id: "err",
+            passed: false,
+            status: "system_error",
+            output: "",
+            error: err.response?.data?.message || err.message || "Failed to execute code",
+          },
+        ],
+        result: {
+          status: "system_error",
+          stdout: "",
+          stderr: err.response?.data?.message || err.message || "Execution error",
+        },
+      });
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  // Submit and Save Solution
+  const handleSubmitSolution = async () => {
+    setIsSubmitting(true);
+    setBottomTab("output");
+    try {
+      const payloadCases =
+        sampleCases.length > 0
+          ? sampleCases.map((tc, idx) => ({
+              id: tc.id || String(idx + 1),
+              input: tc.input || "",
+              expected: tc.expected || tc.output || "",
+            }))
+          : [{ id: "1", input: customInput || "", expected: "" }];
+
+      const res = await azureRunAPI.run({
+        code,
+        language,
+        testCases: payloadCases,
+        timeoutMs: 15000,
+      });
+
+      const data = res.data;
+      setRunResult(data);
+
+      const passed = data.passedCount ?? data.results?.filter((r: any) => r.passed).length ?? 0;
+      const total = data.totalCount ?? data.results?.length ?? payloadCases.length;
+
+      onSave(code, language, passed, total);
+
+      setSaveSuccessNotice(
+        `Code verified! Passed ${passed} of ${total} test cases (${Math.round((passed / Math.max(1, total)) * 100)}%). Answer marked and saved.`
+      );
+      setTimeout(() => setSaveSuccessNotice(null), 5000);
+    } catch (err: any) {
+      console.error("Evaluation error:", err);
+      // Fallback save anyway so student's code is not lost
+      onSave(code, language, 0, sampleCases.length || 1);
+      setSaveSuccessNotice("Code saved successfully.");
+      setTimeout(() => setSaveSuccessNotice(null), 4000);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resultsList = runResult?.results || (runResult?.result ? [runResult.result] : []);
+  const allPassed =
+    resultsList.length > 0 && resultsList.every((r: any) => r.passed || r.status === "accepted" || r.status === "success");
+
+  return (
+    <div className="flex-1 flex flex-col xl:flex-row gap-4 min-h-[620px] max-w-full">
+      {/* ─────────────────────────────────────────────────────────── */}
+      {/* LEFT PANE: Problem Statement, Constraints, Sample Cases     */}
+      {/* ─────────────────────────────────────────────────────────── */}
+      <div className="w-full xl:w-[45%] flex flex-col bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+        {/* Problem Header Ribbon */}
+        <div className="p-4 sm:p-5 border-b border-border bg-muted/20 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5">
+              <Code2 className="w-3.5 h-3.5" /> Algorithmic Coding
+            </span>
+            <span
+              className={`px-2 py-0.5 rounded-md text-[11px] font-bold uppercase border ${
+                question.difficulty === "hard"
+                  ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                  : question.difficulty === "medium"
+                  ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                  : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+              }`}
+            >
+              {question.difficulty || "medium"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3 text-xs font-mono">
+            <span className="text-emerald-400 font-bold">+{question.marks || 5} marks</span>
+            <span className="text-muted-foreground flex items-center gap-1">
+              <Clock className="w-3 h-3 text-primary" /> {question.timeLimit ? `${question.timeLimit / 1000}s` : "2.0s"}
+            </span>
+          </div>
+        </div>
+
+        {/* Problem Description Body */}
+        <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-6 text-sm">
+          {/* Title */}
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold text-foreground tracking-tight leading-snug">
+              {question.question}
+            </h2>
+            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+              <span>{question.topic}</span>
+              {question.subtopic && <span>• {question.subtopic}</span>}
+            </div>
+          </div>
+
+          {/* Constraints Card */}
+          <div className="rounded-xl border border-border bg-muted/30 p-3.5 space-y-2">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              <Cpu className="w-3.5 h-3.5 text-primary" /> Constraints & Limits
+            </div>
+            <div className="text-xs text-foreground font-mono space-y-1">
+              <div>• Time Limit: {question.timeLimit ? `${question.timeLimit / 1000}s` : "2.0 seconds"}</div>
+              <div>• Memory Limit: {question.memoryLimit ? `${question.memoryLimit}MB` : "256 MB"}</div>
+              {question.constraints && (
+                <div className="text-muted-foreground whitespace-pre-line pt-1">
+                  {question.constraints}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Example Test Cases (LeetCode Style) */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-primary" /> Examples & Test Cases
+            </h3>
+
+            {sampleCases.length > 0 ? (
+              sampleCases.map((tc, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-xl border border-border/80 bg-zinc-950/60 p-4 space-y-2.5 font-mono text-xs"
+                >
+                  <div className="font-sans font-bold text-foreground text-xs flex items-center justify-between">
+                    <span>Example {idx + 1}</span>
+                    <button
+                      onClick={() => {
+                        setSelectedTestCaseIndex(idx);
+                        setCustomInput(tc.input);
+                        setBottomTab("testcases");
+                      }}
+                      className="text-[11px] text-primary hover:underline font-mono"
+                    >
+                      Load in Console
+                    </button>
+                  </div>
+
+                  <div>
+                    <span className="text-muted-foreground font-semibold">Input:</span>
+                    <pre className="mt-1 p-2 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-200 overflow-x-auto whitespace-pre-wrap">
+                      {tc.input}
+                    </pre>
+                  </div>
+
+                  <div>
+                    <span className="text-muted-foreground font-semibold">Expected Output:</span>
+                    <pre className="mt-1 p-2 rounded-lg bg-zinc-900 border border-zinc-800 text-emerald-400 font-bold overflow-x-auto whitespace-pre-wrap">
+                      {tc.expected || tc.output}
+                    </pre>
+                  </div>
+
+                  {tc.explanation && (
+                    <div className="text-[11px] text-muted-foreground font-sans pt-1 border-t border-zinc-800/80">
+                      <strong className="text-foreground">Explanation:</strong> {tc.explanation}
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-muted-foreground italic">
+                Read input from standard input (stdin) and write solution to standard output (stdout).
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ─────────────────────────────────────────────────────────── */}
+      {/* RIGHT PANE: Code Editor & Interactive Test Runner Console   */}
+      {/* ─────────────────────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col bg-zinc-950 border border-border rounded-2xl overflow-hidden shadow-sm min-h-[580px]">
+        {/* Editor Toolbar */}
+        <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-900 border-b border-zinc-800">
+          <div className="flex items-center gap-3">
+            {/* Language Selector Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowLangDropdown((p) => !p)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700/80 border border-zinc-700 rounded-lg text-xs font-semibold text-zinc-200 transition-colors"
+              >
+                <Code2 className="w-3.5 h-3.5 text-amber-400" />
+                <span>{LANGUAGES.find((l) => l.value === language)?.label || language}</span>
+                <ChevronDown className="w-3 h-3 text-zinc-400" />
+              </button>
+
+              {showLangDropdown && (
+                <div className="absolute left-0 top-full mt-1 w-44 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl z-50 py-1 overflow-hidden">
+                  {LANGUAGES.map((l) => (
+                    <button
+                      key={l.value}
+                      type="button"
+                      onClick={() => handleLanguageChange(l.value)}
+                      className={`w-full text-left px-3.5 py-2 text-xs font-medium flex items-center justify-between transition-colors ${
+                        language === l.value
+                          ? "text-amber-400 bg-amber-500/10 font-bold"
+                          : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                      }`}
+                    >
+                      <span>{l.label}</span>
+                      {language === l.value && <Check className="w-3.5 h-3.5" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <span className="text-[11px] text-zinc-500 hidden sm:inline font-mono">
+              {lineCount} lines • {code.length} chars
+            </span>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => handleResetCode(true)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white border border-zinc-700 text-[11px] font-semibold transition-colors"
+              title="Reset and load default runnable boilerplate starter template for this language"
+            >
+              <RotateCcw className="w-3 h-3 text-amber-400" />
+              <span>Reset Boilerplate</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleCopyCode}
+              className="p-1.5 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded-lg transition-colors"
+              title="Copy code"
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Code Textarea Area with Line Numbers */}
+        <div className="flex-1 flex min-h-[300px] relative bg-[#0b0c10]">
+          {/* Line Numbers Gutter */}
+          <div className="select-none py-4 pl-3 pr-2 text-right bg-[#090a0d] border-r border-zinc-800/80 font-mono text-xs text-zinc-600 w-12 shrink-0">
+            {lineNumbers.map((num) => (
+              <div key={num} className="leading-6">
+                {num}
+              </div>
+            ))}
+          </div>
+
+          {/* Editor Input */}
+          <div className="flex-1 relative">
+            <textarea
+              ref={textareaRef}
+              value={code}
+              onChange={(e) => {
+                const val = e.target.value;
+                setCode(val);
+                setCodeByLang((prev) => ({ ...prev, [language]: val }));
+              }}
+              onKeyDown={handleKeyDown}
+              spellCheck={false}
+              className="w-full h-full p-4 bg-transparent text-zinc-100 font-mono text-xs sm:text-sm leading-6 resize-none focus:outline-none selection:bg-amber-500/20"
+              style={{ tabSize: 4 }}
+              placeholder={`// Write your ${language} solution here...`}
+            />
+          </div>
+        </div>
+
+        {/* Save Notice Banner */}
+        {saveSuccessNotice && (
+          <div className="px-4 py-2 bg-emerald-500/10 border-t border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center justify-between animate-in fade-in">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <span>{saveSuccessNotice}</span>
+            </div>
+            <button
+              onClick={() => setSaveSuccessNotice(null)}
+              className="text-emerald-400/80 hover:text-emerald-300"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* ─────────────────────────────────────────────────────────── */}
+        {/* BOTTOM PANEL: Test Cases, Custom Input, Output Console      */}
+        {/* ─────────────────────────────────────────────────────────── */}
+        <div className="border-t border-zinc-800 bg-zinc-900/90 flex flex-col">
+          {/* Console Tabs */}
+          <div className="flex items-center justify-between px-4 pt-2 border-b border-zinc-800">
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setBottomTab("testcases")}
+                className={`px-3 py-1.5 text-xs font-bold rounded-t-lg transition-colors flex items-center gap-1.5 ${
+                  bottomTab === "testcases"
+                    ? "bg-zinc-800 text-zinc-100 border-t-2 border-primary"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>Test Cases</span>
+                {sampleCases.length > 0 && (
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-zinc-700 text-zinc-300">
+                    {sampleCases.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setBottomTab("custom_input")}
+                className={`px-3 py-1.5 text-xs font-bold rounded-t-lg transition-colors flex items-center gap-1.5 ${
+                  bottomTab === "custom_input"
+                    ? "bg-zinc-800 text-zinc-100 border-t-2 border-primary"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                <Terminal className="w-3.5 h-3.5" />
+                <span>Custom Input</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setBottomTab("output")}
+                className={`px-3 py-1.5 text-xs font-bold rounded-t-lg transition-colors flex items-center gap-1.5 ${
+                  bottomTab === "output"
+                    ? "bg-zinc-800 text-zinc-100 border-t-2 border-primary"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                <Cpu className="w-3.5 h-3.5" />
+                <span>Output Console</span>
+                {resultsList.length > 0 && (
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                      allPassed ? "bg-emerald-500/20 text-emerald-400" : "bg-rose-500/20 text-rose-400"
+                    }`}
+                  >
+                    {runResult.passedCount ?? resultsList.filter((r: any) => r.passed).length}/{resultsList.length}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* Micro execution status */}
+            {isRunning && (
+              <span className="text-[11px] text-amber-400 flex items-center gap-1.5 font-mono animate-pulse">
+                <Spinner className="w-3 h-3 animate-spin" /> Compiling & Running...
+              </span>
+            )}
+          </div>
+
+          {/* Tab Content Box */}
+          <div className="p-4 min-h-[140px] max-h-56 overflow-y-auto">
+            {/* TAB 1: Sample Test Cases */}
+            {bottomTab === "testcases" && (
+              <div className="space-y-3">
+                {sampleCases.length > 0 ? (
+                  <>
+                    <div className="flex flex-wrap gap-2">
+                      {sampleCases.map((tc, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setSelectedTestCaseIndex(idx);
+                            setCustomInput(tc.input);
+                          }}
+                          className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all ${
+                            selectedTestCaseIndex === idx
+                              ? "bg-primary text-primary-foreground shadow-sm"
+                              : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200"
+                          }`}
+                        >
+                          Case {idx + 1}
+                        </button>
+                      ))}
+                    </div>
+
+                    {sampleCases[selectedTestCaseIndex] && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div>
+                          <div className="text-[11px] font-bold uppercase text-zinc-400 mb-1">Input</div>
+                          <pre className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 font-mono text-xs text-zinc-200 whitespace-pre-wrap overflow-x-auto">
+                            {sampleCases[selectedTestCaseIndex].input}
+                          </pre>
+                        </div>
+                        <div>
+                          <div className="text-[11px] font-bold uppercase text-zinc-400 mb-1">Expected Output</div>
+                          <pre className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 font-mono text-xs text-emerald-400 font-bold whitespace-pre-wrap overflow-x-auto">
+                            {sampleCases[selectedTestCaseIndex].expected || sampleCases[selectedTestCaseIndex].output}
+                          </pre>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-xs text-zinc-500">No predefined test cases for this question. Use Custom Input to test.</p>
+                )}
+              </div>
+            )}
+
+            {/* TAB 2: Custom Input */}
+            {bottomTab === "custom_input" && (
+              <div className="space-y-2">
+                <div className="text-[11px] font-bold uppercase text-zinc-400">Standard Input (stdin)</div>
+                <textarea
+                  value={customInput}
+                  onChange={(e) => setCustomInput(e.target.value)}
+                  rows={4}
+                  placeholder="Enter custom input lines here..."
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs font-mono text-zinc-200 focus:outline-none focus:border-primary resize-none"
+                />
+              </div>
+            )}
+
+            {/* TAB 3: Execution Output Console */}
+            {bottomTab === "output" && (
+              <div className="space-y-3 font-mono text-xs">
+                {isRunning ? (
+                  <div className="flex items-center gap-2 text-zinc-400 py-4 justify-center">
+                    <Spinner className="w-5 h-5 animate-spin text-primary" />
+                    <span>Executing code in Microsoft Azure / Local Sandbox environment...</span>
+                  </div>
+                ) : resultsList.length > 0 ? (
+                  <div className="space-y-3">
+                    {/* Execution Summary Header */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-lg bg-zinc-950 border border-zinc-800">
+                      <div className="flex items-center gap-2">
+                        {allPassed ? (
+                          <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span>ACCEPTED</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-rose-400 font-bold">
+                            <XCircle className="w-4 h-4" />
+                            <span>FAILED SOME TEST CASES</span>
+                          </div>
+                        )}
+                        <span className="text-zinc-500">|</span>
+                        <span className="text-zinc-300 font-sans">
+                          {runResult.passedCount ?? resultsList.filter((r: any) => r.passed).length} of {resultsList.length} passed
+                        </span>
+                      </div>
+
+                      {runResult.engine && (
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono">
+                          Engine: {runResult.engine}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Detailed Per-Case Results */}
+                    {resultsList.map((res: any, idx: number) => {
+                      const isCasePassed = res.passed || res.status === "accepted" || res.status === "success";
+                      return (
+                        <div
+                          key={res.id || idx}
+                          className={`p-3 rounded-lg border text-xs space-y-2 ${
+                            isCasePassed
+                              ? "bg-emerald-500/5 border-emerald-500/20"
+                              : "bg-rose-500/5 border-rose-500/20"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {isCasePassed ? (
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                              ) : (
+                                <XCircle className="w-3.5 h-3.5 text-rose-400" />
+                              )}
+                              <span className="font-bold text-zinc-200">
+                                Case {idx + 1}: {isCasePassed ? "Passed" : (res.status || "Wrong Answer").replace(/_/g, " ").toUpperCase()}
+                              </span>
+                            </div>
+
+                            {res.executionTimeMs && (
+                              <span className="text-zinc-500 text-[11px]">
+                                {res.executionTimeMs} ms
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Stdout / Output */}
+                          {res.stdout || res.output ? (
+                            <div>
+                              <div className="text-[10px] text-zinc-400 font-sans">Your Output:</div>
+                              <pre className="p-2 rounded bg-zinc-950 border border-zinc-800 text-zinc-200 whitespace-pre-wrap">
+                                {res.stdout || res.output}
+                              </pre>
+                            </div>
+                          ) : null}
+
+                          {/* Expected (if available) */}
+                          {res.expected && !isCasePassed && (
+                            <div>
+                              <div className="text-[10px] text-zinc-400 font-sans">Expected Output:</div>
+                              <pre className="p-2 rounded bg-zinc-950 border border-zinc-800 text-emerald-400 font-bold whitespace-pre-wrap">
+                                {res.expected}
+                              </pre>
+                            </div>
+                          )}
+
+                          {/* Stderr / Error Message */}
+                          {(res.stderr || res.error) && (
+                            <div>
+                              <div className="text-[10px] text-rose-400 font-sans font-bold">Compiler / Runtime Error:</div>
+                              <pre className="p-2 rounded bg-rose-950/20 border border-rose-500/30 text-rose-300 text-[11px] whitespace-pre-wrap">
+                                {res.stderr || res.error}
+                              </pre>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-zinc-500">
+                    Click <strong className="text-zinc-300">Run Code</strong> to compile against sample test cases, or <strong className="text-zinc-300">Submit Solution</strong> to verify all test cases and save.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Action Button Bar */}
+          <div className="px-4 py-3 bg-zinc-950 border-t border-zinc-800 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-zinc-500 hidden sm:inline">
+                {savedResponse?.status === "answered" ? (
+                  <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                    <Check className="w-3.5 h-3.5" /> Solution Saved
+                  </span>
+                ) : (
+                  "Not submitted yet"
+                )}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              {/* Run Code / Run Test */}
+              <button
+                type="button"
+                onClick={handleRunTest}
+                disabled={isRunning || isSubmitting}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-bold border border-zinc-700 transition-all disabled:opacity-50"
+              >
+                {isRunning ? (
+                  <Spinner className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Play className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                )}
+                <span>Run Code</span>
+              </button>
+
+              {/* Submit Solution / Save Answer */}
+              <button
+                type="button"
+                onClick={handleSubmitSolution}
+                disabled={isRunning || isSubmitting}
+                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all shadow-md shadow-primary/20 disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <Spinner className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                )}
+                <span>Submit Solution</span>
+              </button>
+
+              {/* Next Question (Optional shortcut) */}
+              {onNext && !isLastQuestion && (
+                <button
+                  type="button"
+                  onClick={onNext}
+                  className="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground text-xs font-semibold border border-border transition-colors"
+                >
+                  <span>Next</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

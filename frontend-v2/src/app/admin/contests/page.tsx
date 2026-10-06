@@ -43,7 +43,7 @@ export default function ContestsAdminPage() {
     
     if (now < start) return { label: "Upcoming", color: "bg-blue-100 text-blue-700" };
     if (now >= start && now <= end) return { label: "Active", color: "bg-green-100 text-green-700" };
-    return { label: "Ended", color: "bg-gray-100 text-gray-700" };
+    return { label: "Ended", color: "bg-muted text-gray-700" };
   };
 
   const filteredContests = contests.filter((c) => 
@@ -136,7 +136,7 @@ export default function ContestsAdminPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          status.label === 'Upcoming' ? 'bg-blue-500/10 text-blue-500' :
+                          status.label === 'Upcoming' ? 'bg-primary/10 text-primary' :
                           status.label === 'Active' ? 'bg-green-500/10 text-green-500' :
                           'bg-muted text-muted-foreground'
                         }`}>
@@ -159,7 +159,7 @@ export default function ContestsAdminPage() {
                           <Link href={`/contests/${contest.slug}`} target="_blank" className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors" title="View Contest">
                             <Eye className="w-4 h-4" />
                           </Link>
-                          <button className="p-1.5 text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10 rounded-md transition-colors" title="Edit Contest">
+                          <button className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-colors" title="Edit Contest">
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button onClick={() => handleDelete(contest._id)} className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors" title="Delete Contest">

@@ -7,7 +7,7 @@ import { useInView } from 'react-intersection-observer';
 // Dynamically import the Editor component, completely disabling SSR to reduce bundle size
 const Editor = dynamic(() => import('@monaco-editor/react'), { 
   ssr: false,
-  loading: () => <div className="h-full w-full flex items-center justify-center bg-[#1e1e2e] text-muted-foreground animate-pulse">Loading Editor Core...</div>
+  loading: () => <div className="h-full w-full flex items-center justify-center bg-card text-muted-foreground animate-pulse">Loading Editor Core...</div>
 });
 
 interface MonacoEditorProps {
@@ -53,8 +53,8 @@ export function MonacoEditor({
         />
       ) : (
         // Lightweight visual placeholder that consumes nearly 0 memory
-        <div className="h-full w-full bg-[#1e1e2e] flex flex-col p-4 text-muted-foreground font-mono text-sm opacity-50 select-none overflow-hidden">
-           <div className="text-blue-400 mb-2">// Editor paused (out of viewport) to save memory</div>
+        <div className="h-full w-full bg-card flex flex-col p-4 text-muted-foreground font-mono text-sm opacity-50 select-none overflow-hidden">
+           <div className="text-primary mb-2">// Editor paused (out of viewport) to save memory</div>
            <div className="truncate">{value.split('\n')[0] || ''}</div>
            <div className="truncate">{value.split('\n')[1] || ''}</div>
            <div className="truncate">{value.split('\n')[2] || ''}</div>

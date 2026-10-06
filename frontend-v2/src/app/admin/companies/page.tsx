@@ -67,7 +67,7 @@ export default function AdminCompaniesPage() {
               placeholder="Search companies by name or industry..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-foreground transition-all"
+              className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground transition-all"
             />
           </div>
           <div className="text-sm text-muted-foreground font-medium">
@@ -118,10 +118,10 @@ export default function AdminCompaniesPage() {
                         </div>
                         <div>
                           <div className="font-medium text-foreground flex items-center gap-1.5">
-                            <Link href={`/${company.username}`} target="_blank" className="hover:text-blue-500 hover:underline transition-colors">
+                            <Link href={`/${company.username}`} target="_blank" className="hover:text-primary hover:underline transition-colors">
                               {company.name}
                             </Link>
-                            {company.isVerified && <BadgeCheck className="w-4 h-4 text-blue-500" />}
+                            {company.isVerified && <BadgeCheck className="w-4 h-4 text-primary" />}
                           </div>
                           <div className="text-xs text-muted-foreground font-mono mt-0.5">@{company.username}</div>
                           <div className="text-[10px] text-muted-foreground/70 mt-1 uppercase tracking-wider">
@@ -135,7 +135,7 @@ export default function AdminCompaniesPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        company.isVerified ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' : 'bg-muted text-muted-foreground border border-border'
+                        company.isVerified ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-muted text-muted-foreground border border-border'
                       }`}>
                         {company.isVerified ? "Verified" : "Unverified"}
                       </span>
@@ -150,7 +150,7 @@ export default function AdminCompaniesPage() {
                           className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1 ${
                             company.isVerified 
                               ? "bg-muted text-muted-foreground hover:bg-amber-500/10 hover:text-amber-500" 
-                              : "bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white"
+                              : "bg-primary/10 text-primary hover:bg-primary hover:text-white"
                           }`}
                           title={company.isVerified ? "Revoke Verification" : "Verify Company"}
                         >

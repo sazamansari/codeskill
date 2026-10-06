@@ -42,15 +42,15 @@ export default function CompilerMessage({ message }: CompilerMessageProps) {
   if (!message) return null;
 
   return (
-    <div className="w-full rounded-xl overflow-hidden bg-[#0D0D12] border border-red-500/20">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-[#27272A] bg-[#18181B]/50">
+    <div className="w-full rounded-xl overflow-hidden bg-muted/50 border border-red-500/20">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card/50">
         <div className="flex items-center gap-2 text-zinc-400">
           <Terminal className="w-4 h-4" />
           <span className="text-xs font-semibold uppercase tracking-wider">Compiler Message</span>
         </div>
         <button
           onClick={handleCopy}
-          className="p-1.5 text-zinc-400 hover:text-zinc-200 hover:bg-[#27272A] rounded-md transition-colors"
+          className="p-1.5 text-zinc-400 hover:text-zinc-200 hover:bg-muted rounded-md transition-colors"
           title="Copy output"
         >
           {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}

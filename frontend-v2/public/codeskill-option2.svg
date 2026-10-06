@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 220" width="100%" height="100%">
+  <defs>
+    <linearGradient id="cuCrimson" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C8102E"/>
+      <stop offset="100%" stop-color="#880B1F"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Crest / Shield Icon -->
+  <g transform="translate(45, 20)">
+    <!-- Outer Shield Frame -->
+    <path d="M90 10 C140 10 165 25 165 75 C165 130 90 185 90 185 C90 185 15 130 15 75 C15 25 40 10 90 10 Z" fill="url(#cuCrimson)" />
+    
+    <!-- Inner Shield Inset -->
+    <path d="M90 20 C132 20 153 33 153 75 C153 122 90 168 90 168 C90 168 27 122 27 75 C27 33 48 20 90 20 Z" fill="#0F172A" />
+
+    <!-- Academic Star on top -->
+    <polygon points="90,32 93,42 103,42 95,48 98,58 90,52 82,58 85,48 77,42 87,42" fill="url(#goldGrad)" />
+
+    <!-- Stylized Code Bracket glyph inside shield -->
+    <path d="M68 80 L52 100 L68 120" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M112 80 L128 100 L112 120" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Central Binary / Circuit Stem -->
+    <line x1="90" y1="75" x2="90" y2="135" stroke="url(#goldGrad)" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="90" cy="75" r="4.5" fill="#FFFFFF"/>
+    <circle cx="90" cy="135" r="4.5" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Typography -->
+  <text x="240" y="104" font-family="'Outfit', 'Inter', -apple-system, sans-serif" font-weight="900" font-size="62" letter-spacing="-1">
+    <tspan fill="#0F172A">Code</tspan><tspan fill="#C8102E">Skill</tspan>
+  </text>
+
+  <!-- Subtitle -->
+  <text x="242" y="138" font-family="'Inter', -apple-system, sans-serif" font-weight="800" font-size="14" fill="#C8102E" letter-spacing="3.5">
+    CHANDIGARH UNIVERSITY
+  </text>
+  <text x="242" y="162" font-family="'Inter', -apple-system, sans-serif" font-weight="500" font-size="12" fill="#64748B" letter-spacing="1">
+    Centre for Competitive Programming &amp; Industry Readiness
+  </text>
+</svg>

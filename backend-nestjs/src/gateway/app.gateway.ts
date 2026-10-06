@@ -76,6 +76,6 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Used to notify a specific user
   emitToUser(userId: string, event: string, data: any) {
     const roomName = `user_${userId}`;
-    this.server.to(roomName).emit(event, data);
+    this.server?.to(roomName).emit(event, data);
   }
 }

@@ -25,7 +25,7 @@ export default function ContactPage() {
         {/* Header Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-            Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500">Touch</span>
+            Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary">Touch</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Have questions about CodeSkill or want to integrate our platform into your institution? We're here to help.
@@ -38,13 +38,13 @@ export default function ContactPage() {
           <div className="lg:col-span-1 space-y-6">
             
             <div className="bg-card/50 backdrop-blur-xl p-6 rounded-3xl shadow-xl shadow-black/5 border border-border/50 flex items-start gap-4 hover:border-primary/50 transition-colors">
-              <div className="w-12 h-12 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center shrink-0">
                 <Mail className="w-6 h-6" />
               </div>
               <div>
                 <h3 className="font-semibold text-foreground mb-1">Email Us</h3>
-                <p className="text-sm text-muted-foreground mb-2">Our friendly team is here to help.</p>
-                <a href="mailto:support@evolvian.in" className="text-primary hover:underline font-medium">support@evolvian.in</a>
+                <p className="text-sm text-muted-foreground mb-2">Our technical support team is here to help.</p>
+                <a href="mailto:support@cuchd.in" className="text-primary hover:underline font-medium">support@cuchd.in</a>
               </div>
             </div>
 
@@ -53,9 +53,9 @@ export default function ContactPage() {
                 <MapPin className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-foreground mb-1">Office</h3>
-                <p className="text-sm text-muted-foreground mb-2">Come say hello at our HQ.</p>
-                <span className="text-foreground font-medium">Evolvian Headquarters<br/>Bangalore, India</span>
+                <h3 className="font-semibold text-foreground mb-1">Campus Office</h3>
+                <p className="text-sm text-muted-foreground mb-2">Technical Assessment Cell</p>
+                <span className="text-foreground font-medium">Chandigarh University<br/>NH-05, Ludhiana - Chandigarh State Hwy, Gharuan, Mohali, Punjab 140413</span>
               </div>
             </div>
 
@@ -85,11 +85,11 @@ export default function ContactPage() {
                   </div>
                   <h3 className="text-3xl font-bold tracking-tight text-foreground">Message Sent!</h3>
                   <p className="text-muted-foreground max-w-md text-lg">
-                    Thank you for reaching out to Evolvian. Our team will get back to you within 24-48 hours.
+                    Thank you for reaching out to CodeSkill Chandigarh University. Our team will get back to you within 24-48 hours.
                   </p>
                   <button 
                     onClick={() => setSubmitted(false)}
-                    className="mt-6 px-8 py-3 bg-zinc-900 dark:bg-white text-white dark:text-black font-semibold rounded-full hover:scale-105 transition-transform"
+                    className="mt-6 px-8 py-3 bg-primary text-white font-semibold rounded-full hover:bg-primary/90 transition-all shadow-md shadow-primary/20"
                   >
                     Send another message
                   </button>

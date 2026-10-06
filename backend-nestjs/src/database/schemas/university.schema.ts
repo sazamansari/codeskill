@@ -39,6 +39,9 @@ export class University {
   @Prop({ default: '' })
   description: string;
 
+  @Prop({ default: '' })
+  contactEmail: string;
+
   @Prop({
     enum: ['Tier 1', 'Tier 2', 'Tier 3', 'Unranked', ''],
     default: '',

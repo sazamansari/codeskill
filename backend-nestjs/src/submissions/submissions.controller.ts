@@ -1,7 +1,18 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { SubmissionsService } from './submissions.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { SubmissionRateLimitGuard } from '../common/guards/submission-rate-limit.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('Submissions')
@@ -12,7 +23,11 @@ export class SubmissionsController {
   constructor(private readonly submissionsService: SubmissionsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new submission' })
+  @UseGuards(SubmissionRateLimitGuard)
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiOperation({
+    summary: 'Create a new code submission and queue for isolated execution',
+  })
   async createSubmission(
     @CurrentUser('_id') userId: string,
     @Body() data: any,
@@ -21,7 +36,76 @@ export class SubmissionsController {
       userId,
       data,
     );
-    return { submission };
+    return {
+      success: true,
+      submissionId: submission._id,
+      status: submission.status,
+      message: 'Submission successfully queued for execution',
+      submission,
+    };
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get submission details by ID' })
+  async getSubmission(
+    @CurrentUser('_id') userId: string,
+    @CurrentUser('role') role: string,
+    @Param('id') id: string,
+  ) {
+    const isAdmin = role === 'admin';
+    const submission = await this.submissionsService.getSubmissionById(
+      userId,
+      id,
+      isAdmin,
+    );
+    return { success: true, submission };
+  }
+
+  @Get(':id/result')
+  @ApiOperation({ summary: 'Get submission result and status' })
+  async getSubmissionResult(
+    @CurrentUser('_id') userId: string,
+    @CurrentUser('role') role: string,
+    @Param('id') id: string,
+  ) {
+    const isAdmin = role === 'admin';
+    const result = await this.submissionsService.getSubmissionResult(
+      userId,
+      id,
+      isAdmin,
+    );
+    return { success: true, ...result };
+  }
+
+  @Post(':id/cancel')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Cancel a queued submission' })
+  async cancelSubmission(
+    @CurrentUser('_id') userId: string,
+    @CurrentUser('role') role: string,
+    @Param('id') id: string,
+  ) {
+    const isAdmin = role === 'admin';
+    return this.submissionsService.cancelSubmission(userId, id, isAdmin);
+  }
+
+  @Get('user/:userId')
+  @ApiOperation({ summary: "Get a specific user's submissions history" })
+  async getSubmissionsByUser(
+    @CurrentUser('_id') currentUserId: string,
+    @CurrentUser('role') role: string,
+    @Param('userId') targetUserId: string,
+    @Query()
+    query: {
+      page?: number;
+      limit?: number;
+      problemId?: string;
+      status?: string;
+    },
+  ) {
+    const isAdmin = role === 'admin';
+    const effectiveUserId = isAdmin ? targetUserId : currentUserId;
+    return this.submissionsService.getSubmissionsByUser(effectiveUserId, query);
   }
 
   @Get('problem/:problemId')

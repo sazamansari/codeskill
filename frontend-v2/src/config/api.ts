@@ -1,19 +1,47 @@
 import axios from "axios";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+// Dynamically determine the correct API base URL
+const getDynamicBaseURL = (): string => {
+  if (typeof window !== "undefined") {
+    const envUrl = process.env.NEXT_PUBLIC_API_URL;
+    // In browser: if envUrl is missing or points to localhost/127.0.0.1 on a non-local domain, use relative /api
+    if (
+      !envUrl ||
+      envUrl === "/api" ||
+      (envUrl.includes("localhost") &&
+        window.location.hostname !== "localhost" &&
+        window.location.hostname !== "127.0.0.1")
+    ) {
+      return "/api";
+    }
+    return envUrl;
+  }
+  return process.env.INTERNAL_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5001/api";
+};
 
-const api = axios.create({ baseURL: API_BASE });
+const api = axios.create({
+  baseURL: getDynamicBaseURL(),
+});
 
-// Attach JWT token to every request and fix URL resolution
+// Attach JWT token to every request and ensure correct baseURL/URL formatting
 api.interceptors.request.use((config) => {
-  // Normalize URL resolution:
-  // If baseURL does not end with a slash, append it.
+  // Dynamically update baseURL in browser to prevent stale baked build URLs
+  if (typeof window !== "undefined") {
+    config.baseURL = getDynamicBaseURL();
+  }
+
+  // Normalize baseURL & url resolution
   if (config.baseURL && !config.baseURL.endsWith("/")) {
     config.baseURL += "/";
   }
-  // If the request URL starts with a slash, remove it so it appends correctly to baseURL.
+
   if (config.url && config.url.startsWith("/")) {
     config.url = config.url.substring(1);
+  }
+
+  // Prevent double "/api/api" if baseURL is /api/ and url starts with api/
+  if (config.baseURL?.endsWith("/api/") && config.url?.startsWith("api/")) {
+    config.url = config.url.substring(4);
   }
 
   if (typeof window !== "undefined") {
@@ -23,15 +51,37 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 errors globally
+// Handle 401 errors globally without breaking login pages or public routes
 api.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401 && typeof window !== "undefined") {
-      localStorage.removeItem("codeskill_token");
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
+      const pathname = window.location.pathname;
+      const isAuthPage =
+        pathname === "/login" ||
+        pathname === "/register" ||
+        pathname === "/admin/login" ||
+        pathname === "/student-login" ||
+        pathname.startsWith("/forgot-password") ||
+        pathname.startsWith("/reset-password");
+
+      const reqUrl = error.config?.url || "";
+      const isAuthRequest =
+        reqUrl.includes("auth/login") ||
+        reqUrl.includes("auth/admin-login") ||
+        reqUrl.includes("auth/student-login") ||
+        reqUrl.includes("auth/register");
+
+      // Only clear token and redirect if NOT on an auth page, NOT during an auth request, and NOT on public pages
+      if (!isAuthPage && !isAuthRequest) {
+        localStorage.removeItem("codeskill_token");
+        const isPublicPage = pathname === "/" || pathname === "/problems" || pathname.startsWith("/problems/");
+        if (!isPublicPage) {
+          window.location.href = "/login";
+        }
       }
+    } else if (error.response?.status === 400 && typeof window !== "undefined") {
+      console.warn(`[API 400 Bad Request] ${error.config?.url}:`, error.response?.data);
     }
     return Promise.reject(error);
   }
@@ -56,10 +106,13 @@ export const authAPI = {
   toggleBookmark: (problemId: string) => api.put(`/auth/bookmark/${problemId}`),
   forgotPassword: (data: { email: string }) => api.post("/auth/forgot-password", data),
   resetPassword: (data: any) => api.post("/auth/reset-password", data),
+  studentLogin: (data: { uid: string; password: string }) => api.post("/auth/student-login", data),
+  forceChangePassword: (data: { currentPassword: string; newPassword: string }) => api.post("/auth/force-change-password", data),
 };
 
 export const usersAPI = {
   getPublicProfile: (identifier: string) => api.get(`/users/${identifier}`),
+  getLeaderboard: (limit = 50) => api.get(`/users/leaderboard?limit=${limit}`),
 };
 
 // ── Public Problems ──
@@ -82,7 +135,21 @@ export const submissionAPI = {
 
 export const runAPI = {
   run: (data: { code: string; language: string; testCases: any[]; config?: any }) =>
-    api.post("/execution/run", data, { timeout: 60000 }), // 60s timeout for compilation + execution
+    api.post("/execution/run", data, { timeout: 60000 }),
+  getJob: (jobId: string) => api.get(`/execution/jobs/${jobId}`, { timeout: 60000 }),
+};
+
+// Azure-backed high-scale execution (Microsoft Azure Container Instances)
+// Falls back to local executor if AZURE_COMPILER_URL is not set on the backend
+export const azureRunAPI = {
+  run: (data: {
+    code: string;
+    language: string;
+    stdin?: string;
+    testCases?: Array<{ id: string; input: string; expected: string }>;
+    timeoutMs?: number;
+    memoryMB?: number;
+  }) => api.post("/execution/azure-run", data, { timeout: 90000 }),
 };
 
 // ── Discussions ──
@@ -135,6 +202,8 @@ export const adminCompaniesAPI = {
 
 export const adminUniversitiesAPI = {
   getAll: (search = "") => api.get(`/admin/universities?search=${encodeURIComponent(search)}`),
+  create: (data: { name: string; domain?: string; website?: string; location?: string; contactEmail?: string }) =>
+    api.post("/admin/universities", data),
   toggleVerify: (id: string) => api.put(`/admin/universities/${id}/verify`),
   delete: (id: string) => api.delete(`/admin/universities/${id}`),
 };
@@ -186,6 +255,118 @@ export const campusBatchesAPI = {
 export const campusStudentsAPI = {
   getAll: (universityId: string) => api.get("/campus/students", { headers: { "X-University-ID": universityId } }),
   generateMock: (universityId: string) => api.post("/campus/students/mock", {}, { headers: { "X-University-ID": universityId } }),
+};
+
+export const adminStudentsAPI = {
+  getAll: (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    department?: string;
+    batch?: string;
+    semester?: number;
+    isActive?: string;
+  }) => api.get("/admin/students", { params }),
+  getById: (id: string) => api.get(`/admin/students/${id}`),
+  create: (data: any) => api.post("/admin/students", data),
+  update: (id: string, data: any) => api.put(`/admin/students/${id}`, data),
+  setStatus: (id: string, isActive: boolean) =>
+    api.put(`/admin/students/${id}/status`, { isActive }),
+  deactivate: (id: string) => api.delete(`/admin/students/${id}`),
+  resetPassword: (id: string) => api.post(`/admin/students/${id}/reset-password`),
+  importPreview: (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post("/admin/students/import", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  confirmImport: (validRows: any[]) =>
+    api.post("/admin/students/import/confirm", { validRows }),
+  sendCredentials: (jobIds?: string[], portalUrl?: string) =>
+    api.post("/admin/students/send-credentials", { jobIds, portalUrl }),
+  sendSingleCredential: (studentId: string, portalUrl?: string) =>
+    api.post(`/admin/students/${studentId}/send-credential`, { portalUrl }),
+  retryFailedCredentials: (portalUrl?: string) =>
+    api.post("/admin/students/retry-failed", { portalUrl }),
+  getEmailStatus: (params?: { page?: number; limit?: number; status?: string }) =>
+    api.get("/admin/students/email-status", { params }),
+};
+
+export const adminQuestionsAPI = {
+  getAll: (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    topic?: string;
+    subtopic?: string;
+    difficulty?: string;
+    questionType?: string;
+    status?: string;
+    language?: string;
+    aiGenerated?: boolean;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) => api.get("/admin/questions", { params }),
+  getById: (id: string) => api.get(`/admin/questions/${id}`),
+  create: (data: any) => api.post("/admin/questions", data),
+  update: (id: string, data: any) => api.put(`/admin/questions/${id}`, data),
+  delete: (id: string) => api.delete(`/admin/questions/${id}`),
+  approve: (id: string) => api.put(`/admin/questions/${id}/approve`),
+  reject: (id: string, reason: string) => api.put(`/admin/questions/${id}/reject`, { reason }),
+  getTopics: () => api.get("/admin/questions/topics"),
+  importPreview: (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post("/admin/questions/import", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  confirmImport: (validRows: any[]) =>
+    api.post("/admin/questions/import/confirm", { validRows }),
+  autoImport: (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post("/admin/questions/import/auto", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+};
+
+export const adminQuestionBanksAPI = {
+  getAll: (params?: { topic?: string }) => api.get("/admin/question-banks", { params }),
+  getById: (id: string) => api.get(`/admin/question-banks/${id}`),
+  create: (data: any) => api.post("/admin/question-banks", data),
+  update: (id: string, data: any) => api.put(`/admin/question-banks/${id}`, data),
+  delete: (id: string) => api.delete(`/admin/question-banks/${id}`),
+};
+
+export const adminAssessmentsAPI = {
+  getAll: (params?: { status?: string; search?: string }) =>
+    api.get("/admin/assessments", { params }),
+  getById: (id: string) => api.get(`/admin/assessments/${id}`),
+  create: (data: any) => api.post("/admin/assessments", data),
+  update: (id: string, data: any) => api.put(`/admin/assessments/${id}`, data),
+  updateStatus: (id: string, status: string) => api.put(`/admin/assessments/${id}/status`, { status }),
+  delete: (id: string) => api.delete(`/admin/assessments/${id}`),
+  getResults: (id: string) => api.get(`/admin/assessments/${id}/results`),
+};
+
+export const studentAssessmentsAPI = {
+  getMyAssessments: () => api.get("/assessments/my-assessments"),
+  getOverview: (id: string) => api.get(`/assessments/${id}/overview`),
+  startAttempt: (id: string) => api.post(`/assessments/${id}/start`),
+  saveProgress: (id: string, data: any) => api.post(`/assessments/${id}/save-progress`, data),
+  submitAttempt: (id: string, data: any) => api.post(`/assessments/${id}/submit`, data),
+  getResult: (id: string) => api.get(`/assessments/${id}/result`),
+  retakeAttempt: (id: string) => api.post(`/assessments/${id}/retake`),
+};
+
+
+export const analyticsAPI = {
+  getOverview: (assessmentId: string) => api.get(`/admin/analytics/assessment/${assessmentId}/overview`),
+  getLeaderboard: (assessmentId: string, params?: { page?: number; limit?: number }) => api.get(`/admin/analytics/assessment/${assessmentId}/leaderboard`, { params }),
+  getQuestionAnalytics: (assessmentId: string) => api.get(`/admin/analytics/assessment/${assessmentId}/questions`),
 };
 
 export default api;

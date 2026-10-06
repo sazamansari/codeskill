@@ -51,9 +51,9 @@ export class AdminUsersController {
   @Put(':id/promote')
   @ApiOperation({ summary: 'Promote user to admin' })
   async promoteUser(@Param('id') id: string) {
-    const user = await this.adminService.updateUserRole(id, { 
-      isAdmin: true, 
-      'profile.role': 'admin' 
+    const user = await this.adminService.updateUserRole(id, {
+      isAdmin: true,
+      'profile.role': 'admin',
     });
     return {
       success: true,
@@ -65,9 +65,9 @@ export class AdminUsersController {
   @Put(':id/demote')
   @ApiOperation({ summary: 'Demote user from admin' })
   async demoteUser(@Param('id') id: string) {
-    const user = await this.adminService.updateUserRole(id, { 
-      isAdmin: false, 
-      'profile.role': 'student' 
+    const user = await this.adminService.updateUserRole(id, {
+      isAdmin: false,
+      'profile.role': 'student',
     });
     return {
       success: true,
