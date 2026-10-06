@@ -538,33 +538,9 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
     : "N/A";
 
   return (
-    <div ref={containerRef} className="flex h-dvh bg-background overflow-hidden font-sans text-foreground relative">
+    <div ref={containerRef} className="flex flex-col h-dvh bg-background overflow-hidden font-sans text-foreground relative">
       
-      {/* ═══════════════════════════════════════════════════════════════════════
-          1. SLIM LEFT SIDEBAR (Activity Bar) — Modern Developer icon rail
-         ═══════════════════════════════════════════════════════════════════════ */}
-      <div className="w-12 border-r border-[#1F2937] bg-[#0A0A0A] flex flex-col items-center py-3 gap-1 z-10 shrink-0">
-        
-        {SIDEBAR_TABS.map(tab => (
-          <SidebarIcon
-            key={tab.id}
-            icon={tab.icon}
-            label={tab.label}
-            shortcut={tab.shortcut}
-            active={activeSidebarTab === tab.id}
-            onClick={() => setActiveSidebarTab(tab.id)}
-          />
-        ))}
-        
-        <div className="flex-1" />
-        <SidebarIcon icon={Settings} label="Settings" onClick={() => {}} />
-      </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          2 & 3. MAIN CONTENT — Resizable Panels
-         ═══════════════════════════════════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col min-w-0">
-        
         {/* ─── TOP NAVBAR ─────────────────────────────────────────────────── */}
         <header className="h-13 border-b border-[#1F2937] bg-[#0A0A0A] flex items-center justify-between px-4 shrink-0 gap-3">
           <div className="flex items-center gap-3 min-w-0">
@@ -668,6 +644,29 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
             
           </div>
         </header>
+
+      {/* ─── MAIN ROW ─────────────────────────────────────────────────── */}
+      <div className="flex-1 flex min-h-0 overflow-hidden">
+        
+        {/* ═══════════════════════════════════════════════════════════════════════
+            1. SLIM LEFT SIDEBAR (Activity Bar) — Modern Developer icon rail
+           ═══════════════════════════════════════════════════════════════════════ */}
+        <div className="w-12 border-r border-[#1F2937] bg-[#0A0A0A] flex flex-col items-center py-3 gap-1 z-10 shrink-0">
+          
+          {SIDEBAR_TABS.map(tab => (
+            <SidebarIcon
+              key={tab.id}
+              icon={tab.icon}
+              label={tab.label}
+              shortcut={tab.shortcut}
+              active={activeSidebarTab === tab.id}
+              onClick={() => setActiveSidebarTab(tab.id)}
+            />
+          ))}
+          
+          <div className="flex-1" />
+          <SidebarIcon icon={Settings} label="Settings" onClick={() => {}} />
+        </div>
 
         {/* ─── PANELS ──────────────────────────────────────────────────────── */}
         <div className="flex-1 min-h-0 overflow-hidden p-1.5 relative z-0">
@@ -1432,8 +1431,12 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
           </PanelGroup>
         </div>
 
-        {/* ─── BOTTOM NAVIGATION BAR (STICKY ACTION BAR) ───────────────────── */}
-        <footer className="coding-action-bar sticky bottom-0 z-40 h-[64px] border-t border-[#1F2937] bg-[#0A0A0A] flex items-center justify-between px-6 shrink-0 shadow-[0_-4px_24px_rgba(0,0,0,0.04)] pb-[env(safe-area-inset-bottom)]">
+
+      </div> {/* End MAIN ROW */}
+
+      {/* ─── BOTTOM NAVIGATION BAR (STICKY ACTION BAR) ───────────────────── */}
+      <footer className="coding-action-bar h-[64px] border-t border-[#1F2937] bg-[#0A0A0A] flex items-center justify-between px-6 shrink-0 shadow-[0_-4px_24px_rgba(0,0,0,0.04)] pb-[env(safe-area-inset-bottom)]">
+
           <div className="flex items-center gap-2">
             <Link href="/problems">
               <Button variant="ghost" className="h-[42px] px-4 text-[14px] font-semibold gap-2 text-[#9CA3AF] hover:text-[#F3F4F6] hover:bg-[#1F2937] rounded-[8px] btn-interactive">
@@ -1458,8 +1461,8 @@ export default function ProblemWorkspace({ params }: { params: Promise<{ id: str
               </Button>
             </Link>
           </div>
-        </footer>
-      </div>
+      </footer>
+
 
       {/* Login Prompt Modal */}
       <AnimatePresence>

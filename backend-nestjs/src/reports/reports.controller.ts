@@ -60,17 +60,14 @@ export class ReportsController {
     const questions = await Promise.all(
       (attempt.responses || []).map(async (resp) => {
         const q = await this.questionModel.findById(resp.questionId).lean();
-        return {
+        const item: { id: string; title: string; difficulty: string; status: 'Passed' | 'Failed' | 'Partial'; points: number } = {
           id: resp.questionId.toString(),
           title: q && q.title ? q.title : 'Unknown Question',
           difficulty: q && q.difficulty ? q.difficulty : 'Medium',
-          status: (resp.isCorrect
-            ? 'Passed'
-            : resp.marksAwarded > 0
-              ? 'Partial'
-              : 'Failed') as 'Passed' | 'Failed' | 'Partial',
+          status: resp.isCorrect ? 'Passed' : (resp.marksAwarded > 0 ? 'Partial' : 'Failed'),
           points: resp.marksAwarded || 0,
         };
+        return item;
       }),
     );
 

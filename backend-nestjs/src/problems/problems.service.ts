@@ -1,17 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import {
-  ProblemMetadata,
-  ProblemMetadataDocument,
-} from '../database/schemas/problem-metadata.schema';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, Brackets } from 'typeorm';
+import { Problem as ProblemEntity } from '../database/entities/problem.entity';
 import { CacheService } from '../redis/cache.service';
 
 @Injectable()
 export class ProblemsService {
   constructor(
-    @InjectModel(ProblemMetadata.name)
-    private problemModel: Model<ProblemMetadataDocument>,
+    @InjectRepository(ProblemEntity)
+    private problemRepository: Repository<ProblemEntity>,
     private cacheService: CacheService,
   ) {}
 
@@ -31,55 +28,53 @@ export class ProblemsService {
       return cachedData;
     }
 
-    const filter: any = {
-      $or: [
-        { visibility: { $in: ['Published', 'published', 'Public', 'public'] } },
-        { visibility: { $exists: false } },
-      ],
-    };
+    const qb = this.problemRepository.createQueryBuilder('problem');
 
-    if (query.difficulty && query.difficulty !== 'all') {
-      filter.difficulty = query.difficulty;
+    // Visibility filter
+    qb.where(new Brackets((qbInner) => {
+      qbInner.where('problem.visibility IN (:...vis)', { vis: ['Published', 'published', 'Public', 'public'] })
+             .orWhere('problem.visibility IS NULL');
+    }));
+
+    if (difficulty !== 'all') {
+      qb.andWhere('problem.difficulty = :difficulty', { difficulty });
     }
 
-    if (
-      query.category &&
-      query.category !== 'All Topics' &&
-      query.category !== 'all'
-    ) {
-      filter.categories = { $in: [new RegExp(`^${query.category}$`, 'i')] };
+    if (category !== 'All Topics' && category !== 'all') {
+      // JSONB array inclusion check in PostgreSQL
+      qb.andWhere(`EXISTS (SELECT 1 FROM jsonb_array_elements_text(problem.tags) AS t WHERE t ILIKE :category)`, { category: `%${category}%` });
     }
 
-    if (
-      query.search &&
-      typeof query.search === 'string' &&
-      query.search.trim() &&
-      query.search !== 'none'
-    ) {
-      const s = query.search.trim();
-      filter.$and = [
-        {
-          $or: [
-            { title: { $regex: s, $options: 'i' } },
-            { slug: { $regex: s, $options: 'i' } },
-            { tags: { $in: [new RegExp(s, 'i')] } },
-          ],
-        },
-      ];
+    if (search !== 'none' && search.trim()) {
+      const s = search.trim();
+      qb.andWhere(new Brackets((searchQb) => {
+        searchQb.where('problem.title ILIKE :search', { search: `%${s}%` })
+                .orWhere('problem.slug ILIKE :search', { search: `%${s}%` })
+                .orWhere(`EXISTS (SELECT 1 FROM jsonb_array_elements_text(problem.tags) AS t WHERE t ILIKE :search)`, { search: `%${s}%` });
+      }));
     }
 
-    const [problems, total] = await Promise.all([
-      this.problemModel
-        .find(filter)
-        .select(
-          'title slug difficulty categories tags stats createdAt updatedAt',
-        )
-        .sort({ createdAt: -1, _id: -1 })
-        .skip(startIndex)
-        .limit(limit)
-        .lean(),
-      this.problemModel.countDocuments(filter),
-    ]);
+    const [problems, total] = await qb
+      .select([
+        'problem.id',
+        'problem.title',
+        'problem.slug',
+        'problem.difficulty',
+        'problem.tags',
+        'problem.stats',
+        'problem.createdAt',
+        'problem.updatedAt'
+      ])
+      .orderBy('problem.createdAt', 'DESC')
+      .addOrderBy('problem.id', 'DESC')
+      .skip(startIndex)
+      .take(limit)
+      .getManyAndCount();
+
+    const mappedProblems = problems.map(p => ({
+      ...p,
+      categories: p.tags // Mapping tags to categories for frontend compatibility
+    }));
 
     const result = {
       count: problems.length,
@@ -87,7 +82,7 @@ export class ProblemsService {
       page,
       pages: Math.ceil(total / limit) || 1,
       totalPages: Math.ceil(total / limit) || 1,
-      data: problems,
+      data: mappedProblems,
     };
 
     await this.cacheService.set(cacheKey, result, 300); // cache for 5 min
@@ -102,29 +97,17 @@ export class ProblemsService {
       return cachedData;
     }
 
-    let problem = await this.problemModel
-      .findOne({
-        slug,
-        $or: [
-          {
-            visibility: { $in: ['Published', 'published', 'Public', 'public'] },
-          },
-          { visibility: { $exists: false } },
-        ],
-      })
-      .populate('statement')
-      .populate('config')
-      .populate('testCases')
-      .lean();
+    let problem = await this.problemRepository.createQueryBuilder('problem')
+      .where('problem.slug = :slug', { slug })
+      .andWhere(new Brackets((qbInner) => {
+        qbInner.where('problem.visibility IN (:...vis)', { vis: ['Published', 'published', 'Public', 'public'] })
+               .orWhere('problem.visibility IS NULL');
+      }))
+      .getOne();
 
     if (!problem) {
-      // Fallback in case visibility is not strictly matched
-      problem = await this.problemModel
-        .findOne({ slug })
-        .populate('statement')
-        .populate('config')
-        .populate('testCases')
-        .lean();
+      // Fallback
+      problem = await this.problemRepository.findOne({ where: { slug } });
     }
 
     if (!problem) {
@@ -132,17 +115,37 @@ export class ProblemsService {
     }
 
     // Don't leak reference solutions or hidden test cases in public API
-    if (problem.config && (problem.config as any).referenceSolution) {
-      delete (problem.config as any).referenceSolution;
+    if (problem.starterCode && problem.starterCode['referenceSolution']) {
+      delete problem.starterCode['referenceSolution'];
     }
 
-    if (problem.testCases && (problem.testCases as any).cases) {
-      (problem.testCases as any).cases = (
-        problem.testCases as any
-      ).cases.filter((c: any) => !c.isHidden);
+    if (problem.testCases && Array.isArray(problem.testCases)) {
+      problem.testCases = problem.testCases.filter(c => !c.isHidden);
     }
 
-    await this.cacheService.set(cacheKey, { data: problem }, 3600); // Cache for 1 hour
-    return { data: problem };
+    // Mapping to legacy payload structure for frontend compatibility
+    const mappedProblem = {
+      ...problem,
+      statement: {
+        description: problem.description,
+        inputFormat: problem.inputFormat,
+        outputFormat: problem.outputFormat,
+        constraints: problem.constraints,
+        examples: problem.examples,
+        hints: problem.hints,
+      },
+      config: {
+        timeLimit: problem.timeLimit,
+        memoryLimit: problem.memoryLimit,
+        supportedLanguages: problem.supportedLanguages,
+        difficulty: problem.difficulty,
+      },
+      testCases: {
+        cases: problem.testCases,
+      }
+    };
+
+    await this.cacheService.set(cacheKey, { data: mappedProblem }, 3600); // Cache for 1 hour
+    return { data: mappedProblem };
   }
 }

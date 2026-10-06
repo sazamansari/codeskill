@@ -9,6 +9,9 @@ import { Problem as ProblemEntity } from './entities/problem.entity';
 import { Question as QuestionEntity } from './entities/question.entity';
 import { Assessment as AssessmentEntity } from './entities/assessment.entity';
 import { Submission as SubmissionEntity } from './entities/submission.entity';
+import { QuestionBank as QuestionBankEntity } from './entities/question-bank.entity';
+import { AuditLog as AuditLogEntity } from './entities/audit-log.entity';
+import { AssessmentAttempt as AssessmentAttemptEntity } from './entities/assessment-attempt.entity';
 import {
   ProblemMetadata,
   ProblemMetadataSchema,
@@ -138,6 +141,9 @@ import {
       QuestionEntity,
       AssessmentEntity,
       SubmissionEntity,
+      QuestionBankEntity,
+      AuditLogEntity,
+      AssessmentAttemptEntity,
     ]),
   ],
   exports: [MongooseModule, TypeOrmModule],

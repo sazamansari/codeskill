@@ -1,17 +1,14 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProblemsController } from './problems.controller';
 import { ProblemsService } from './problems.service';
-import {
-  ProblemMetadata,
-  ProblemMetadataSchema,
-} from '../database/schemas/problem-metadata.schema';
+import { Problem as ProblemEntity } from '../database/entities/problem.entity';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: ProblemMetadata.name, schema: ProblemMetadataSchema },
-    ]),
+    TypeOrmModule.forFeature([ProblemEntity]),
+    RedisModule,
   ],
   controllers: [ProblemsController],
   providers: [ProblemsService],

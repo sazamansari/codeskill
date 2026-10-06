@@ -3,20 +3,11 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
-import {
-  Question,
-  QuestionDocument,
-} from '../database/schemas/question.schema';
-import {
-  QuestionBank,
-  QuestionBankDocument,
-} from '../database/schemas/question-bank.schema';
-import {
-  AuditLog,
-  AuditLogDocument,
-} from '../database/schemas/audit-log.schema';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, Brackets, In } from 'typeorm';
+import { Question as QuestionEntity } from '../database/entities/question.entity';
+import { QuestionBank as QuestionBankEntity } from '../database/entities/question-bank.entity';
+import { AuditLog as AuditLogEntity } from '../database/entities/audit-log.entity';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { QueryQuestionsDto } from './dto/query-questions.dto';
@@ -26,12 +17,12 @@ import * as XLSX from 'xlsx';
 @Injectable()
 export class QuestionsService {
   constructor(
-    @InjectModel(Question.name)
-    private readonly questionModel: Model<QuestionDocument>,
-    @InjectModel(QuestionBank.name)
-    private readonly questionBankModel: Model<QuestionBankDocument>,
-    @InjectModel(AuditLog.name)
-    private readonly auditLogModel: Model<AuditLogDocument>,
+    @InjectRepository(QuestionEntity)
+    private readonly questionRepository: Repository<QuestionEntity>,
+    @InjectRepository(QuestionBankEntity)
+    private readonly questionBankRepository: Repository<QuestionBankEntity>,
+    @InjectRepository(AuditLogEntity)
+    private readonly auditLogRepository: Repository<AuditLogEntity>,
   ) {}
 
   async findAll(query: QueryQuestionsDto) {
@@ -39,53 +30,50 @@ export class QuestionsService {
     const limit = Math.min(100, Math.max(1, Number(query.limit) || 20));
     const skip = (page - 1) * limit;
 
-    const filter: any = {};
+    const qb = this.questionRepository.createQueryBuilder('question')
+      .leftJoinAndSelect('question.createdBy', 'createdBy')
+      .leftJoinAndSelect('question.approvedBy', 'approvedBy');
 
     if (query.status && query.status !== 'all') {
-      filter.status = query.status;
+      qb.andWhere('question.status = :status', { status: query.status });
     } else {
-      filter.status = { $ne: 'archived' };
+      qb.andWhere('question.status != :archived', { archived: 'archived' });
     }
 
     if (query.topic && query.topic.trim()) {
-      filter.topic = query.topic.trim();
+      qb.andWhere('question.topic = :topic', { topic: query.topic.trim() });
     }
 
     if (query.subtopic && query.subtopic.trim()) {
-      filter.subtopic = query.subtopic.trim();
+      qb.andWhere('question.subtopic = :subtopic', { subtopic: query.subtopic.trim() });
     }
 
     if (query.difficulty && query.difficulty !== 'all') {
-      filter.difficulty = query.difficulty;
+      qb.andWhere('question.difficulty = :difficulty', { difficulty: query.difficulty });
     }
 
     if (query.aiGenerated !== undefined && query.aiGenerated !== '') {
-      filter.aiGenerated = query.aiGenerated === 'true';
+      qb.andWhere('question.aiGenerated = :aiGenerated', { aiGenerated: query.aiGenerated === 'true' });
     }
 
     if (query.search && query.search.trim()) {
-      const searchRegex = new RegExp(query.search.trim(), 'i');
-      filter.$or = [
-        { question: searchRegex },
-        { topic: searchRegex },
-        { subtopic: searchRegex },
-        { tags: searchRegex },
-      ];
+      const search = `%${query.search.trim()}%`;
+      qb.andWhere(new Brackets(qbInner => {
+        qbInner.where('question.question ILIKE :search', { search })
+               .orWhere('question.topic ILIKE :search', { search })
+               .orWhere('question.subtopic ILIKE :search', { search })
+               .orWhere(`EXISTS (SELECT 1 FROM jsonb_array_elements_text(question.tags) AS t WHERE t ILIKE :search)`);
+      }));
     }
 
-    const [questions, total, pendingCount, approvedCount] = await Promise.all([
-      this.questionModel
-        .find(filter)
-        .populate('createdBy', 'name email')
-        .populate('approvedBy', 'name email')
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
-      this.questionModel.countDocuments(filter),
-      this.questionModel.countDocuments({ status: 'pending' }),
-      this.questionModel.countDocuments({ status: 'approved' }),
-    ]);
+    const [questions, total] = await qb
+      .orderBy('question.createdAt', 'DESC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    const pendingCount = await this.questionRepository.count({ where: { status: 'pending' } });
+    const approvedCount = await this.questionRepository.count({ where: { status: 'approved' } });
 
     return {
       questions,
@@ -104,11 +92,12 @@ export class QuestionsService {
   }
 
   async findById(id: string, isStudent = false) {
-    if (!Types.ObjectId.isValid(id)) {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    if (!isUuid) {
       throw new BadRequestException('Invalid question ID');
     }
 
-    const question = await this.questionModel.findById(id).lean();
+    const question = await this.questionRepository.findOne({ where: { id } });
     if (!question || question.status === 'archived') {
       throw new NotFoundException('Question not found');
     }
@@ -149,21 +138,21 @@ export class QuestionsService {
       );
     }
 
-    const question = new this.questionModel({
+    const newQuestion = this.questionRepository.create({
       ...dto,
-      createdBy: adminUser._id,
-      status: 'approved', // Manually created admin questions are approved by default
-      approvedBy: adminUser._id,
+      created_by_id: adminUser.id || adminUser._id,
+      status: 'approved',
+      approved_by_id: adminUser.id || adminUser._id,
       approvedAt: new Date(),
     });
 
-    await question.save();
+    const question = await this.questionRepository.save(newQuestion);
 
-    await this.auditLogModel.create({
-      actorId: adminUser._id,
+    const auditLog = this.auditLogRepository.create({
+      actorId: adminUser.id || adminUser._id,
       actorEmail: adminUser.email,
       action: 'CREATE_QUESTION',
-      target: question._id.toString(),
+      target: question.id,
       targetType: 'Question',
       ipAddress: ip,
       userAgent: userAgent,
@@ -172,6 +161,7 @@ export class QuestionsService {
         difficulty: question.difficulty,
       },
     });
+    await this.auditLogRepository.save(auditLog);
 
     return question;
   }
@@ -183,7 +173,7 @@ export class QuestionsService {
     ip = '',
     userAgent = '',
   ) {
-    const question = await this.questionModel.findById(id);
+    const question = await this.questionRepository.findOne({ where: { id } });
     if (!question || question.status === 'archived') {
       throw new NotFoundException('Question not found');
     }
@@ -201,39 +191,40 @@ export class QuestionsService {
     }
 
     Object.assign(question, dto);
-    await question.save();
+    await this.questionRepository.save(question);
 
-    await this.auditLogModel.create({
-      actorId: adminUser._id,
+    const auditLog = this.auditLogRepository.create({
+      actorId: adminUser.id || adminUser._id,
       actorEmail: adminUser.email,
       action: 'UPDATE_QUESTION',
-      target: question._id.toString(),
+      target: question.id,
       targetType: 'Question',
       ipAddress: ip,
       userAgent: userAgent,
       metadata: { updates: dto },
     });
+    await this.auditLogRepository.save(auditLog);
 
     return question;
   }
 
   async delete(id: string, adminUser: any, ip = '', userAgent = '') {
-    const question = await this.questionModel.findById(id);
+    const question = await this.questionRepository.findOne({ where: { id } });
     if (!question) throw new NotFoundException('Question not found');
 
-    // Soft delete
     question.status = 'archived';
-    await question.save();
+    await this.questionRepository.save(question);
 
-    await this.auditLogModel.create({
-      actorId: adminUser._id,
+    const auditLog = this.auditLogRepository.create({
+      actorId: adminUser.id || adminUser._id,
       actorEmail: adminUser.email,
       action: 'DELETE_QUESTION',
-      target: question._id.toString(),
+      target: question.id,
       targetType: 'Question',
       ipAddress: ip,
       userAgent: userAgent,
     });
+    await this.auditLogRepository.save(auditLog);
 
     return { success: true, message: 'Question successfully archived' };
   }
@@ -246,12 +237,12 @@ export class QuestionsService {
     ip = '',
     userAgent = '',
   ) {
-    const question = await this.questionModel.findById(id);
+    const question = await this.questionRepository.findOne({ where: { id } });
     if (!question) throw new NotFoundException('Question not found');
 
     question.status = status;
     if (status === 'approved') {
-      question.approvedBy = adminUser._id;
+      question.approved_by_id = adminUser.id || adminUser._id;
       question.approvedAt = new Date();
       question.rejectedReason = undefined;
     } else {
@@ -259,116 +250,123 @@ export class QuestionsService {
         reason || 'Declined during administrative review';
     }
 
-    await question.save();
+    await this.questionRepository.save(question);
 
-    await this.auditLogModel.create({
-      actorId: adminUser._id,
+    const auditLog = this.auditLogRepository.create({
+      actorId: adminUser.id || adminUser._id,
       actorEmail: adminUser.email,
       action: status === 'approved' ? 'APPROVE_QUESTION' : 'REJECT_QUESTION',
-      target: question._id.toString(),
+      target: question.id,
       targetType: 'Question',
       ipAddress: ip,
       userAgent: userAgent,
       metadata: { reason },
     });
+    await this.auditLogRepository.save(auditLog);
 
     return question;
   }
 
   async getTopicsDistribution() {
-    const topicsAggregation = await this.questionModel.aggregate([
-      { $match: { status: { $ne: 'archived' } } },
-      {
-        $group: {
-          _id: '$topic',
-          total: { $sum: 1 },
-          easy: {
-            $sum: { $cond: [{ $eq: ['$difficulty', 'easy'] }, 1, 0] },
-          },
-          medium: {
-            $sum: { $cond: [{ $eq: ['$difficulty', 'medium'] }, 1, 0] },
-          },
-          hard: {
-            $sum: { $cond: [{ $eq: ['$difficulty', 'hard'] }, 1, 0] },
-          },
-          approved: {
-            $sum: { $cond: [{ $eq: ['$status', 'approved'] }, 1, 0] },
-          },
-          pending: {
-            $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] },
-          },
-        },
-      },
-      { $sort: { total: -1 } },
-    ]);
+    const query = await this.questionRepository.query(`
+      SELECT 
+        COALESCE(topic, 'Unassigned') as topic,
+        COUNT(*) as total,
+        SUM(CASE WHEN difficulty = 'easy' THEN 1 ELSE 0 END) as easy,
+        SUM(CASE WHEN difficulty = 'medium' THEN 1 ELSE 0 END) as medium,
+        SUM(CASE WHEN difficulty = 'hard' THEN 1 ELSE 0 END) as hard,
+        SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
+        SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending
+      FROM questions
+      WHERE status != 'archived'
+      GROUP BY topic
+      ORDER BY total DESC
+    `);
 
-    return topicsAggregation.map((t) => ({
-      topic: t._id || 'Unassigned',
-      total: t.total,
-      easy: t.easy,
-      medium: t.medium,
-      hard: t.hard,
-      approved: t.approved,
-      pending: t.pending,
+    return query.map((t: any) => ({
+      topic: t.topic,
+      total: Number(t.total) || 0,
+      easy: Number(t.easy) || 0,
+      medium: Number(t.medium) || 0,
+      hard: Number(t.hard) || 0,
+      approved: Number(t.approved) || 0,
+      pending: Number(t.pending) || 0,
     }));
   }
 
   // --- Question Bank Collection Methods ---
 
   async findAllBanks(topic?: string) {
-    const filter: any = {};
-    if (topic) filter.topic = topic;
+    const qb = this.questionBankRepository.createQueryBuilder('bank')
+      .leftJoinAndSelect('bank.createdBy', 'createdBy');
+    
+    if (topic) {
+      qb.where('bank.topic = :topic', { topic });
+    }
 
-    return this.questionBankModel
-      .find(filter)
-      .populate('createdBy', 'name email')
-      .populate({
-        path: 'questions',
-        select: 'question topic difficulty marks options',
-      })
-      .sort({ createdAt: -1 })
-      .lean();
+    const banks = await qb.orderBy('bank.createdAt', 'DESC').getMany();
+
+    // Map questions for frontend if we were populated before
+    for (const bank of banks) {
+      if (bank.questions && bank.questions.length > 0) {
+        const qEntities = await this.questionRepository.find({
+          where: { id: In(bank.questions) },
+          select: { id: true, question: true, topic: true, difficulty: true, marks: true, options: true }
+        });
+        (bank as any).questions = qEntities;
+      }
+    }
+
+    return banks;
   }
 
   async findBankById(id: string) {
-    if (!Types.ObjectId.isValid(id))
-      throw new BadRequestException('Invalid ID');
-    const bank = await this.questionBankModel
-      .findById(id)
-      .populate('createdBy', 'name email')
-      .populate('questions')
-      .lean();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    if (!isUuid) throw new BadRequestException('Invalid ID');
+
+    const bank = await this.questionBankRepository.findOne({
+      where: { id },
+      relations: { createdBy: true }
+    });
+
     if (!bank) throw new NotFoundException('Question Bank not found');
+
+    if (bank.questions && bank.questions.length > 0) {
+      const qEntities = await this.questionRepository.find({
+        where: { id: In(bank.questions) },
+      });
+      (bank as any).questions = qEntities;
+    }
+
     return bank;
   }
 
   async createBank(dto: CreateQuestionBankDto, adminUser: any) {
-    const bank = new this.questionBankModel({
+    const bank = this.questionBankRepository.create({
       ...dto,
-      questions: (dto.questions || []).map((qId) => new Types.ObjectId(qId)),
-      createdBy: adminUser._id,
+      questions: dto.questions || [],
+      createdBy_id: adminUser.id || adminUser._id,
     });
-    return bank.save();
+    return this.questionBankRepository.save(bank);
   }
 
   async updateBank(id: string, dto: Partial<CreateQuestionBankDto>) {
-    const bank = await this.questionBankModel.findById(id);
+    const bank = await this.questionBankRepository.findOne({ where: { id } });
     if (!bank) throw new NotFoundException('Question Bank not found');
-    if (dto.questions) {
-      bank.questions = dto.questions.map((q) => new Types.ObjectId(q));
-    }
+
+    if (dto.questions) bank.questions = dto.questions;
     if (dto.name) bank.name = dto.name;
     if (dto.description !== undefined) bank.description = dto.description;
     if (dto.topic) bank.topic = dto.topic;
     if (dto.isPublic !== undefined) bank.isPublic = dto.isPublic;
     if (dto.tags) bank.tags = dto.tags;
 
-    return bank.save();
+    return this.questionBankRepository.save(bank);
   }
 
   async deleteBank(id: string) {
-    const res = await this.questionBankModel.findByIdAndDelete(id);
-    if (!res) throw new NotFoundException('Question Bank not found');
+    const res = await this.questionBankRepository.delete(id);
+    if (res.affected === 0) throw new NotFoundException('Question Bank not found');
     return { success: true, message: 'Question Bank removed' };
   }
 
@@ -611,13 +609,12 @@ export class QuestionsService {
     }
 
     const allFileQuestions = parsedRows.map((r) => r.question).filter(Boolean);
-    const existingDbQuestions = await this.questionModel
-      .find({
-        question: { $in: allFileQuestions },
-        status: { $ne: 'archived' },
-      })
-      .select('question topic')
-      .lean();
+    const existingDbQuestions = await this.questionRepository.find({
+      where: {
+        question: In(allFileQuestions),
+      },
+      select: { question: true, topic: true },
+    });
 
     const dbQuestionMap = new Set(
       existingDbQuestions.map(
@@ -804,8 +801,8 @@ export class QuestionsService {
         language: r.language || 'general',
         tags: r.tags || [],
         status: 'approved',
-        createdBy: adminUser?._id,
-        approvedBy: adminUser?._id,
+        createdBy_id: adminUser?.id || adminUser?._id,
+        approvedBy_id: adminUser?.id || adminUser?._id,
         approvedAt: new Date(),
         metadata: {
           importedVia: 'bulk_csv',
@@ -818,43 +815,28 @@ export class QuestionsService {
       };
     });
 
-    // High performance bulkWrite with upsert
-    const operations = docs.map((doc) => ({
-      updateOne: {
-        filter: {
-          question: doc.question,
-          topic: doc.topic,
-        },
-        update: {
-          $set: {
-            ...doc,
-            updatedAt: new Date(),
-          },
-          $setOnInsert: {
-            createdAt: new Date(),
-          },
-        },
-        upsert: true,
-      },
-    }));
-
-    const chunkSize = 250;
     let totalUpserted = 0;
     let totalModified = 0;
 
-    for (let i = 0; i < operations.length; i += chunkSize) {
-      const chunk = operations.slice(i, i + chunkSize);
-      const res = await this.questionModel.bulkWrite(chunk as any, {
-        ordered: false,
+    for (const doc of docs) {
+      const existing = await this.questionRepository.findOne({
+        where: { question: doc.question, topic: doc.topic }
       });
-      totalUpserted += res.upsertedCount || 0;
-      totalModified += res.modifiedCount || 0;
+      if (existing) {
+        Object.assign(existing, doc);
+        await this.questionRepository.save(existing);
+        totalModified++;
+      } else {
+        const newDoc = this.questionRepository.create(doc as any);
+        await this.questionRepository.save(newDoc);
+        totalUpserted++;
+      }
     }
 
     const totalProcessed = docs.length;
 
-    await this.auditLogModel.create({
-      actorId: adminUser?._id,
+    const auditLog = this.auditLogRepository.create({
+      actorId: adminUser?.id || adminUser?._id,
       actorEmail: adminUser?.email || 'admin',
       action: 'BULK_IMPORT_QUESTIONS_UPSERT',
       target: 'Question',
@@ -868,6 +850,7 @@ export class QuestionsService {
         sampleTopics: [...new Set(docs.map((d) => d.topic))].slice(0, 5),
       },
     });
+    await this.auditLogRepository.save(auditLog);
 
     return {
       success: true,

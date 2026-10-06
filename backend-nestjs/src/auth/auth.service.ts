@@ -264,17 +264,9 @@ export class AuthService implements OnModuleInit {
         await this.userRepository.save(user);
       }
     } else {
-      const newUser = this.userRepository.create({
-        name,
-        email,
-        googleId: sub,
-        avatar: picture,
-        authProvider: 'google',
-        stats: {},
-        profile: {},
-        studentProfile: {},
-      });
-      user = await this.userRepository.save(newUser);
+      throw new UnauthorizedException(
+        'Account not found. Google sign-up is currently disabled. Please register an account first.',
+      );
     }
 
     return this.authResponse(user);
@@ -517,14 +509,13 @@ export class AuthService implements OnModuleInit {
       if (!isMatch) {
         throw new UnauthorizedException('Invalid credentials');
       }
-      return this.authResponse(user);
     }
 
     await this.otpService.sendOTP(normalizedEmail);
     return {
       success: true,
       requireOTP: true,
-      message: 'Verification OTP sent to your email (OAuth Admin Account)',
+      message: 'Verification OTP sent to your email (Admin Account)',
     };
   }
 

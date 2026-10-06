@@ -22,6 +22,18 @@ export class Problem {
   @Column({ type: 'text' })
   description: string;
 
+  @Column({ type: 'text', nullable: true })
+  inputFormat?: string;
+
+  @Column({ type: 'text', nullable: true })
+  outputFormat?: string;
+
+  @Column({ type: 'jsonb', default: [] })
+  examples: any[];
+
+  @Column({ type: 'varchar', length: 50, default: 'Published' })
+  visibility: string;
+
   @Column({
     type: 'varchar',
     length: 50,
@@ -40,6 +52,9 @@ export class Problem {
 
   @Column({ type: 'int', default: 256 })
   memoryLimit: number;
+
+  @Column('text', { array: true, default: '{}' })
+  supportedLanguages: string[];
 
   @Column({ type: 'jsonb', default: {} })
   starterCode: Record<string, string>;

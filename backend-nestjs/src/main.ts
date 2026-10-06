@@ -13,6 +13,9 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
 import compression from 'compression';
+import { ConfigService } from '@nestjs/config';
+import { RedisIoAdapter } from './gateway/redis-io.adapter';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,6 +32,12 @@ async function bootstrap() {
     origin: true,
     credentials: true,
   });
+
+  // Redis Socket.IO adapter
+  const configService = app.get(ConfigService);
+  const redisIoAdapter = new RedisIoAdapter(app);
+  await redisIoAdapter.connectToRedis(configService);
+  app.useWebSocketAdapter(redisIoAdapter);
 
   // Global validation pipe
   app.useGlobalPipes(
