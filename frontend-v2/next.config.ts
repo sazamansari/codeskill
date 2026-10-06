@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  serverExternalPackages: ["@react-pdf/renderer"],
   async rewrites() {
     return [
       {
