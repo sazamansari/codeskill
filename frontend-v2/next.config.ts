@@ -5,6 +5,15 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   serverExternalPackages: ["@react-pdf/renderer"],
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /\.m?js$/,
+      resolve: {
+        fullySpecified: false,
+      },
+    });
+    return config;
+  },
   async rewrites() {
     return [
       {
