@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   typescript: {
@@ -12,6 +13,13 @@ const nextConfig: NextConfig = {
         fullySpecified: false,
       },
     });
+    
+    // Fix monaco-vim attempting to import a strict ESM path that conflicts with monaco-editor's package.json exports
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "monaco-editor/esm/vs/editor/editor.api": path.resolve(process.cwd(), "node_modules/monaco-editor/esm/vs/editor/editor.api.js"),
+    };
+    
     return config;
   },
   async rewrites() {
