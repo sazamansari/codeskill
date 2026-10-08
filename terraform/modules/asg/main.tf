@@ -13,15 +13,15 @@ resource "aws_launch_template" "app" {
 #!/bin/bash
 exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 
-echo "Starting CodeSkill EC2 initialization..."
+echo "Starting CodeSkill EC2 initialization for Amazon Linux..."
 
 # Update and install dependencies
-apt-get update -y
-apt-get install -y curl unzip awscli nginx
+dnf update -y
+dnf install -y curl unzip aws-cli nginx
 
 # Install Node.js (v20)
-curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-apt-get install -y nodejs
+curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
+dnf install -y nodejs
 
 # Install PM2 globally
 npm install -g pm2
@@ -32,15 +32,14 @@ mkdir -p $APP_DIR
 cd $APP_DIR
 
 # Download latest build from S3 using the IAM Instance Profile attached to this EC2 instance
-# Note: The S3 bucket was created in the Terraform S3 module
 aws s3 cp s3://${var.name_prefix}-files-reports/releases/latest.zip .
 
 # Unzip and set permissions
 unzip latest.zip
-chown -R ubuntu:ubuntu $APP_DIR
+chown -R ec2-user:ec2-user $APP_DIR
 
 # Create Nginx reverse proxy configuration
-cat << 'NGINX' > /etc/nginx/sites-available/default
+cat << 'NGINX' > /etc/nginx/conf.d/codeskill.conf
 server {
     listen 80;
     
@@ -73,10 +72,13 @@ server {
 }
 NGINX
 
+# Remove default nginx conf to avoid conflicts
+rm -f /etc/nginx/conf.d/default.conf
+systemctl enable nginx
 systemctl restart nginx
 
-# Install production dependencies and start apps as the ubuntu user
-sudo -u ubuntu -i << 'EOSUDO'
+# Install production dependencies and start apps as the ec2-user
+sudo -u ec2-user -i << 'EOSUDO'
 cd /opt/codeskill
 npm ci --prefix backend-nestjs --omit=dev
 npm ci --prefix frontend-v2 --omit=dev
@@ -88,7 +90,7 @@ pm2 save
 EOSUDO
 
 # Setup PM2 to start on boot
-env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
+env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u ec2-user --hp /home/ec2-user
 
 echo "Initialization complete!"
 EOF
@@ -133,16 +135,16 @@ resource "aws_autoscaling_policy" "cpu" {
   }
 }
 
-resource "aws_autoscaling_policy" "alb_requests" {
-  name                   = "${var.name_prefix}-alb-requests-policy"
-  policy_type            = "TargetTrackingScaling"
-  autoscaling_group_name = aws_autoscaling_group.app.name
-
-  target_tracking_configuration {
-    predefined_metric_specification {
-      predefined_metric_type = "ALBRequestCountPerTarget"
-      resource_label         = "${split("/", var.target_group_arn)[1]}/${split("/", var.target_group_arn)[2]}/${split("/", var.target_group_arn)[3]}"
-    }
-    target_value = 1000.0
-  }
-}
+# resource "aws_autoscaling_policy" "alb_requests" {
+#   name                   = "${var.name_prefix}-alb-requests-policy"
+#   policy_type            = "TargetTrackingScaling"
+#   autoscaling_group_name = aws_autoscaling_group.app.name
+# 
+#   target_tracking_configuration {
+#     predefined_metric_specification {
+#       predefined_metric_type = "ALBRequestCountPerTarget"
+#       resource_label         = "${split("/", var.target_group_arn)[1]}/${split("/", var.target_group_arn)[2]}/${split("/", var.target_group_arn)[3]}"
+#     }
+#     target_value = 1000.0
+#   }
+# }

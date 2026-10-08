@@ -19,7 +19,7 @@ resource "aws_security_group" "rds" {
 resource "aws_db_instance" "main" {
   identifier           = "${var.name_prefix}-postgres"
   engine               = "postgres"
-  engine_version       = "15.4"
+  engine_version       = "14"
   instance_class       = var.instance_class
   allocated_storage    = var.allocated_storage
   max_allocated_storage = 100 # Auto-scaling up to 100GB
