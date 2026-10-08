@@ -52,12 +52,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         return;
       }
 
-<<<<<<< Updated upstream
       if (token) {
         try {
           const res = await authAPI.getMe();
           const freshUser = res.data?.user;
-          if (freshUser && freshUser.isAdmin) {
+          if (
+            freshUser &&
+            (freshUser.isAdmin ||
+              ["admin", "super_admin", "assessment_admin"].includes(freshUser.role))
+          ) {
             updateUserLocal(freshUser);
             if (isMounted) setIsVerifying(false);
             return;
@@ -69,26 +72,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           router.replace("/admin/login");
           return;
         }
-=======
-      // User exists but local state is not an admin (e.g. logged in as student)
-      // Re-verify with backend in case user was recently promoted
-      try {
-        const res = await authAPI.getMe();
-        const freshUser = res.data?.user;
-        if (
-          freshUser &&
-          (freshUser.isAdmin ||
-            ["admin", "super_admin", "assessment_admin"].includes(freshUser.role))
-        ) {
-          updateUserLocal(freshUser);
-          if (isMounted) setIsVerifying(false);
-        } else {
-          router.push("/admin/login");
-        }
-      } catch (err) {
-        router.push("/admin/login");
->>>>>>> Stashed changes
       }
+
 
       router.replace("/admin/login");
     }
