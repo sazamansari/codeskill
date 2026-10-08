@@ -1,6 +1,6 @@
 variable "aws_region" {
   type    = string
-  default = "us-east-1"
+  default = "ap-south-1"
 }
 variable "vpc_cidr" {
   type    = string
@@ -8,7 +8,7 @@ variable "vpc_cidr" {
 }
 variable "azs" {
   type    = list(string)
-  default = ["us-east-1a", "us-east-1b"]
+  default = ["ap-south-1a", "ap-south-1b"]
 }
 variable "public_subnets" {
   type    = list(string)
@@ -24,7 +24,7 @@ variable "private_db_subnets" {
 }
 variable "ami_id" {
   type    = string
-  default = "ami-03c3da4cfa8e8943a" # Valid Amazon Linux 2023 AMI in us-east-1
+  default = "ami-03054015e26069645" # Valid Amazon Linux 2023 AMI in ap-south-1
 }
 variable "db_name" {
   type    = string
