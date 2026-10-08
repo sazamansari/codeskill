@@ -123,7 +123,7 @@ export default function AppLoginPage() {
               <p className="text-sm font-semibold text-primary mt-1">by Chandigarh University</p>
               <p className="text-xs text-muted-foreground mt-0.5">Department of Skill Development & Lab</p>
             </div>
-            
+
             <p className="text-sm text-foreground/80 leading-relaxed max-w-md border-l-2 border-primary/30 pl-4 py-1">
               Standardized examination portal and algorithmic skill-building platform engineered for developers, students, and technical evaluations.
             </p>

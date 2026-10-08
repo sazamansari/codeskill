@@ -24,7 +24,7 @@ variable "private_db_subnets" {
 }
 variable "ami_id" {
   type    = string
-  default = "ami-0c55b159cbfafe1f0" # Replace with valid AMI ID
+  default = "ami-03c3da4cfa8e8943a" # Valid Amazon Linux 2023 AMI in us-east-1
 }
 variable "db_name" {
   type    = string

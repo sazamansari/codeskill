@@ -66,11 +66,11 @@ module "alb" {
   security_group_id = aws_security_group.alb.id
 }
 
-module "waf" {
-  source      = "../../modules/waf"
-  name_prefix = local.name_prefix
-  alb_arn     = module.alb.alb_arn
-}
+# module "waf" {
+#   source      = "../../modules/waf"
+#   name_prefix = local.name_prefix
+#   alb_arn     = module.alb.alb_arn
+# }
 
 module "s3" {
   source      = "../../modules/s3"
@@ -96,10 +96,10 @@ module "asg" {
   private_app_subnet_ids    = module.vpc.private_app_subnet_ids
   target_group_arn          = module.alb.target_group_arn
   app_security_group_id     = module.ec2.app_security_group_id
-  instance_type             = "c6i.large"
-  min_size                  = 2
-  max_size                  = 10
-  desired_capacity          = 2
+  instance_type             = "t2.micro"
+  min_size                  = 1
+  max_size                  = 2
+  desired_capacity          = 1
   ami_id                    = var.ami_id
   iam_instance_profile_name = module.iam.instance_profile_name
 }
@@ -113,9 +113,9 @@ module "rds" {
   db_name               = var.db_name
   db_username           = var.db_username
   db_password           = var.db_password
-  instance_class        = "db.r6g.large"
-  allocated_storage     = 100
-  multi_az              = true
+  instance_class        = "db.t3.micro"
+  allocated_storage     = 20
+  multi_az              = false
 }
 
 module "redis" {
@@ -124,15 +124,15 @@ module "redis" {
   vpc_id                = module.vpc.vpc_id
   private_db_subnet_ids = module.vpc.private_db_subnet_ids
   app_security_group_id = module.ec2.app_security_group_id
-  node_type             = "cache.m6g.large"
+  node_type             = "cache.t4g.micro"
 }
 
-module "route53" {
-  source       = "../../modules/route53"
-  domain_name  = local.domain_name
-  alb_dns_name = module.alb.alb_dns_name
-  alb_zone_id  = module.alb.alb_zone_id
-}
+# module "route53" {
+#   source       = "../../modules/route53"
+#   domain_name  = local.domain_name
+#   alb_dns_name = module.alb.alb_dns_name
+#   alb_zone_id  = module.alb.alb_zone_id
+# }
 
 module "monitoring" {
   source           = "../../modules/monitoring"

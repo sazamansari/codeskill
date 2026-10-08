@@ -7,8 +7,8 @@ on:
 
 env:
   AWS_REGION: ap-south-1
-  S3_BUCKET: codeskill-prod-files-reports
-  ASG_NAME: codeskill-prod-asg
+  S3_BUCKET: codeskill-dev-files-reports
+  ASG_NAME: codeskill-dev-asg
 
 permissions:
   id-token: write # Required for configuring AWS Credentials via OIDC
