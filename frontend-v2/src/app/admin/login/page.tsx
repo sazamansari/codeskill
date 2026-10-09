@@ -33,6 +33,42 @@ export default function AdminLoginPage() {
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const { adminLogin, adminLoginVerify } = useAuth();
   const router = useRouter();
+
+  const form = useForm<AdminLoginFormValues>({
+    resolver: zodResolver(adminLoginSchema),
+    defaultValues: { email: "", password: "" },
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+  });
+
+  const onSubmit = async (data: AdminLoginFormValues) => {
+    setIsLoading(true);
+    form.clearErrors("root");
+    setInfoMessage(null);
+    try {
+      if (!showOTP) {
+        const res = await adminLogin({ email: data.email, password: data.password });
+        if (res.requireOTP) {
+          setShowOTP(true);
+          if (res.message) setInfoMessage(res.message);
+        } else {
+          window.location.href = "/admin/dashboard";
+        }
+      } else {
+        if (!data.otp) {
+          form.setError("otp", { type: "manual", message: "OTP is required" });
+          return;
+        }
+        await adminLoginVerify({ email: data.email, otp: data.otp });
+        window.location.href = "/admin/dashboard";
+      }
+    } catch (err: any) {
+      form.setError("root", { type: "manual", message: err.message || "Failed to authenticate admin" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       <AuthUI
