@@ -14,8 +14,6 @@ import * as jwt from 'jsonwebtoken';
 @Entity('users')
 @Index(['isAssessmentStudent'])
 @Index(['role'])
-@Index(['studentProfile.department'])
-@Index(['studentProfile.batch'])
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
