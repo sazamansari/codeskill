@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { studentAssessmentsAPI } from "@/config/api";
 import DSAAssessmentEditor from "@/components/assessment/DSAAssessmentEditor";
+import SafeExamBrowser from "@/components/assessment/SafeExamBrowser";
 import { Spinner } from "@/components/ui/spinner";
 
 interface TestCase {
@@ -428,125 +429,10 @@ export default function TakeAssessmentPage({
     return () => clearInterval(autosaveInterval);
   }, [id, isLoading, questions, startedAt]);
 
-  // 6. Anti-Cheat: Tab Switch & Window Blur Detection
-  useEffect(() => {
-    if (isLoading) return;
+  // Anti-Cheat functionality is now handled entirely by the SafeExamBrowser component.
+  // The hooks below have been simplified to just rely on SafeExamBrowser.
 
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        const nextStrikes = tabSwitchesRef.current + 1;
-        setTabSwitches(nextStrikes);
-
-        recordViolation(
-          "tab_switch",
-          `Tab switch strike ${nextStrikes} of ${maxTabSwitches}`
-        );
-
-        if (nextStrikes >= maxTabSwitches) {
-          setViolationMessage(
-            `You exceeded the limit of ${maxTabSwitches} tab-switch warnings. Your assessment will now be auto-submitted for institutional review.`
-          );
-          setShowViolationModal(true);
-          setTimeout(() => {
-            submitExam(true);
-          }, 3000);
-        } else {
-          setViolationMessage(
-            `Warning: Tab switch detected! (Strike ${nextStrikes} of ${maxTabSwitches}). Leaving the test window is prohibited.`
-          );
-          setShowViolationModal(true);
-        }
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [isLoading, maxTabSwitches, submitExam, recordViolation]);
-
-  // 7. Anti-Cheat: Keyboard Shortcut Interception & Warning
-  useEffect(() => {
-    if (isLoading) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (
-        target?.tagName === "INPUT" ||
-        target?.tagName === "TEXTAREA" ||
-        target?.isContentEditable
-      ) {
-        return;
-      }
-
-      const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
-      const mod = isMac ? e.metaKey : e.ctrlKey;
-
-      let shortcutName = "";
-
-      // Prohibited Key Combinations
-      if (mod && (e.key === "c" || e.key === "C")) shortcutName = "Copy (Ctrl+C)";
-      else if (mod && (e.key === "v" || e.key === "V")) shortcutName = "Paste (Ctrl+V)";
-      else if (mod && (e.key === "a" || e.key === "A")) shortcutName = "Select All (Ctrl+A)";
-      else if (mod && (e.key === "u" || e.key === "U")) shortcutName = "View Source (Ctrl+U)";
-      else if (mod && (e.key === "p" || e.key === "P")) shortcutName = "Print (Ctrl+P)";
-      else if (mod && (e.key === "s" || e.key === "S")) shortcutName = "Save Page (Ctrl+S)";
-      else if (e.key === "F12") shortcutName = "DevTools (F12)";
-      else if (mod && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c")) {
-        shortcutName = "Inspect Element";
-      } else if (e.altKey && e.key === "Tab") {
-        shortcutName = "Window Switch (Alt+Tab)";
-      } else if (e.key === "PrintScreen") {
-        shortcutName = "Screen Capture (PrintScreen)";
-      }
-
-      if (shortcutName) {
-        e.preventDefault();
-        e.stopPropagation();
-        recordViolation("shortcut_attempt", `Prohibited shortcut intercepted: ${shortcutName}`);
-        return false;
-      }
-    };
-
-    const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-      recordViolation("context_menu", "Right-click context menu attempt prevented");
-    };
-
-    const handleFullscreenChange = () => {
-      const isFull = !!(
-        document.fullscreenElement ||
-        (document as any).webkitFullscreenElement ||
-        (document as any).mozFullScreenElement ||
-        (document as any).msFullscreenElement
-      );
-      setIsFullscreen(isFull);
-      if (!isFull && !isLoading) {
-        recordViolation(
-          "fullscreen_exit",
-          "Candidate exited fullscreen exam environment"
-        );
-        setViolationMessage(
-          "Proctoring Alert: Fullscreen Exit Detected! University examination integrity policy strictly requires you to remain in fullscreen mode throughout the entire test. Click below to re-enter fullscreen immediately."
-        );
-        setShowViolationModal(true);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown, true);
-    window.addEventListener("contextmenu", handleContextMenu);
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
-    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
-    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown, true);
-      window.removeEventListener("contextmenu", handleContextMenu);
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
-      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
-      document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
-    };
-  }, [isLoading, recordViolation]);
+  // Keyboard shortcuts, fullscreen logic, and context menu are handled by SafeExamBrowser.
 
   // Toast Auto-Dismiss
   useEffect(() => {
@@ -715,7 +601,13 @@ export default function TakeAssessmentPage({
   const isTimeCritical = timeLeftSeconds < 300; // < 5 mins
 
   return (
-    <div className="flex-1 bg-background text-foreground font-sans min-h-screen flex flex-col select-none relative">
+    <SafeExamBrowser 
+      isEnabled={!isLoading} 
+      maxWarnings={maxTabSwitches} 
+      onTerminate={() => submitExam(true)}
+      onViolation={recordViolation}
+    >
+      <div className="flex-1 bg-background text-foreground font-sans min-h-screen flex flex-col select-none relative">
       {/* Top Test Header Bar */}
       <header className="h-16 border-b border-border bg-card px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
         <div className="flex items-center gap-3">
@@ -1257,48 +1149,8 @@ export default function TakeAssessmentPage({
         </div>
       )}
 
-      {/* Proctoring Violation Warning Modal */}
-      {showViolationModal && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-card border border-rose-500/30 rounded-3xl p-6 max-w-md w-full space-y-4 animate-in fade-in shadow-2xl">
-            <div className="flex items-center gap-3 text-rose-500">
-              <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center">
-                <ShieldAlert className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-foreground">Proctoring Alert</h3>
-                <p className="text-xs text-rose-400">Violation incident recorded</p>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {violationMessage}
-            </p>
-            <div className="pt-2 flex items-center justify-end gap-2.5">
-              {!isFullscreen && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowViolationModal(false);
-                    if (!document.fullscreenElement) {
-                      document.documentElement.requestFullscreen().catch(() => {});
-                    }
-                  }}
-                  className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all shadow-md shadow-primary/20 flex items-center gap-1.5"
-                >
-                  <Maximize2 className="w-3.5 h-3.5" /> Re-enter Fullscreen
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => setShowViolationModal(false)}
-                className="px-4 py-2.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground text-xs font-bold transition-all border border-border"
-              >
-                Dismiss Warning
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Proctoring Violation Warning Modal is removed in favor of SafeExamBrowser overlay */}
     </div>
+    </SafeExamBrowser>
   );
 }

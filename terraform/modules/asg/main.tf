@@ -19,7 +19,7 @@ echo "Starting CodeSkill EC2 initialization for Amazon Linux..."
 # Add retry logic because dnf can sometimes be locked during boot
 dnf update -y
 for i in {1..5}; do
-  dnf install -y curl unzip aws-cli nginx && break || sleep 10
+  dnf install -y unzip aws-cli nginx --allowerasing && break || sleep 10
 done
 
 # Install Node.js (v20)
