@@ -16,12 +16,17 @@ exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 echo "Starting CodeSkill EC2 initialization for Amazon Linux..."
 
 # Update and install dependencies
+# Add retry logic because dnf can sometimes be locked during boot
 dnf update -y
-dnf install -y curl unzip aws-cli nginx
+for i in {1..5}; do
+  dnf install -y curl unzip aws-cli nginx && break || sleep 10
+done
 
 # Install Node.js (v20)
 curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
-dnf install -y nodejs
+for i in {1..5}; do
+  dnf install -y nodejs && break || sleep 10
+done
 
 # Install PM2 globally
 npm install -g pm2
@@ -80,11 +85,19 @@ systemctl restart nginx
 # Install production dependencies and start apps as the ec2-user
 sudo -u ec2-user -i << 'EOSUDO'
 cd /opt/codeskill
-npm ci --prefix backend-nestjs --omit=dev
-npm ci --prefix frontend-v2 --omit=dev
+npm install --prefix backend-nestjs --omit=dev --legacy-peer-deps
+npm install --prefix frontend-v2 --omit=dev --legacy-peer-deps
 
-pm2 start dist/main.js --name "codeskill-backend" --prefix backend-nestjs
-cd frontend-v2 && pm2 start npm --name "codeskill-frontend" -- run start
+# Create .env for backend
+cat << 'ENVFILE' > /opt/codeskill/backend-nestjs/.env
+DATABASE_URL="postgresql://${var.db_username}:${var.db_password}@${var.db_endpoint}/${var.db_name}?schema=public"
+REDIS_HOST="${var.redis_endpoint}"
+REDIS_PORT=6379
+ENVFILE
+chown ec2-user:ec2-user /opt/codeskill/backend-nestjs/.env
+
+cd /opt/codeskill/backend-nestjs && pm2 start dist/main.js --name "codeskill-backend"
+cd /opt/codeskill/frontend-v2 && pm2 start npm --name "codeskill-frontend" -- run start
 
 pm2 save
 EOSUDO

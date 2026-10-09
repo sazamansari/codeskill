@@ -8,4 +8,9 @@ variable "max_size" { type = number }
 variable "desired_capacity" { type = number }
 variable "ami_id" { type = string }
 variable "iam_instance_profile_name" { type = string }
+variable "db_endpoint" { type = string }
+variable "db_name" { type = string }
+variable "db_username" { type = string }
+variable "db_password" { type = string }
+variable "redis_endpoint" { type = string }
 

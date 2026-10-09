@@ -64,6 +64,7 @@ module "alb" {
   vpc_id            = module.vpc.vpc_id
   public_subnet_ids = module.vpc.public_subnet_ids
   security_group_id = aws_security_group.alb.id
+  certificate_arn   = "arn:aws:acm:ap-south-1:239939507154:certificate/29148a30-541b-4859-82ee-a8f8eda07ed8"
 }
 
 # module "waf" {
@@ -102,6 +103,11 @@ module "asg" {
   desired_capacity          = 1
   ami_id                    = var.ami_id
   iam_instance_profile_name = module.iam.instance_profile_name
+  db_endpoint               = module.rds.endpoint
+  db_name                   = var.db_name
+  db_username               = var.db_username
+  db_password               = var.db_password
+  redis_endpoint            = module.redis.endpoint
 }
 
 module "rds" {

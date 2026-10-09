@@ -21,7 +21,7 @@ resource "aws_lb_target_group" "app" {
   target_type = "instance"
 
   health_check {
-    path                = "/api/health"
+    path                = "/"
     healthy_threshold   = 3
     unhealthy_threshold = 3
     timeout             = 5
