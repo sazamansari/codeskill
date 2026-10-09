@@ -16,12 +16,17 @@ exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 echo "Starting CodeSkill EC2 initialization for Amazon Linux..."
 
 # Update and install dependencies
+# Add retry logic because dnf can sometimes be locked during boot
 dnf update -y
-dnf install -y curl unzip aws-cli nginx
+for i in {1..5}; do
+  dnf install -y curl unzip aws-cli nginx && break || sleep 10
+done
 
 # Install Node.js (v20)
 curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
-dnf install -y nodejs
+for i in {1..5}; do
+  dnf install -y nodejs && break || sleep 10
+done
 
 # Install PM2 globally
 npm install -g pm2
