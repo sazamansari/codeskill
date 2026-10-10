@@ -73,6 +73,7 @@ import { ExamSecurityModule } from './exam-security/exam-security.module';
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
+        prefix: '{bull}',
         connection: {
           host: configService.get<string>('redis.host') || '127.0.0.1',
           port: Number(configService.get<number>('redis.port')) || 6379,
