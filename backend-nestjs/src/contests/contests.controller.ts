@@ -27,7 +27,7 @@ export class ContestsController {
   @ApiOperation({ summary: 'Register for a contest' })
   async register(
     @Param('id') id: string,
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('id') userId: string,
     @Body('password') password?: string,
   ) {
     return this.contestsService.register(id, userId, password);

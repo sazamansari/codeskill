@@ -84,7 +84,7 @@ export class AuthController {
   })
   @HttpCode(HttpStatus.OK)
   async forceChangePassword(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('id') userId: string,
     @Body() dto: ForceChangePasswordDto,
   ) {
     return this.authService.forceChangePassword(userId, dto);
@@ -143,7 +143,7 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get current user profile' })
-  async getMe(@CurrentUser('_id') userId: string) {
+  async getMe(@CurrentUser('id') userId: string) {
     const user = await this.authService.getMe(userId);
     return { user };
   }
@@ -152,7 +152,7 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Update user profile' })
-  async updateProfile(@CurrentUser('_id') userId: string, @Body() body: any) {
+  async updateProfile(@CurrentUser('id') userId: string, @Body() body: any) {
     const user = await this.authService.updateProfile(userId, body);
     return { user };
   }
@@ -177,7 +177,7 @@ export class AuthController {
     }),
   )
   async uploadAvatar(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('id') userId: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) {

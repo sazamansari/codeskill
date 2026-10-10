@@ -45,7 +45,7 @@ export class DiscussionsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new discussion thread' })
-  async createThread(@CurrentUser('_id') userId: string, @Body() data: any) {
+  async createThread(@CurrentUser('id') userId: string, @Body() data: any) {
     return this.discussionsService.createThread(userId, data);
   }
 
@@ -55,7 +55,7 @@ export class DiscussionsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a discussion thread (author only)' })
   async deleteThread(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('id') userId: string,
     @Param('threadId') threadId: string,
   ) {
     return this.discussionsService.deleteThread(userId, threadId);
@@ -67,7 +67,7 @@ export class DiscussionsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Upvote or downvote a thread' })
   async voteThread(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('id') userId: string,
     @Param('threadId') threadId: string,
     @Body('direction') direction: 'up' | 'down',
   ) {
@@ -80,7 +80,7 @@ export class DiscussionsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Reply to a discussion thread' })
   async createReply(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('id') userId: string,
     @Param('threadId') threadId: string,
     @Body() data: any,
   ) {
@@ -93,7 +93,7 @@ export class DiscussionsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a reply (author only)' })
   async deleteReply(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('id') userId: string,
     @Param('replyId') replyId: string,
   ) {
     return this.discussionsService.deleteReply(userId, replyId);
@@ -105,7 +105,7 @@ export class DiscussionsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Upvote or downvote a reply' })
   async voteReply(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('id') userId: string,
     @Param('replyId') replyId: string,
     @Body('direction') direction: 'up' | 'down',
   ) {

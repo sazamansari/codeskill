@@ -92,7 +92,7 @@ export class ExecutionController {
       },
     },
   })
-  async runCode(@CurrentUser('_id') userId: string, @Body() body: any) {
+  async runCode(@CurrentUser('id') userId: string, @Body() body: any) {
     const { language, code, testCases, config = {} } = body;
 
     // Validate required fields
@@ -147,7 +147,7 @@ export class ExecutionController {
   @Get('jobs/:jobId')
   @ApiOperation({ summary: 'Get an asynchronous execution result' })
   async getJob(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('id') userId: string,
     @Param('jobId') jobId: string,
   ) {
     const job = await this.submissionQueue.getJob(jobId);
@@ -187,7 +187,7 @@ export class ExecutionController {
       'Execute code via Azure Container Instances (Microsoft-powered, high scale)',
   })
   async azureRun(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('id') userId: string,
     @Body()
     body: {
       code: string;

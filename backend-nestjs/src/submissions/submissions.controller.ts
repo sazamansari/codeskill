@@ -29,7 +29,7 @@ export class SubmissionsController {
     summary: 'Create a new code submission and queue for isolated execution',
   })
   async createSubmission(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('id') userId: string,
     @Body() data: any,
   ) {
     const submission = await this.submissionsService.createSubmission(
@@ -48,7 +48,7 @@ export class SubmissionsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get submission details by ID' })
   async getSubmission(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('id') userId: string,
     @CurrentUser('role') role: string,
     @Param('id') id: string,
   ) {
@@ -64,7 +64,7 @@ export class SubmissionsController {
   @Get(':id/result')
   @ApiOperation({ summary: 'Get submission result and status' })
   async getSubmissionResult(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('id') userId: string,
     @CurrentUser('role') role: string,
     @Param('id') id: string,
   ) {
@@ -81,7 +81,7 @@ export class SubmissionsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cancel a queued submission' })
   async cancelSubmission(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('id') userId: string,
     @CurrentUser('role') role: string,
     @Param('id') id: string,
   ) {
@@ -92,7 +92,7 @@ export class SubmissionsController {
   @Get('user/:userId')
   @ApiOperation({ summary: "Get a specific user's submissions history" })
   async getSubmissionsByUser(
-    @CurrentUser('_id') currentUserId: string,
+    @CurrentUser('id') currentUserId: string,
     @CurrentUser('role') role: string,
     @Param('userId') targetUserId: string,
     @Query()
@@ -111,7 +111,7 @@ export class SubmissionsController {
   @Get('problem/:problemId')
   @ApiOperation({ summary: 'Get submissions for a specific problem' })
   async getSubmissionsByProblem(
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('id') userId: string,
     @Param('problemId') problemId: string,
   ) {
     const submissions = await this.submissionsService.getSubmissionsByProblem(
@@ -123,7 +123,7 @@ export class SubmissionsController {
 
   @Get('recent')
   @ApiOperation({ summary: 'Get recent submissions' })
-  async getRecentSubmissions(@CurrentUser('_id') userId: string) {
+  async getRecentSubmissions(@CurrentUser('id') userId: string) {
     const submissions =
       await this.submissionsService.getRecentSubmissions(userId);
     return { count: submissions.length, data: submissions };
@@ -131,7 +131,7 @@ export class SubmissionsController {
 
   @Get('stats')
   @ApiOperation({ summary: 'Get user statistics' })
-  async getUserStats(@CurrentUser('_id') userId: string) {
+  async getUserStats(@CurrentUser('id') userId: string) {
     return this.submissionsService.getUserStats(userId);
   }
 }
