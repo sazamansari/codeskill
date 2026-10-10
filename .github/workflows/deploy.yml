@@ -37,6 +37,8 @@ jobs:
       - name: Install and Build Frontend
         working-directory: ./frontend-v2
         run: |
+          echo "NEXT_PUBLIC_API_URL=https://codeskill.novaserve.cloud/api" >> .env
+          echo "NEXT_PUBLIC_GOOGLE_CLIENT_ID=968191151730-mglf3rq4pldoqqhhcrbqfbt9g2j9n8o6.apps.googleusercontent.com" >> .env
           npm install --legacy-peer-deps
           npm run build
 
