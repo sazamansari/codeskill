@@ -105,7 +105,12 @@ NODE_ENV=production
 ENVFILE
 chown ec2-user:ec2-user /opt/codeskill/backend-nestjs/.env
 
-cd /opt/codeskill/backend-nestjs && pm2 start dist/main.js --name "codeskill-backend"
+# Sync database schema and migrate users
+cd /opt/codeskill/backend-nestjs
+npm run typeorm:sync
+npm run migrate:users
+
+pm2 start dist/main.js --name "codeskill-backend"
 cd /opt/codeskill/frontend-v2 && pm2 start npm --name "codeskill-frontend" -- run start
 
 pm2 save
