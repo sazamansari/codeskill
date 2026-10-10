@@ -1,5 +1,6 @@
 import { S3Module } from './s3/s3.module';
 import { ReportsModule } from './reports/reports.module';
+import { Cluster } from 'ioredis';
 import { AnalyticsModule } from './analytics/analytics.module';
 
 import { Module } from '@nestjs/common';
@@ -72,16 +73,32 @@ import { ExamSecurityModule } from './exam-security/exam-security.module';
     RedisModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        prefix: '{bull}',
-        connection: {
-          host: configService.get<string>('redis.host') || '127.0.0.1',
-          port: Number(configService.get<number>('redis.port')) || 6379,
-          password: configService.get<string>('redis.password') || undefined,
-          maxRetriesPerRequest: null,
-          connectTimeout: 5000,
-        },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const isCluster = process.env.NODE_ENV === 'production';
+        const host = configService.get<string>('redis.host') || '127.0.0.1';
+        const port = Number(configService.get<number>('redis.port')) || 6379;
+        const password = configService.get<string>('redis.password') || undefined;
+
+        if (isCluster) {
+          return {
+            prefix: '{bull}',
+            connection: new Cluster([{ host, port }], {
+              redisOptions: { password },
+            }) as any,
+          };
+        }
+
+        return {
+          prefix: '{bull}',
+          connection: {
+            host,
+            port,
+            password,
+            maxRetriesPerRequest: null,
+            connectTimeout: 5000,
+          },
+        };
+      },
       inject: [ConfigService],
     }),
     ServeStaticModule.forRoot({

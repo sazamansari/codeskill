@@ -1,10 +1,10 @@
 import { Injectable, OnModuleDestroy, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Redis } from 'ioredis';
+import { Redis, Cluster } from 'ioredis';
 
 @Injectable()
 export class RedisService implements OnModuleDestroy {
-  private readonly client: Redis;
+  private readonly client: Redis | Cluster;
   private readonly logger = new Logger(RedisService.name);
 
   constructor(private readonly configService: ConfigService) {
@@ -24,7 +24,14 @@ export class RedisService implements OnModuleDestroy {
       },
     };
 
-    if (url) {
+    const isCluster = process.env.NODE_ENV === 'production';
+    if (isCluster) {
+      this.client = new Redis.Cluster([{ host: options.host, port: options.port }], {
+        redisOptions: {
+          password: options.password,
+        },
+      });
+    } else if (url) {
       this.client = new Redis(url, options);
     } else {
       this.client = new Redis(options);
@@ -40,7 +47,7 @@ export class RedisService implements OnModuleDestroy {
     });
   }
 
-  getClient(): Redis {
+  getClient(): Redis | Cluster {
     return this.client;
   }
 

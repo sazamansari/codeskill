@@ -15,25 +15,21 @@ export class CacheService {
 
   async invalidatePrefix(prefix: string): Promise<void> {
     const client = this.redisService.getClient();
-    const stream = client.scanStream({
-      match: `${prefix}*`,
-      count: 100,
-    });
+    let keysToDelete: string[] = [];
 
-    return new Promise((resolve, reject) => {
-      const keysToDelete: string[] = [];
-      stream.on('data', (keys: string[]) => {
-        if (keys.length) {
-          keysToDelete.push(...keys);
-        }
-      });
-      stream.on('end', async () => {
-        if (keysToDelete.length > 0) {
-          await this.redisService.del(keysToDelete);
-        }
-        resolve();
-      });
-      stream.on('error', (err) => reject(err));
-    });
+    if ((client as any).isCluster) {
+      const nodes = (client as any).nodes('master');
+      for (const node of nodes) {
+        const keys = await node.keys(`${prefix}*`);
+        keysToDelete.push(...keys);
+      }
+    } else {
+      const keys = await client.keys(`${prefix}*`);
+      keysToDelete.push(...keys);
+    }
+
+    if (keysToDelete.length > 0) {
+      await this.redisService.del(keysToDelete);
+    }
   }
 }
