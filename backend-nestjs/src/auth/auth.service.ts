@@ -511,12 +511,7 @@ export class AuthService implements OnModuleInit {
       }
     }
 
-    await this.otpService.sendOTP(normalizedEmail);
-    return {
-      success: true,
-      requireOTP: true,
-      message: 'Verification OTP sent to your email (Admin Account)',
-    };
+    return this.authResponse(user);
   }
 
   async adminVerifyOtp(dto: AdminVerifyOtpDto) {
