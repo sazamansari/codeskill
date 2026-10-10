@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 
 import { authAPI } from "@/config/api";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { BrandLogo } from "@/components/BrandLogo";
 import { Spinner } from "@/components/ui/spinner";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -104,9 +105,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Standardized Admin Header with CodeSkill Branding & Theme Toggle */}
         <header className="bg-card border-b border-border h-16 flex items-center justify-between px-6 sticky top-0 z-10 shrink-0 shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center p-1">
-              <img src="/logo-dark.svg" alt="CodeSkill" className="w-full h-full object-contain" />
-            </div>
+            <BrandLogo className="w-9 h-9" src="/logo-dark.svg" alt="CodeSkill" />
             <div>
               <p className="text-sm font-bold text-foreground leading-tight">CodeSkill Admin</p>
               <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Chandigarh University</p>
