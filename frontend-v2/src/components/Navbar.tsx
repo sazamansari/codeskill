@@ -211,7 +211,7 @@ export function Navbar() {
                   Log In
                 </Link>
                 <Link
-                  href="/register"
+                  href="/login"
                   className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-xl text-[15px] font-bold bg-foreground hover:bg-[#262626] text-background shadow-xs hover:shadow dark:bg-white dark:hover:bg-neutral-200 dark:text-black transition-all duration-150 whitespace-nowrap shrink-0"
                 >
                   <span className="whitespace-nowrap">Get Started</span>
@@ -304,7 +304,7 @@ export function Navbar() {
               ) : (
                 <div className="flex flex-col gap-2">
                   <Link
-                    href="/register"
+                    href="/login"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center justify-center gap-1.5 w-full h-10.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-100 dark:text-foreground font-bold text-[15px] shadow-xs"
                   >

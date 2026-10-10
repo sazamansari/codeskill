@@ -469,13 +469,10 @@ export class StudentsService {
       ]);
 
       const rawSem = findField(row, ['semester', 'sem']);
-      const semester = rawSem && !isNaN(Number(rawSem)) ? Number(rawSem) : 1;
+      const semester = rawSem ? Number(rawSem) : 1;
 
       const rawYear = findField(row, ['year', 'grad_year', 'graduation_year']);
-      const year =
-        rawYear && !isNaN(Number(rawYear))
-          ? Number(rawYear)
-          : new Date().getFullYear();
+      const year = rawYear ? Number(rawYear) : NaN;
 
       const password = findField(row, [
         'password',
@@ -546,6 +543,22 @@ export class StudentsService {
         rowErrors.push('Student name is missing');
       }
 
+      if (!row.batch) {
+        rowErrors.push('Batch/class is missing');
+      }
+
+      if (!Number.isInteger(row.year) || row.year < 1990 || row.year > 2100) {
+        rowErrors.push('Year is missing or invalid');
+      }
+
+      if (
+        !Number.isInteger(row.semester) ||
+        row.semester < 1 ||
+        row.semester > 12
+      ) {
+        rowErrors.push('Semester must be a number between 1 and 12');
+      }
+
       if (!row.email) {
         rowErrors.push('Email is missing');
       } else if (!emailRegex.test(row.email)) {
@@ -600,16 +613,36 @@ export class StudentsService {
       throw new BadRequestException('No valid rows provided for import');
     }
 
+    // Never trust client-supplied rows: re-check duplicates server-side
+    const uids = validRows.map((r) => String(r.uid || '').toUpperCase());
+    const emails = validRows.map((r) => String(r.email || '').toLowerCase());
+    const [dupUids, dupEmails] = await Promise.all([
+      this.userModel.find({ uid: { $in: uids } }).select('uid').lean(),
+      this.userModel.find({ email: { $in: emails } }).select('email').lean(),
+    ]);
+    if (dupUids.length || dupEmails.length) {
+      throw new ConflictException(
+        'Some students already exist; please re-upload the file for validation',
+      );
+    }
+    if (
+      new Set(uids).size !== uids.length ||
+      new Set(emails).size !== emails.length
+    ) {
+      throw new BadRequestException('Duplicate UIDs or emails in import data');
+    }
+
     const salt = await bcrypt.genSalt(10);
     const usersToInsert: any[] = [];
     const emailJobsToInsert: any[] = [];
     const pgUsersToInsert: any[] = [];
 
     for (const row of validRows) {
+      // Random per-student temporary password unless one is supplied
       const rawPassword =
         row.password && String(row.password).trim()
           ? String(row.password).trim()
-          : 'Student@123';
+          : crypto.randomBytes(9).toString('base64url');
       const hashedPassword = await bcrypt.hash(rawPassword, salt);
       const studentId = new Types.ObjectId();
 

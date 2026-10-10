@@ -121,11 +121,11 @@ export default function ImportStudentsPage() {
       `"${err.error.replace(/"/g, '""')}"`,
     ]);
 
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-
-    const encodedUri = encodeURI(csvContent);
+    const csvBody = [headers.join(","), ...rows.map((e) => e.join(","))].join(
+      "\n",
+    );
+    const encodedUri =
+      "data:text/csv;charset=utf-8," + encodeURIComponent(csvBody);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
     link.setAttribute(
@@ -141,12 +141,10 @@ export default function ImportStudentsPage() {
     const csvContent =
       "data:text/csv;charset=utf-8," +
       encodeURIComponent(
-        `uid,name,email,university,department,course,semester,section,group,year,batch,password
-CU202600101,Aarav Patel,aarav.patel@university.edu,Chandigarh University,Computer Science,B.Tech CSE,6,A1,Group-1,2026,2022-2026,Student@123
-CU202600102,Diya Sharma,diya.sharma@university.edu,Chandigarh University,Computer Science,B.Tech CSE,6,A1,Group-1,2026,2022-2026,Student@123
-CU202600103,Rohan Verma,rohan.verma@university.edu,Chandigarh University,Information Technology,B.Tech IT,6,B2,Group-2,2026,2022-2026,Student@123
-CU202600104,Ananya Iyer,ananya.iyer@university.edu,Chandigarh University,Computer Science,B.Tech CSE,6,A2,Group-1,2026,2022-2026,Student@123
-CU202600105,Kabir Mehta,kabir.mehta@university.edu,Chandigarh University,Electronics,B.Tech ECE,6,C1,Group-2,2026,2022-2026,Student@123`
+        `uid,name,email,university,department,course,semester,section,group,year,batch
+CU202600101,Aarav Patel,aarav.patel@university.edu,Chandigarh University,Computer Science,B.Tech CSE,6,A1,Group-1,2026,2022-2026
+CU202600102,Diya Sharma,diya.sharma@university.edu,Chandigarh University,Computer Science,B.Tech CSE,6,A1,Group-1,2026,2022-2026
+CU202600103,Rohan Verma,rohan.verma@university.edu,Chandigarh University,Information Technology,B.Tech IT,6,B2,Group-2,2026,2022-2026`
       );
     const link = document.createElement("a");
     link.setAttribute("href", csvContent);
@@ -285,9 +283,9 @@ CU202600105,Kabir Mehta,kabir.mehta@university.edu,Chandigarh University,Electro
             </div>
 
             <div className="flex items-center gap-4 text-xs text-muted-foreground font-mono bg-muted/60 px-4 py-1.5 rounded-lg border border-border">
-              <span>Required Columns: UID, Name, Email</span>
+              <span>Required Columns: UID, Name, Email, Batch, Year</span>
               <span>•</span>
-              <span>Optional: Department, Course, Semester, Section, Batch</span>
+              <span>Optional: Department, Course, Semester, Section, Password (auto-generated if blank)</span>
             </div>
           </div>
 

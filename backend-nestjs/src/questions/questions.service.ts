@@ -428,7 +428,7 @@ export class QuestionsService {
       ).toLowerCase();
 
       const rawMarks = findField(row, ['marks', 'mark', 'score', 'points']);
-      const marks = rawMarks && !isNaN(Number(rawMarks)) ? Number(rawMarks) : 1;
+      const marks = rawMarks ? Number(rawMarks) : 1;
 
       const rawNeg = findField(row, [
         'negative_marks',
@@ -436,8 +436,7 @@ export class QuestionsService {
         'negative',
         'penalty',
       ]);
-      const negativeMarks =
-        rawNeg && !isNaN(Number(rawNeg)) ? Number(rawNeg) : 0;
+      const negativeMarks = rawNeg ? Number(rawNeg) : 0;
 
       const optA = findField(row, [
         'option_a',
@@ -556,6 +555,7 @@ export class QuestionsService {
           });
         }
       }
+      let testCaseJsonError = false;
       const rawTestCasesJson = findField(row, [
         'test_cases',
         'testcases',
@@ -567,22 +567,52 @@ export class QuestionsService {
           const parsedTc = JSON.parse(rawTestCasesJson);
           if (Array.isArray(parsedTc)) {
             testCases.push(...parsedTc);
+          } else {
+            testCaseJsonError = true;
           }
         } catch (e) {
-          // ignore invalid JSON
+          testCaseJsonError = true;
         }
       }
 
-      const isCoding =
-        ['coding', 'algorithmic', 'algorithm', 'code', 'dsa'].includes(
-          rawQuestionType.toLowerCase(),
-        ) || testCases.length > 0;
-      const questionType = isCoding ? 'coding' : rawQuestionType.toLowerCase();
+      const typeKey = rawQuestionType.toLowerCase().replace(/[\s-]/g, '_');
+      const TYPE_MAP: Record<string, string> = {
+        single_choice: 'single_choice',
+        mcq: 'single_choice',
+        single: 'single_choice',
+        multiple_choice: 'multiple_choice',
+        multiple: 'multiple_choice',
+        msq: 'multiple_choice',
+        true_false: 'true_false',
+        truefalse: 'true_false',
+        tf: 'true_false',
+        coding: 'coding',
+        algorithmic: 'coding',
+        algorithm: 'coding',
+        code: 'coding',
+        dsa: 'coding',
+      };
+      const mappedType = TYPE_MAP[typeKey];
+      const isCoding = mappedType === 'coding' || testCases.length > 0;
+      const unknownType = !isCoding && !mappedType;
+
+      // True/False is stored as a two-option single choice question
+      const isTrueFalse = !isCoding && mappedType === 'true_false';
+      const questionType = isCoding
+        ? 'coding'
+        : isTrueFalse
+          ? 'single_choice'
+          : mappedType || typeKey;
 
       parsedRows.push({
         rowNumber: i + 2,
         question,
         questionType,
+        unknownType,
+        rawQuestionType,
+        testCaseJsonError,
+        rawMarks,
+        rawNeg,
         topic,
         subtopic,
         difficulty: ['easy', 'medium', 'hard'].includes(difficulty)
@@ -590,11 +620,11 @@ export class QuestionsService {
           : 'medium',
         marks,
         negativeMarks,
-        optA,
-        optB,
-        optC,
-        optD,
-        optE,
+        optA: isTrueFalse ? 'True' : optA,
+        optB: isTrueFalse ? 'False' : optB,
+        optC: isTrueFalse ? '' : optC,
+        optD: isTrueFalse ? '' : optD,
+        optE: isTrueFalse ? '' : optE,
         correctAnswerRaw,
         explanation,
         codeSnippet,
@@ -655,6 +685,33 @@ export class QuestionsService {
 
       if (!row.topic) {
         rowErrors.push('Topic is required');
+      }
+
+      if (row.unknownType) {
+        rowErrors.push(
+          `Unsupported question type '${row.rawQuestionType}' (use single_choice, multiple_choice, true_false or coding)`,
+        );
+      }
+
+      if (row.rawMarks && (isNaN(row.marks) || row.marks <= 0)) {
+        rowErrors.push('Marks must be a positive number');
+      }
+      if (row.rawNeg && (isNaN(row.negativeMarks) || row.negativeMarks < 0)) {
+        rowErrors.push('Negative marks must be zero or a positive number');
+      }
+
+      if (row.isCoding) {
+        if (row.testCaseJsonError) {
+          rowErrors.push('test_cases column is not a valid JSON array');
+        }
+        const usable = (row.testCases || []).filter(
+          (t: any) => t && String(t.output ?? t.expectedOutput ?? '').trim(),
+        );
+        if (usable.length === 0) {
+          rowErrors.push(
+            'Coding questions require at least one test case with expected output',
+          );
+        }
       }
 
       const isChoice = ['single_choice', 'multiple_choice'].includes(
@@ -786,6 +843,30 @@ export class QuestionsService {
         correctAnswerIndex = correctIdx >= 0 ? correctIdx : 0;
       }
 
+      const isCodingRow = r.questionType === 'coding';
+      const correctIndices = Array.isArray(r.options)
+        ? r.options
+            .map((o: any, idx: number) =>
+              typeof o === 'object' && o.isCorrect ? idx : -1,
+            )
+            .filter((idx: number) => idx >= 0)
+        : [];
+      const normalizedTestCases = (r.testCases || [])
+        .map((t: any, idx: number) => ({
+          id: String(t.id ?? idx + 1),
+          input: String(t.input ?? ''),
+          expectedOutput: String(t.expectedOutput ?? t.output ?? ''),
+          isHidden: t.isHidden ?? idx >= 2,
+          weight: Number(t.weight) > 0 ? Number(t.weight) : 1,
+        }))
+        .filter((t: any) => t.expectedOutput.trim());
+      const constraintList = Array.isArray(r.constraints)
+        ? r.constraints
+        : String(r.constraints || '')
+            .split('\n')
+            .map((c: string) => c.trim())
+            .filter(Boolean);
+
       return {
         question: r.question,
         questionType: r.questionType || 'single_choice',
@@ -796,6 +877,7 @@ export class QuestionsService {
         negativeMarks: r.negativeMarks || 0,
         options: optionsList,
         correctAnswer: correctAnswerIndex,
+        correctAnswers: correctIndices,
         explanation: r.explanation || '',
         codeSnippet: r.codeSnippet || '',
         language: r.language || 'general',
@@ -804,13 +886,18 @@ export class QuestionsService {
         createdBy_id: adminUser?.id || adminUser?._id,
         approvedBy_id: adminUser?.id || adminUser?._id,
         approvedAt: new Date(),
+        ...(isCodingRow
+          ? {
+              problemStatement: r.question,
+              constraints: constraintList,
+              timeLimit: r.timeLimit || 2000,
+              memoryLimit: r.memoryLimit || 256,
+              testCases: normalizedTestCases,
+            }
+          : {}),
         metadata: {
           importedVia: 'bulk_csv',
           originalRow: r.rowNumber,
-          constraints: r.constraints || '',
-          timeLimit: r.timeLimit || 2000,
-          memoryLimit: r.memoryLimit || 256,
-          testCases: r.testCases || [],
         },
       };
     });
