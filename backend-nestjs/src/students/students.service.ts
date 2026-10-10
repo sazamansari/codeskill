@@ -23,11 +23,15 @@ import {
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { QueryStudentsDto } from './dto/query-students.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User as UserEntity } from '../database/entities/user.entity';
 
 @Injectable()
 export class StudentsService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
     @InjectModel(AuditLog.name)
     private readonly auditLogModel: Model<AuditLogDocument>,
     @InjectModel(EmailJob.name)
@@ -179,6 +183,22 @@ export class StudentsService {
     });
 
     await student.save();
+
+    // Dual-write to Postgres
+    const pgUser = this.userRepository.create({
+      mongoId: student._id.toString(),
+      name: student.name,
+      email: student.email,
+      uid: student.uid,
+      password: student.password,
+      role: student.role,
+      isAssessmentStudent: student.isAssessmentStudent,
+      forcePasswordChange: student.forcePasswordChange,
+      isActive: student.isActive,
+      studentProfile: student.studentProfile,
+      authProvider: student.authProvider,
+    });
+    await this.userRepository.save(pgUser);
 
     // Audit log
     await this.auditLogModel.create({
@@ -583,6 +603,7 @@ export class StudentsService {
     const salt = await bcrypt.genSalt(10);
     const usersToInsert: any[] = [];
     const emailJobsToInsert: any[] = [];
+    const pgUsersToInsert: any[] = [];
 
     for (const row of validRows) {
       const rawPassword =
@@ -594,6 +615,29 @@ export class StudentsService {
 
       usersToInsert.push({
         _id: studentId,
+        name: row.name,
+        email: row.email,
+        uid: row.uid,
+        password: hashedPassword,
+        role: 'student',
+        isAssessmentStudent: true,
+        forcePasswordChange: true,
+        isActive: true,
+        authProvider: 'local',
+        studentProfile: {
+          university: row.university || '',
+          department: row.department || '',
+          course: row.course || '',
+          semester: row.semester || 1,
+          section: row.section || '',
+          group: row.group || '',
+          batch: row.batch || '',
+          year: row.year || new Date().getFullYear(),
+        },
+      });
+
+      pgUsersToInsert.push({
+        mongoId: studentId.toString(),
         name: row.name,
         email: row.email,
         uid: row.uid,
@@ -632,6 +676,12 @@ export class StudentsService {
     for (let i = 0; i < usersToInsert.length; i += chunkSize) {
       const userChunk = usersToInsert.slice(i, i + chunkSize);
       await this.userModel.insertMany(userChunk, { ordered: false });
+    }
+
+    for (let i = 0; i < pgUsersToInsert.length; i += chunkSize) {
+      const pgUserChunk = pgUsersToInsert.slice(i, i + chunkSize);
+      const entities = this.userRepository.create(pgUserChunk);
+      await this.userRepository.save(entities);
     }
 
     for (let i = 0; i < emailJobsToInsert.length; i += chunkSize) {

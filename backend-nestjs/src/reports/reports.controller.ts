@@ -22,7 +22,7 @@ import {
 } from '../database/schemas/question.schema';
 import type { Response } from 'express';
 import { renderToStream } from '@react-pdf/renderer';
-import { StudentResultReport, StudentResult } from './student-result.pdf.js';
+import { StudentResultReport, StudentResult } from './student-result.pdf';
 import * as React from 'react';
 
 @Controller('reports')

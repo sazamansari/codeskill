@@ -18,6 +18,9 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ nullable: true })
+  mongoId: string;
+
   @Column({ length: 50 })
   name: string;
 

@@ -102,6 +102,11 @@ module "asg" {
   desired_capacity          = 1
   ami_id                    = var.ami_id
   iam_instance_profile_name = module.iam.instance_profile_name
+  db_endpoint               = module.rds.endpoint
+  db_username               = var.db_username
+  db_password               = var.db_password
+  db_name                   = var.db_name
+  redis_endpoint            = module.redis.endpoint
 }
 
 module "rds" {

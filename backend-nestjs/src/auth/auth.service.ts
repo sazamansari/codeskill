@@ -539,8 +539,12 @@ export class AuthService implements OnModuleInit {
 
   async studentLogin(dto: StudentLoginDto) {
     const formattedUid = dto.uid.toUpperCase().trim();
+    const formattedEmail = dto.uid.toLowerCase().trim();
     const user = await this.userRepository.findOne({
-      where: { uid: formattedUid },
+      where: [
+        { uid: formattedUid },
+        { email: formattedEmail }
+      ],
       select: { id: true, name: true, email: true, password: true, role: true, isAdmin: true, uid: true, isAssessmentStudent: true, forcePasswordChange: true, studentProfile: true, avatar: true, bio: true, profile: true, stats: true, authProvider: true, isActive: true }
     });
     if (!user) {

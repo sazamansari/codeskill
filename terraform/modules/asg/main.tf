@@ -93,6 +93,15 @@ cat << 'ENVFILE' > /opt/codeskill/backend-nestjs/.env
 DATABASE_URL="postgresql://${var.db_username}:${var.db_password}@${var.db_endpoint}/${var.db_name}?schema=public"
 REDIS_HOST="${var.redis_endpoint}"
 REDIS_PORT=6379
+MONGODB_URI=mongodb+srv://mdshadabazamansari:123123123123@cluster0.gwcfd5x.mongodb.net/codeskill?retryWrites=true&w=majority
+JWT_SECRET=supersecretcodeskilljwt
+JWT_EXPIRE=30d
+ADMIN_EMAILS=admin@codeskill.com,admin@cuchd.in,md.shadab.azam.ansari@gmail.com,kanhamishra555@gmail.com,shaikhmustakim2942@gmail.com
+ADMIN_PASSWORD=admin123
+ADMIN_CUCHD_PASSWORD=Admin@CodeSkill2026
+AWS_SES_EMAIL=noreply@codeskill.novaserve.cloud
+AWS_SES_SENDER=noreply@codeskill.novaserve.cloud
+NODE_ENV=production
 ENVFILE
 chown ec2-user:ec2-user /opt/codeskill/backend-nestjs/.env
 

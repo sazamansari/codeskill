@@ -5,11 +5,14 @@ import { EmailModule } from '../emails/email.module';
 import { StudentsController } from './students.controller';
 import { StudentsService } from './students.service';
 import { CredentialEmailProcessor } from './credential-email.processor';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User as UserEntity } from '../database/entities/user.entity';
 
 @Module({
   imports: [
     DatabaseModule,
     EmailModule,
+    TypeOrmModule.forFeature([UserEntity]),
     BullModule.registerQueue({
       name: 'credential-email',
     }),
